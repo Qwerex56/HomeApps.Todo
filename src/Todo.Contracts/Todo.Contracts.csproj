@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Messages the Todo plugin publishes for other services (JARVIS, the hub). Only records, no logic. -->
+  <PropertyGroup>
+    <RootNamespace>HomeApps.Todo.Contracts</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="HomeApps.Contracts" />
+  </ItemGroup>
+
+</Project>

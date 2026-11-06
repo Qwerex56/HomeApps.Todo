@@ -8,10 +8,18 @@
 
   <ItemGroup Label="HomeApps kit">
     <PackageVersion Include="HomeApps.BuildingBlocks.Domain" Version="$(HomeAppsVersion)" />
+    <PackageVersion Include="HomeApps.Contracts" Version="$(HomeAppsVersion)" />
+    <PackageVersion Include="HomeApps.Plugins" Version="$(HomeAppsVersion)" />
+    <PackageVersion Include="HomeApps.Plugins.Hosting" Version="$(HomeAppsVersion)" />
+    <PackageVersion Include="HomeApps.BuildingBlocks.Testing" Version="$(HomeAppsVersion)" />
   </ItemGroup>
 
   <ItemGroup Label="Core">
     <PackageVersion Include="FluentResults" Version="4.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Microsoft">
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12" />
   </ItemGroup>
 
   <ItemGroup Label="Testing">
