@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Todo domain: lists and tasks of one household. Only the kit's domain building blocks and FluentResults. -->
+  <ItemGroup>
+    <PackageReference Include="HomeApps.BuildingBlocks.Domain" />
+    <PackageReference Include="FluentResults" />
+  </ItemGroup>
+
+</Project>
