@@ -94,7 +94,8 @@ public sealed class TodoTask : IHasDomainEvents
             return check.ToResult<TodoTask>();
         }
 
-        return new TodoTask(Guid.NewGuid(), list, validTitle.Value, actor.UserId, position, time.GetUtcNow())
+        var now = time.GetUtcNow();
+        return new TodoTask(Guid.CreateVersion7(now), list, validTitle.Value, actor.UserId, position, now)
         {
             Notes = validNotes.Value,
             Due = due,

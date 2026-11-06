@@ -57,8 +57,9 @@ public sealed class TodoList
     public static TodoList CreateDefault(Guid householdId, Guid switchedOnBy, TimeProvider time)
     {
         ArgumentNullException.ThrowIfNull(time);
-        return new TodoList(Guid.NewGuid(), householdId, ListName.Create(DefaultName).Value, ListVisibility.Shared,
-            switchedOnBy, time.GetUtcNow());
+        var now = time.GetUtcNow();
+        return new TodoList(Guid.CreateVersion7(now), householdId, ListName.Create(DefaultName).Value, ListVisibility.Shared,
+            switchedOnBy, now);
     }
 
     /// <summary>A shared list needs an admin; any member may keep private lists.</summary>
@@ -82,7 +83,8 @@ public sealed class TodoList
             return validName.ToResult<TodoList>();
         }
 
-        return new TodoList(Guid.NewGuid(), householdId, validName.Value, visibility, actor.UserId, time.GetUtcNow());
+        var now = time.GetUtcNow();
+        return new TodoList(Guid.CreateVersion7(now), householdId, validName.Value, visibility, actor.UserId, now);
     }
 
     /// <summary>Shared lists for everyone, a private list only for its owner and not while they are out of the household.</summary>

@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Todo use cases: the manifest, one file per feature (commands, queries, validators, handlers) and the ports for Infrastructure. -->
+  <ItemGroup>
+    <ProjectReference Include="..\Todo.Domain\Todo.Domain.csproj" />
+    <ProjectReference Include="..\Todo.Contracts\Todo.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="HomeApps.Plugins" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Todo.Api.Tests" />
+  </ItemGroup>
+
+</Project>

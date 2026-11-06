@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!-- The plugin's host: kit pipeline under /plugins/todo, the endpoints and (from T3) the built UI in wwwroot/ui. -->
+  <ItemGroup>
+    <ProjectReference Include="..\Todo.Infrastructure\Todo.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Todo.Api.Tests" />
+  </ItemGroup>
+
+</Project>

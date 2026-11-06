@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The plugin end to end: real Postgres (Testcontainers, needs Docker), in-memory bus, Households faked over HTTP. -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Todo.Api\Todo.Api.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="HomeApps.BuildingBlocks.Testing" />
+  </ItemGroup>
+
+</Project>
