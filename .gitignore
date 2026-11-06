@@ -1,0 +1,10 @@
+bin/
+obj/
+.idea/
+.vs/
+*.user
+TestResults/
+node_modules/
+dist/
+.DS_Store
+.env
