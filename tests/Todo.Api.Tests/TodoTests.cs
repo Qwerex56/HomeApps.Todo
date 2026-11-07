@@ -25,6 +25,22 @@ public sealed class TodoTests(TodoFactory factory) : IClassFixture<TodoFactory>
     }
 
     [Fact]
+    public async Task The_manifest_points_at_the_built_ui_with_the_page_and_the_today_widget()
+    {
+        var client = factory.CreateClient();
+        var ui = (await client.GetFromJsonAsync<JsonNode>("/plugins/todo/manifest"))!["ui"]!;
+
+        Assert.Equal("/plugins/todo/ui/entry.js", ui["entry"]!.GetValue<string>());
+        Assert.Equal([""], ui["routes"]!.AsArray().Select(r => r!["path"]!.GetValue<string>()));
+        var widget = Assert.Single(ui["widgets"]!.AsArray())!;
+        Assert.Equal("today", widget["id"]!.GetValue<string>());
+
+        var entry = await client.GetAsync("/plugins/todo/ui/entry.js");
+        Assert.Equal(HttpStatusCode.OK, entry.StatusCode);
+        Assert.Contains("todo", await entry.Content.ReadAsStringAsync(), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task The_first_switch_on_creates_the_shared_list_Dom()
     {
         var h = await AHousehold.SwitchedOnAsync(factory);

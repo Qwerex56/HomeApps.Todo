@@ -5,8 +5,8 @@ using HomeApps.Todo.Contracts;
 namespace Todo.Application;
 
 /// <summary>
-/// The Todo plugin's manifest (docs/plugins.md in HomeApps). The UI, the display screen and MCP join it in their own
-/// stages (T3, T4), so the web app never tries to load what is not there yet.
+/// The Todo plugin's manifest (docs/plugins.md in HomeApps). The UI (src/Todo.Web, built into Todo.Api/wwwroot/ui) is
+/// here since T3; the display screen and MCP join it in T4, so the web app never tries to load what is not there yet.
 /// </summary>
 public static class TodoPlugin
 {
@@ -35,6 +35,11 @@ public static class TodoPlugin
             new PluginPermission(Write, HouseholdRole.Member, new LocalizedText("Dodawanie i odhaczanie zadań, prywatne listy", "Add and tick off tasks, private lists")),
             new PluginPermission(Manage, HouseholdRole.Admin, new LocalizedText("Zarządzanie wspólnymi listami", "Manage shared lists")),
         ],
+        Ui = new PluginUi
+        {
+            Routes = [new PluginRoute("", new LocalizedText("Zadania", "Tasks"))],
+            Widgets = [new PluginWidget("today", new LocalizedText("Na dziś", "Today"), WidgetSize.Medium, [WidgetPlace.Household, WidgetPlace.Wall])],
+        },
         Events = new PluginEvents([typeof(TaskCompleted)], [typeof(MemberLeft), typeof(MemberJoined)]),
     };
 }
