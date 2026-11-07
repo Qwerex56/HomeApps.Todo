@@ -1,7 +1,6 @@
 using HomeApps.BuildingBlocks.Api.Endpoints;
 using HomeApps.BuildingBlocks.Api.Results;
 using MediatR;
-using Todo.Application.Abstractions;
 using Todo.Application.Common;
 using Todo.Application.Tasks;
 using Todo.Application.Tasks.CompleteTask;
@@ -14,8 +13,6 @@ using Todo.Application.Tasks.UpdateTask;
 using Todo.Domain.Tasks;
 
 namespace Todo.Api.Endpoints;
-
-internal sealed record MoveTaskRequest(Guid ListId, Guid? BeforeTaskId);
 
 /// <summary>Tasks of one household (plan 4.3).</summary>
 internal sealed class TaskEndpoints : IEndpoint

@@ -1,26 +1,7 @@
-using HomeApps.BuildingBlocks.Domain.Errors;
 using Todo.Domain.Common;
 using Todo.Domain.Lists;
 
 namespace Todo.Domain.Tests;
-
-internal sealed class FixedTime(DateTimeOffset now) : TimeProvider
-{
-    public DateTimeOffset Now { get; set; } = now;
-
-    public override DateTimeOffset GetUtcNow() => Now;
-
-    public void Advance(TimeSpan by) => Now += by;
-}
-
-internal static class A
-{
-    public static readonly DateTimeOffset Now = new(2026, 11, 6, 12, 0, 0, TimeSpan.Zero);
-
-    public static readonly DateOnly Today = DateOnly.FromDateTime(Now.Date);
-
-    public static string Code(this FluentResults.ResultBase result) => (string)result.Errors[0].Metadata[AppError.CodeKey];
-}
 
 /// <summary>A household with an admin, two members, its default shared list and a private list of the first member.</summary>
 internal sealed class AHousehold
