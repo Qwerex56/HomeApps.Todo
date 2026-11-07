@@ -2,7 +2,7 @@
 # uses its Postgres (own database homeapps_todo, created on first start), RabbitMQ and Auth, and claims
 # /plugins/todo in its Traefik. Settings come from HomeApps' .env:
 #   ln -s ../HomeApps/.env .env      (once; .env is ignored by git)
-#   docker compose up -d --build
+#   docker compose -f compose.yaml up -d --build   (-f: the linked .env may set COMPOSE_FILE for HomeApps)
 # and HOMEAPPS_PLUGINS=todo in that .env (then recreate HomeApps' web container) makes the web app load it.
 name: homeapps-todo
 

@@ -38,7 +38,7 @@ Pełny opis, sprawdzenie i rozwiązywanie problemów: `docs/plugin-todo.md` w re
 
 ```bash
 ln -s ../HomeApps/.env .env      # raz: domena i hasła z .env HomeApps
-docker compose up -d --build     # obraz homeapps/todo:1.0.0, kit z ~/.homeapps/packages (HomeApps: scripts/pack.sh)
+docker compose -f compose.yaml up -d --build   # -f, bo .env HomeApps może ustawiać COMPOSE_FILE; obraz homeapps/todo:1.0.0, kit z ~/.homeapps/packages (HomeApps: scripts/pack.sh)
 # w HomeApps: HOMEAPPS_PLUGINS=todo w .env, potem docker compose -f compose.prod.yaml up -d web
 ```
 
