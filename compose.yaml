@@ -1,0 +1,38 @@
+# The Todo plugin next to a running HomeApps (docs/plugin-todo.md in HomeApps). It joins HomeApps' Docker network,
+# uses its Postgres (own database homeapps_todo, created on first start), RabbitMQ and Auth, and claims
+# /plugins/todo in its Traefik. Settings come from HomeApps' .env:
+#   ln -s ../HomeApps/.env .env      (once; .env is ignored by git)
+#   docker compose up -d --build
+# and HOMEAPPS_PLUGINS=todo in that .env (then recreate HomeApps' web container) makes the web app load it.
+name: homeapps-todo
+
+services:
+  todo:
+    image: homeapps/todo:1.0.0
+    build:
+      context: .
+      additional_contexts:
+        homeapps: ${HOMEAPPS_PACKAGES:-${HOME}/.homeapps/packages}
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      Database__MigrateOnStartup: "true"
+      Logging__LogLevel__Microsoft.EntityFrameworkCore: Warning
+      ConnectionStrings__Database: "Host=postgres;Database=homeapps_todo;Username=${POSTGRES_USER:-homeapps};Password=${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD (HomeApps .env)}"
+      RabbitMq__Host: rabbitmq
+      RabbitMq__Username: ${RABBITMQ_USER:-homeapps}
+      RabbitMq__Password: ${RABBITMQ_PASSWORD:?set RABBITMQ_PASSWORD (HomeApps .env)}
+      Jwt__Authority: "http://auth:8080"
+      Jwt__Issuer: "https://${HOMEAPPS_DOMAIN:?set HOMEAPPS_DOMAIN (HomeApps .env)}"
+      Jwt__RequireHttpsMetadata: "false"
+      Plugin__HouseholdsUrl: "http://households:8080"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.todo.rule=Host(`${HOMEAPPS_DOMAIN}`) && PathPrefix(`/plugins/todo`)"
+      - "traefik.http.routers.todo.entrypoints=websecure"
+      - "traefik.http.services.todo.loadbalancer.server.port=8080"
+
+networks:
+  default:
+    name: homeapps_default
+    external: true

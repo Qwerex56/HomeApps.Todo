@@ -32,6 +32,16 @@ cd src/Todo.Web && npm ci && npm run build
    zakładka **Zadania** i widżet **Na dziś** (strona domu i `/wall`). Przy zmianach w UI: `npm run build -- --watch`
    w `src/Todo.Web` i odśwież stronę.
 
+## Uruchomienie obok HomeApps (Docker, produkcja)
+
+Pełny opis, sprawdzenie i rozwiązywanie problemów: `docs/plugin-todo.md` w repo HomeApps. W skrócie:
+
+```bash
+ln -s ../HomeApps/.env .env      # raz: domena i hasła z .env HomeApps
+docker compose up -d --build     # obraz homeapps/todo:1.0.0, kit z ~/.homeapps/packages (HomeApps: scripts/pack.sh)
+# w HomeApps: HOMEAPPS_PLUGINS=todo w .env, potem docker compose -f compose.prod.yaml up -d web
+```
+
 ## API (pod `/plugins/todo`)
 
 | Metoda | Ścieżka (`/api/households/{hid}/...`) | Uprawnienie |
