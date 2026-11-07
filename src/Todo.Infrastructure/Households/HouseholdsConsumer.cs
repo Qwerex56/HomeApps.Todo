@@ -2,7 +2,8 @@ using FluentResults;
 using HomeApps.Contracts.Households;
 using MassTransit;
 using MediatR;
-using Todo.Application.Households;
+using Todo.Application.Households.MemberJoined;
+using Todo.Application.Households.MemberLeft;
 
 namespace Todo.Infrastructure.Households;
 

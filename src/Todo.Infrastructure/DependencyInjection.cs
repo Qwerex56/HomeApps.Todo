@@ -2,6 +2,7 @@ using HomeApps.Plugins.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Todo.Application;
+using Todo.Application.Abstractions;
 using Todo.Application.Common;
 using Todo.Infrastructure.Jobs;
 using Todo.Infrastructure.Persistence;

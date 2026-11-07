@@ -4,7 +4,7 @@ using System.Text.Json.Nodes;
 using HomeApps.Contracts.Households;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
-using Todo.Application.Households;
+using Todo.Application.Households.PurgeLeftLists;
 using Todo.Domain.Lists;
 using Todo.Domain.Tasks;
 using Contracts = HomeApps.Todo.Contracts;

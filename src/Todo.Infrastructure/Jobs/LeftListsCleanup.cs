@@ -2,7 +2,7 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Todo.Application.Households;
+using Todo.Application.Households.PurgeLeftLists;
 
 namespace Todo.Infrastructure.Jobs;
 

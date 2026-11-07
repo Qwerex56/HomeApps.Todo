@@ -53,7 +53,7 @@ Zdarzenia: publikuje `HomeApps.Todo.Contracts.TaskCompleted` (tylko zadania z li
 |---|---|
 | `src/Todo.Domain` | listy (`TodoList`) i zadania (`TodoTask`): kto co widzi i zmienia, archiwum, wyjście z domu (T5) |
 | `src/Todo.Contracts` | wiadomości dla innych usług (`TaskCompleted`) |
-| `src/Todo.Application` | manifest (`TodoPlugin`), komendy i zapytania MediatR, porty |
+| `src/Todo.Application` | manifest (`TodoPlugin`), komendy i zapytania MediatR (folder na każdą: `Lists/CreateList/CreateListCommand.cs`, `…Validator.cs`, `…Handler.cs`), porty w `Abstractions` |
 | `src/Todo.Infrastructure` | `TodoDbContext` (`PluginDbContext`), repozytoria, migracje, konsumenci Households, sprzątanie T5 |
 | `src/Todo.Api` | host pluginu i endpointy |
 | `tests/Todo.Domain.Tests` | testy domeny |
