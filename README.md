@@ -61,6 +61,22 @@ docker compose -f compose.yaml up -d --build   # -f, bo .env HomeApps może usta
 
 Poza `/api`: `GET /plugins/todo/manifest`, `/plugins/todo/openapi/v1.json`, `/plugins/todo/health/{live,ready}`.
 
+## MCP (pod `/plugins/todo/mcp`, HomeApps 2.3.0+)
+
+Dla JARVIS-a i innych klientów MCP, z tokenem osoby (też delegowanym), te same sprawdzenia uprawnień co API. Dom,
+listę i osobę podaje się nazwą (bez względu na wielkość liter) albo id; gdy nazwa pasuje do kilku, narzędzie zwraca
+listę do wyboru zamiast zgadywać. Pominięty dom = jedyny dom osoby (`add_task`) albo wszystkie jej domy z włączonym
+Todo (`my_tasks`, `complete_task`).
+
+| Narzędzie | Argumenty | Co |
+|---|---|---|
+| `add_task` | `title`, `list?`, `household?`, `due?` (`2026-11-13` albo `2026-11-13 18:00`), `assignee?` (imię, id albo `me`) | dodaje zadanie; bez `list` tylko gdy w domu jest jedna lista |
+| `my_tasks` | `when?` (`today`, `week`, `all`, data), `household?` | otwarte zadania przypisane do osoby, z id; „dziś” = lokalna data serwera |
+| `complete_task` | `task` (tytuł albo id), `household?` | odhacza otwarte zadanie |
+
+Asystent (token z `act`) zmienia zadania, ale nie włącza ani nie wyłącza pluginu. Ręcznie: MCP Inspector,
+Streamable HTTP `http://localhost:5400/plugins/todo/mcp`, nagłówek `Authorization: Bearer <token z przeglądarki>`.
+
 Zdarzenia: publikuje `HomeApps.Todo.Contracts.TaskCompleted` (tylko zadania z list wspólnych), słucha
 `MemberLeft` i `MemberJoined` z Households.
 
