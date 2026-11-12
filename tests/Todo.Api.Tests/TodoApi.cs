@@ -34,6 +34,12 @@ internal sealed class AHousehold(TodoFactory factory)
         factory.Households.SetRole(household.Id, household.Member, HouseholdRole.Member);
         factory.Households.SetRole(household.Id, household.Other, HouseholdRole.Member);
         factory.Households.SetRole(household.Id, household.Guest, HouseholdRole.Guest);
+        factory.Households.HouseholdNames[household.Id] = "Mieszkanie";
+        factory.Households.PeopleNames[household.Owner] = "Ola";
+        factory.Households.PeopleNames[household.Admin] = "Adam";
+        factory.Households.PeopleNames[household.Member] = "Ania";
+        factory.Households.PeopleNames[household.Other] = "Olek";
+        factory.Households.PeopleNames[household.Guest] = "Gosia";
         (await household.As(household.Owner).PutAsJsonAsync($"{household.Api}/enablement", new { enabled = true })).EnsureSuccessStatusCode();
         return household;
     }
