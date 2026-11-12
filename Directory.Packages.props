@@ -3,7 +3,7 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <!-- The HomeApps version the plugin is built against (local feed, see nuget.config). -->
-    <HomeAppsVersion>2.1.0</HomeAppsVersion>
+    <HomeAppsVersion>2.3.0</HomeAppsVersion>
   </PropertyGroup>
 
   <ItemGroup Label="HomeApps kit">
