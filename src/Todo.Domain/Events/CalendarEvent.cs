@@ -152,6 +152,11 @@ public sealed class CalendarEvent
             return allowed;
         }
 
+        if (isPrivate != IsPrivate && actor.UserId != CreatedBy)
+        {
+            return Result.Fail(PlannerErrors.CannotEditEvent);
+        }
+
         var validTitle = EventTitle.Create(title);
         var zone = EventTime.CheckZone(timeZoneId);
         var rems = EventReminder.CreateMany(reminders);
@@ -177,6 +182,11 @@ public sealed class CalendarEvent
         var now = time.GetUtcNow();
         if (Attendees.Remove(userId))
         {
+            if (Attendees.Count == 0 && CreatedBy != userId)
+            {
+                Attendees.Add(CreatedBy);
+            }
+
             UpdatedAt = now;
         }
 

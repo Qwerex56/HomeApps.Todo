@@ -56,6 +56,43 @@ public sealed class CalendarEventTests
     }
 
     [Fact]
+    public void MemberLeft_LastAttendeeLeaving_KeepsTheAuthorAsAttendee()
+    {
+        var author = Guid.NewGuid();
+        var leaver = Guid.NewGuid();
+        var e = New(Actor.Member(author), attendees: [leaver]);
+
+        e.MemberLeft(leaver, _time);
+
+        Assert.Equal([author], e.Attendees);
+    }
+
+    [Fact]
+    public void MemberLeft_AuthorLeavingLastAttendee_LeavesListEmpty()
+    {
+        var author = Guid.NewGuid();
+        var e = New(Actor.Member(author), attendees: [author]);
+
+        e.MemberLeft(author, _time);
+
+        Assert.Empty(e.Attendees);
+    }
+
+    [Fact]
+    public void Edit_PrivacyChangeByNonAuthorIsForbidden()
+    {
+        var attendee = Guid.NewGuid();
+        var e = New(Actor.Member(Guid.NewGuid()), attendees: [attendee]);
+
+        var result = e.Edit(Actor.Member(attendee), "Obiad", null, null, "Europe/Warsaw", A.Now, A.Now.AddHours(1), false, true,
+            [attendee], [10], _time);
+
+        Assert.Equal("planner.cannot_edit_event", result.Code());
+        Assert.False(e.IsPrivate);
+        Assert.Contains(attendee, e.Attendees);
+    }
+
+    [Fact]
     public void Edit_ByNonAttendeeIsForbidden()
     {
         var e = New(Actor.Member(Guid.NewGuid()), attendees: [Guid.NewGuid()]);
