@@ -21,7 +21,7 @@ Last updated: 2026-11-22 · HEAD: c1c3df7 · branch feat/household-planner-p4 (P
 | `src/Todo.Api` | host: `Program.cs` (entry, MigrateDatabaseOnStartup), `Endpoints/`, `Mcp/TaskTools.cs:30`, `wwwroot/ui` |
 | `src/Todo.Web` | Vue UI source: `src/TasksPage.vue`, `TodayWidget.vue`, `TaskEditor.vue`, `ListDialog.vue`, `TaskRow.vue`, `api.ts`, `useTodo.ts`, `dates.ts`, `main.ts` (definePlugin, pl/en texts) |
 | `tests/Todo.Domain.Tests` | domain tests (no Docker): `TaskRecurrenceTests`, `CalendarEventTests`, `CalendarEventGuestTests`, `EventSeriesTests`, `EventSeriesOccurrenceTests`, `EventSeriesEdgeTests`, `RecurrenceEvaluatorTests`, `RecurrenceRfcTests`, `EventOverrideTests`, `CalendarSubscriptionTests`, `ExternalCalendarImportTests`, `IcsParserTests`, `SsrfIpPolicyTests`, `SsrfIpPolicyBoundaryTests`, `HouseholdMemberProjectionTests`, `PlannerSettingsTests`, `FeedTokenTests` |
-| `tests/Todo.Api.Tests` | API tests on Testcontainers Postgres (`TodoFactory.cs:12`, `TodoApi.cs`, `FakeHouseholds.cs`, `McpTests.cs:14`, `TodoTests.cs`, `CalendarTests.cs`, `SubscriptionTests.cs`, `IcsFeedGeneratorTests.cs`); no `Todo.Application.Tests` project exists: handler tests go through API tests |
+| `tests/Todo.Api.Tests` | API tests on Testcontainers Postgres (`TodoFactory.cs:12`, `TodoApi.cs`, `FakeHouseholds.cs`, `McpTests.cs:14`, `TodoTests.cs`, `CalendarTests.cs`, `SubscriptionTests.cs`, `IcsFeedGeneratorTests.cs`, `ExternalCalendarApiTests.cs`, `ExternalCalendarHandlerTests.cs`, `ExternalCalendarSyncerTests.cs`, `SsrfSafeHttpClientTests.cs`, `SsrfSafeHttpClientLimitsTests.cs`, `SsrfSchemeAndDnsTests.cs`, `FakeSsrfSafeClient.cs`); no `Todo.Application.Tests` project exists: handler tests go through API tests |
 | `specs/` | READ-ONLY for agents: `household-planner.md` (spec), `household-planner-adr.md` (binding ADR) |
 | `docs/plan.md` | Todo v1 plan and progress log (section 8) |
 | `.claude/skills/` | project skills: `dotnet-conventions`, `vue-conventions`, `testing-standards` (API tests listed NOT RUN if Docker is down), `code-review-checklist` (developer pre-submit section) |
@@ -33,7 +33,7 @@ Last updated: 2026-11-22 · HEAD: c1c3df7 · branch feat/household-planner-p4 (P
 - Endpoints (all under `/plugins/todo/api`, households `/households/{householdId:guid}`):
   - `Endpoints/ListEndpoints.cs:19` lists: GET/POST `/lists`, PUT `/lists/{id}`, POST `archive|restore`, DELETE.
   - `Endpoints/CalendarEndpoints.cs` calendar events/items and series instances (P2; contract in ADR).
-  - `Endpoints/FeedEndpoints.cs` (ICS feed), `Endpoints/SubscriptionEndpoints.cs` (calendar subscriptions, P3).
+  - `Endpoints/FeedEndpoints.cs` (ICS feed), `Endpoints/SubscriptionEndpoints.cs` (calendar subscriptions, P3), `Endpoints/ExternalCalendarEndpoints.cs` (external ICS import, P4).
   - `Endpoints/TaskEndpoints.cs:22-49` tasks: GET `/tasks`, POST `/lists/{id}/tasks`, PUT/DELETE `/tasks/{id}`, POST `complete|reopen|move`.
 - Also: `/plugins/todo/manifest`, `/openapi/v1.json`, `/health/{live,ready}`, MCP at `/plugins/todo/mcp` (tools `add_task`, `my_tasks`, `complete_task` in `Mcp/TaskTools.cs`).
 - Events: publishes `TaskCompleted` (shared lists only; `Application/Events/PublishTaskCompleted.cs:9`); consumes `MemberLeft`/`MemberJoined` (`HouseholdsConsumer.cs:15`); `SeedDefaultList.cs:9` on `PluginSwitchedOn`.
@@ -45,6 +45,7 @@ Last updated: 2026-11-22 · HEAD: c1c3df7 · branch feat/household-planner-p4 (P
 | Build (warnings are errors) | `dotnet build HomeApps.Todo.slnx` |
 | Domain tests | `dotnet test tests/Todo.Domain.Tests` |
 | API tests (needs Docker) | `dotnet test tests/Todo.Api.Tests` |
+| API tests, no Docker | `dotnet test tests/Todo.Api.Tests --filter "FullyQualifiedName~ExternalCalendarHandlerTests\|FullyQualifiedName~SsrfSafeHttpClient\|FullyQualifiedName~ExternalCalendarSyncerTests\|FullyQualifiedName~SsrfSchemeAndDnsTests\|FullyQualifiedName~IcsFeedGeneratorTests"` |
 | UI type-check | `cd src/Todo.Web && npm run type-check` |
 | UI build (commit output) | `cd src/Todo.Web && npm run build` (vue-tsc + vite) |
 | Kit packages | in `../HomeApps`: `scripts/pack.sh` (required before restore/build/UI install) |
