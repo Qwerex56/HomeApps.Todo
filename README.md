@@ -52,11 +52,11 @@ docker compose -f compose.yaml up -d --build   # -f, bo .env HomeApps może usta
 | POST | `lists/{id}/archive`, `lists/{id}/restore` | jw. |
 | DELETE | `lists/{id}` (razem z zadaniami) | jw. |
 | GET | `tasks?list=&assignee=me&dueBy=YYYY-MM-DD&status=Open\|Done` | `tasks.read` |
-| POST | `lists/{id}/tasks` `{title, notes, dueDate, dueTime, priority, assigneeId}` | `tasks.write` |
-| PUT | `tasks/{id}` (cały formularz jak wyżej) | `tasks.write` |
+| POST | `lists/{id}/tasks` `{title, notes, dueDate, dueTime, priority, assigneeId, rrule?, anchor?}` | `tasks.write` |
+| PUT | `tasks/{id}?scope=` (cały formularz jak wyżej, z `rrule?`, `anchor?`) | `tasks.write`; zakres w sekcji „Zadania cykliczne” |
 | POST | `tasks/{id}/complete`, `tasks/{id}/reopen` | `tasks.write` |
 | POST | `tasks/{id}/move` `{listId, beforeTaskId}` (null = na koniec) | `tasks.write` |
-| DELETE | `tasks/{id}` | wspólna lista: autor albo `tasks.manage`; prywatna: właściciel |
+| DELETE | `tasks/{id}?scope=` | wspólna lista: autor albo `tasks.manage`; prywatna: właściciel; zakres jak wyżej |
 | GET/PUT | `enablement` | z kitu (włącza Admin domu) |
 
 Poza `/api`: `GET /plugins/todo/manifest`, `/plugins/todo/openapi/v1.json`, `/plugins/todo/health/{live,ready}`.
@@ -82,6 +82,47 @@ Wydarzenia i serie cykliczne (RRULE). Zapisy wymagają roli Członek domu lub wy
 - Serie zapisane w tym etapie nie przechowują uczestników ani przypomnień: `rrule` razem z uczestnikami lub przypomnieniami daje błąd walidacji.
 - Obsługiwany podzbiór RRULE: `FREQ` DAILY/WEEKLY/MONTHLY/YEARLY z `INTERVAL`, `COUNT`, `UNTIL`, `BYDAY` (z porządkowymi w miesiącu/roku), `BYMONTHDAY` (tylko MONTHLY/YEARLY), `BYMONTH`; `WKST` tylko domyślny. Reszta (np. `BYSETPOS`, `INTERVAL=0`) jest odrzucana przy zapisie.
 - Kody błędów: `400 planner.invalid_date_range`, `400 planner.empty_title`, `400 planner.invalid_scope`, `403 planner.cannot_edit_event`, `403 planner.cannot_edit_private`, `403 planner.cannot_delete_event`, `404 planner.event_not_found`, `404 planner.series_not_found`.
+
+## Reminders and time zones (stage P5)
+
+- `CalendarReminderJob` (hosted service) runs every 60 seconds. It sends event reminders (per-event and per-user overrides, defaults from the user's planner settings), due-time task reminders (due time minus the user's task offsets) and a morning digest "Zadania na dziś" at 07:30 local time, once per user per day.
+- Notifications go through `INotifier`; the job calls `SaveChangesAsync` after notifying so the outbox is written.
+- A reminder more than 60 minutes late is dropped and logged, not sent.
+- Time zones: each user may set an IANA `timeZone` in planner settings (validated). Without it the server uses `Planner:DefaultTimeZone` (`Europe/Warsaw` in `appsettings.json`). The zone is used for local times (digest, due-time reminders, new events and the agenda). Event and series zones are kept as IANA ids.
+- All server-side calculations (recurrence, stored instants, reminder timing) run in UTC. Local times around DST: a skipped local time moves forward one hour, a repeated one takes its first occurrence.
+
+## Planner settings (`/api/households/{hid}/calendar/settings`, stage P6)
+
+| Method | Path | What |
+|---|---|---|
+| GET | `calendar/settings` | the caller's settings in this household |
+| PUT | `calendar/settings` `{eventReminders?, taskReminders?, firstDayOfWeek, timeZone?}` | replace the caller's settings; returns the same view |
+
+- `eventReminders` and `taskReminders` are lists of minutes before the start. `firstDayOfWeek` is a `DayOfWeek` name (for example `Monday`). `timeZone` is an IANA id or null (default zone).
+- Every member, Guest included, changes only their own settings. Errors: `400 validation.problem`, `404 household.not_found`.
+
+## Recurring tasks and scope (stage P6)
+
+- A task may repeat: `rrule` (the same RFC 5545 subset as events) and `anchor`:
+  - `FromDueDate`: the next due date is the previous due date plus the interval;
+  - `FromCompletionDate`: the next due date is the completion date plus the interval.
+- The next instance is created only when the open one is completed, so a series has at most one open task.
+- `PUT tasks/{id}` and `DELETE tasks/{id}` take `?scope=`: `ThisInstance`, `ThisAndFuture` or `All` (case-insensitive). Missing scope means `All`. An unknown value is `400 planner.invalid_scope`.
+- `ThisInstance` changes or skips only the open instance; the next one follows the rule. `ThisAndFuture` and `All` change the series. Deleting with `All` or `ThisAndFuture` removes the open task, and the series does not continue.
+
+## Planner UI and wall widget (stage P6)
+
+- Route `/calendar` shows month, week, day and agenda views (agenda by default on mobile), with layers for household events, private events, tasks, and external calendars. Tasks with a due date have a checkbox.
+- The event drawer edits one event (full screen on mobile). Changing or deleting a repeating event or task asks for the scope (`SeriesScopeDialog`).
+- The settings dialog holds planner settings, ICS subscriptions and external imports. External imports are hidden for Guests.
+- Guests get a read-only view: no create, edit or drag and drop.
+- Widget `planner-agenda` ("Planer: dziś i jutro") for the household and `/wall`: today and tomorrow, with events, due tasks and imported calendars. On `/wall` it uses larger type and shows no external-calendar details and no private events.
+
+## No membership copy
+
+The plugin keeps no copy of users or memberships (see `docs/plugins.md` in HomeApps). Roles come from `IHouseholdAccess` with the caller's token. Background jobs and the public ICS feed use only plugin data:
+- `CalendarSubscription.IsGuest`, updated from `MemberRoleChanged`/`MemberJoined`, for feed visibility;
+- `InactiveMarker` rows, derived from events and not from roles or names: household-level for `HouseholdArchived`/`HouseholdRestored`, user-level for `UserDisabled`/`UserEnabled`/`UserErased` (erased is permanent), and both for `MemberLeft`/`MemberJoined`. The feed and reminders skip marked users.
 
 ## ICS subscriptions (under `/api/households/{hid}/calendar/subscriptions`, stage P3)
 
@@ -173,9 +214,9 @@ Zdarzenia: publikuje `HomeApps.Todo.Contracts.TaskCompleted` (tylko zadania z li
 | `src/Todo.Domain` | listy (`TodoList`) i zadania (`TodoTask`): kto co widzi i zmienia, archiwum, wyjście z domu (T5) |
 | `src/Todo.Contracts` | wiadomości dla innych usług (`TaskCompleted`) |
 | `src/Todo.Application` | manifest (`TodoPlugin`), komendy i zapytania MediatR (folder na każdą: `Lists/CreateList/CreateListCommand.cs`, `…Validator.cs`, `…Handler.cs`), porty w `Abstractions` |
-| `src/Todo.Infrastructure` | `TodoDbContext` (`PluginDbContext`), repozytoria, migracje, konsumenci Households, sprzątanie T5 |
+| `src/Todo.Infrastructure` | `TodoDbContext` (`PluginDbContext`), repozytoria, migracje, konsumenci Households, sprzątanie T5, `CalendarReminderJob`, `ExternalCalendarSyncJob` |
 | `src/Todo.Api` | host pluginu i endpointy; `wwwroot/ui` to zbudowane UI |
-| `src/Todo.Web` | UI (Vue 3 + `@homeapps/plugin-sdk`): strona „Zadania” (`TasksPage`), widżet „Na dziś” (`TodayWidget`), teksty pl/en w `main.ts` |
+| `src/Todo.Web` | UI (Vue 3 + `@homeapps/plugin-sdk`): strona „Zadania” (`TasksPage`), widżet „Na dziś” (`TodayWidget`), planer `/calendar` (`CalendarPage`), widżet `planner-agenda`, teksty pl/en w `main.ts` |
 | `tests/Todo.Domain.Tests` | testy domeny |
 | `tests/Todo.Api.Tests` | testy end to end na Postgresie, z Households udawanym po HTTP |
 
