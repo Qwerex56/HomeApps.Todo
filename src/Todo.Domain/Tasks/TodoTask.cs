@@ -1,6 +1,7 @@
 using FluentResults;
 using HomeApps.BuildingBlocks.Domain;
 using Todo.Domain.Common;
+using Todo.Domain.Events;
 using Todo.Domain.Lists;
 
 namespace Todo.Domain.Tasks;
@@ -61,6 +62,20 @@ public sealed class TodoTask : IHasDomainEvents
     public Guid? CompletedBy { get; private set; }
 
     public DateTimeOffset? CompletedAt { get; private set; }
+
+    /// <summary>Links the tasks of one recurring series; null for a task that does not repeat.</summary>
+    public Guid? SeriesId { get; private set; }
+
+    public RecurrenceRule? Rule { get; private set; }
+
+    /// <summary>What the next due date counts from; set together with <see cref="Rule"/>.</summary>
+    public RecurrenceAnchor? RecurrenceAnchor { get; private set; }
+
+    public DateTimeOffset? LastRecurrenceCompletedAt { get; private set; }
+
+    public DateTimeOffset? ReminderAt { get; private set; }
+
+    public bool IsRecurring => Rule is not null;
 
     public IReadOnlyList<IDomainEvent> DomainEvents => _domainEvents;
 
@@ -131,6 +146,70 @@ public sealed class TodoTask : IHasDomainEvents
     }
 
     /// <summary>
+    /// Edits a recurring task with a scope (ADR 3.7). <c>ThisInstance</c>: the task leaves its series and stands alone.
+    /// <c>ThisAndFuture</c>: the task starts a new series with the new rule. <c>All</c>: the rule of the series changes.
+    /// A null <paramref name="rrule"/> makes the task stop repeating. The next instance after completion is P5.
+    /// </summary>
+    public Result EditRecurring(
+        TodoList list,
+        Actor actor,
+        RecurrenceScope scope,
+        string? title,
+        string? notes,
+        TaskDue? due,
+        TaskPriority priority,
+        string? rrule,
+        RecurrenceAnchor anchor,
+        TimeProvider time)
+    {
+        ArgumentNullException.ThrowIfNull(time);
+        if (!Enum.IsDefined(scope) || !Enum.IsDefined(anchor))
+        {
+            return Result.Fail(PlannerErrors.InvalidScope);
+        }
+
+        var rule = rrule is null ? null : RecurrenceRule.Create(rrule);
+        if (rule is { IsFailed: true })
+        {
+            return rule.ToResult();
+        }
+
+        var edited = Edit(list, actor, title, notes, due, priority, time);
+        if (edited.IsFailed)
+        {
+            return edited;
+        }
+
+        if (scope == RecurrenceScope.ThisInstance)
+        {
+            SeriesId = null;
+            Rule = null;
+            RecurrenceAnchor = null;
+            return Result.Ok();
+        }
+
+        Rule = rule?.Value;
+        RecurrenceAnchor = rule is null ? null : anchor;
+        SeriesId = rule is null ? null : scope == RecurrenceScope.ThisAndFuture ? Guid.CreateVersion7(UpdatedAt) : SeriesId ?? Id;
+        return Result.Ok();
+    }
+
+    /// <summary>Sets or clears the moment the reminder for this task fires.</summary>
+    public Result SetReminder(TodoList list, Actor actor, DateTimeOffset? at, TimeProvider time)
+    {
+        ArgumentNullException.ThrowIfNull(time);
+        var allowed = Allowed(list, actor);
+        if (allowed.IsFailed)
+        {
+            return allowed;
+        }
+
+        ReminderAt = at?.ToUniversalTime();
+        UpdatedAt = time.GetUtcNow();
+        return Result.Ok();
+    }
+
+    /// <summary>
     /// Assigns the task, or clears the assignment with null. On a shared list the Application layer checks that the
     /// person is a household member; on a private list only its owner can be assigned.
     /// </summary>
@@ -166,6 +245,11 @@ public sealed class TodoTask : IHasDomainEvents
         Status = TodoStatus.Done;
         CompletedBy = actor.UserId;
         CompletedAt = UpdatedAt = now;
+        if (IsRecurring)
+        {
+            LastRecurrenceCompletedAt = now;
+        }
+
         _domainEvents.Add(new TaskCompleted(Id, HouseholdId, ListId, list.IsShared, Title.Value, actor.UserId, now));
         return Result.Ok();
     }
