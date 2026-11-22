@@ -21,7 +21,8 @@ internal sealed class CompleteTaskHandler(ITodoListRepository lists, ITodoTaskRe
         // A repeated tick (two people at the wall) changes nothing, so it must not add another instance.
         var wasOpen = found.Value.Task.Status == TodoStatus.Open;
         var done = found.Value.Task.Complete(found.Value.List, actor, time);
-        if (done.IsSuccess && wasOpen && found.Value.Task.NextInstance(time) is { } next)
+        if (done.IsSuccess && wasOpen && found.Value.Task.NextInstance(time) is { } next
+            && !await tasks.HasOpenInSeriesAsync(command.HouseholdId, next.SeriesId!.Value, cancellationToken))
         {
             tasks.Add(next);
         }

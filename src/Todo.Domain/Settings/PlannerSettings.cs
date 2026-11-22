@@ -39,9 +39,13 @@ public sealed class PlannerSettings
         ArgumentNullException.ThrowIfNull(time);
         var events = EventReminder.CreateMany(eventReminders);
         var tasks = EventReminder.CreateMany(taskReminders);
-        if (!string.IsNullOrWhiteSpace(timeZoneId) && !TimeZoneInfo.TryFindSystemTimeZoneById(timeZoneId, out _))
+        if (!string.IsNullOrWhiteSpace(timeZoneId))
         {
-            return Result.Fail($"Unknown time zone '{timeZoneId}'.");
+            var zone = EventTime.CheckZone(timeZoneId);
+            if (zone.IsFailed)
+            {
+                return zone;
+            }
         }
 
         var check = Result.Merge((ResultBase)events, tasks);

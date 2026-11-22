@@ -16,6 +16,9 @@ public interface ITodoTaskRepository
     /// <summary>The highest position below <paramref name="position"/> on the list, leaving out <paramref name="exceptTaskId"/>.</summary>
     Task<decimal?> PositionBeforeAsync(Guid listId, decimal position, Guid exceptTaskId, CancellationToken cancellationToken);
 
+    /// <summary>Whether the recurring series still has an open instance.</summary>
+    Task<bool> HasOpenInSeriesAsync(Guid householdId, Guid seriesId, CancellationToken cancellationToken);
+
     void Add(TodoTask task);
 
     void Remove(TodoTask task);

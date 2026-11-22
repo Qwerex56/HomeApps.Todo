@@ -66,4 +66,16 @@ public sealed class TaskNextInstanceTests
 
         Assert.Null(task.NextInstance(_time));
     }
+
+    [Fact]
+    public void Count_ShrinksWithEachInstanceSoTheSeriesEnds()
+    {
+        var (task, list, by) = Done("FREQ=DAILY;COUNT=2", RecurrenceAnchor.FromDueDate, new TaskDue(A.Today));
+
+        var second = task.NextInstance(_time)!;
+        second.Complete(list, by, _time);
+
+        Assert.Equal("FREQ=DAILY;COUNT=1", second.Rule!.Value);
+        Assert.Null(second.NextInstance(_time));
+    }
 }

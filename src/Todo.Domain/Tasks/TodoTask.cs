@@ -275,6 +275,16 @@ public sealed class TodoTask : IHasDomainEvents
             return null;
         }
 
+        // COUNT is per series, so each instance carries what is left of it.
+        var nextRule = Rule;
+        var parts = Rule.Value.Split(';');
+        var countIndex = Array.FindIndex(parts, p => p.StartsWith("COUNT=", StringComparison.Ordinal));
+        if (countIndex >= 0 && int.TryParse(parts[countIndex]["COUNT=".Length..], out var count))
+        {
+            parts[countIndex] = $"COUNT={count - 1}";
+            nextRule = RecurrenceRule.Create(string.Join(';', parts)).Value;
+        }
+
         var now = time.GetUtcNow();
         return new TodoTask
         {
@@ -292,7 +302,7 @@ public sealed class TodoTask : IHasDomainEvents
             CreatedAt = now,
             UpdatedAt = now,
             SeriesId = SeriesId ?? Id,
-            Rule = Rule,
+            Rule = nextRule,
             RecurrenceAnchor = RecurrenceAnchor,
         };
     }

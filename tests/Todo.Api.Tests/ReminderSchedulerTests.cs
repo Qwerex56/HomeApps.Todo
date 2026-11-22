@@ -2,6 +2,7 @@ using HomeApps.BuildingBlocks.Application.Abstractions;
 using HomeApps.Plugins.Notifications;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Todo.Application;
@@ -107,19 +108,27 @@ public sealed class ReminderSchedulerTests
     public async Task The_job_notifies_each_due_reminder_and_does_not_repeat_it_on_the_next_scan()
     {
         var time = new FixedClock(DateTimeOffset.UtcNow);
-        var notifier = new RecordingNotifier();
+        var log = new List<string>();
+        var notifier = new RecordingNotifier(log);
         var reader = new FakeReader(Sources([Event(time.GetUtcNow().AddSeconds(-10), [0])], Member(_author)));
         var services = new ServiceCollection();
         services.AddSingleton<TimeProvider>(time);
         services.AddSingleton<IReminderReader>(reader);
         services.AddSingleton<INotifier>(notifier);
-        services.AddScoped(_ => new TodoDbContext(new DbContextOptionsBuilder<TodoDbContext>().UseNpgsql("Host=127.0.0.1;Port=1;Timeout=1").Options, new NoPublisher()));
+        services.AddScoped(_ =>
+        {
+            var options = new DbContextOptionsBuilder<TodoDbContext>().UseNpgsql("Host=127.0.0.1;Port=1;Timeout=1").AddInterceptors(new SaveSpy(log)).Options;
+            var context = new TodoDbContext(options, new NoPublisher());
+            context.PlannerSettings.Add(new PlannerSettings(Household, _author, time.GetUtcNow())); // a pending change, so the save reaches the interceptor
+            return context;
+        });
         var job = new CalendarReminderJob(services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>(), NullLogger<CalendarReminderJob>.Instance);
 
         await job.RunOnceAsync(default);
         time.Advance(TimeSpan.FromSeconds(60));
         await job.RunOnceAsync(default);
 
+        Assert.Equal(["notify", "save", "save"], log);
         var sent = Assert.Single(notifier.Sent);
         Assert.Equal((_author, TodoPlugin.EventReminderNotification, Household), (Assert.Single(sent.UserIds), sent.Category, sent.HouseholdId));
     }
@@ -175,13 +184,23 @@ public sealed class ReminderSchedulerTests
         public Task<ReminderSources> LoadAsync(DateTimeOffset from, DateTimeOffset horizon, CancellationToken cancellationToken) => Task.FromResult(sources);
     }
 
-    private sealed class RecordingNotifier : INotifier
+    private sealed class SaveSpy(List<string> log) : SaveChangesInterceptor
+    {
+        public override ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default)
+        {
+            log.Add("save");
+            return ValueTask.FromResult(InterceptionResult<int>.SuppressWithResult(0));
+        }
+    }
+
+    private sealed class RecordingNotifier(List<string> log) : INotifier
     {
         public List<PluginNotification> Sent { get; } = [];
 
         public Task NotifyAsync(PluginNotification notification, CancellationToken ct)
         {
             Sent.Add(notification);
+            log.Add("notify");
             return Task.CompletedTask;
         }
     }
