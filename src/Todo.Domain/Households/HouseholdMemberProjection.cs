@@ -25,11 +25,14 @@ public sealed class HouseholdMemberProjection
 
     public bool IsDisabled { get; private set; }
 
+    /// <summary>True while the household is archived (ADR decision 14); its feeds answer 404.</summary>
+    public bool IsArchived { get; private set; }
+
     public DateTimeOffset JoinedAt { get; private set; }
 
     public DateTimeOffset? LeftAt { get; private set; }
 
-    public bool IsActive => LeftAt is null && !IsDisabled;
+    public bool IsActive => LeftAt is null && !IsDisabled && !IsArchived;
 
     public void ChangeRole(string role)
     {
@@ -45,6 +48,10 @@ public sealed class HouseholdMemberProjection
         LeftAt = null;
         JoinedAt = now;
     }
+
+    public void Archive() => IsArchived = true;
+
+    public void Restore() => IsArchived = false;
 
     public void Disable() => IsDisabled = true;
 

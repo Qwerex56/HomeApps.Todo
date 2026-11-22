@@ -1,12 +1,12 @@
 # Project map: HomeApps.Todo
 
-Last updated: 2026-11-22 · HEAD: a28b7b5 · branch feat/household-planner-p2 (PRs go to integration branch named by owner; master is protected)
+Last updated: 2026-11-22 · HEAD: d189716 · branch feat/household-planner-p3 (PRs go to integration branch named by owner; master is protected)
 
 ## Overview
 - Plugin "Zadania" (Todo) for HomeApps, plus in-progress "Planer" (calendar + recurring tasks). Lives outside HomeApps repo.
 - Stack: .NET 10 (Minimal API, MediatR 12, FluentValidation, FluentResults, EF Core, Postgres, MassTransit/RabbitMQ), kit `HomeApps.*` packages from `~/.homeapps/packages`; UI Vue 3.5 + TS + Vite + TanStack Query + Axios + `@homeapps/plugin-sdk`.
 - Built UI is committed: `src/Todo.Api/wwwroot/ui` (entry.js, entry.css, chunks).
-- Planner: P1 (domain + storage) and P2 (calendar events API) in code; P3-P6 todo (status: `.agents/STATUS.md`). Source of truth: `specs/`.
+- Planner: P1-P3 in code (P3 API tests pending Docker); P4-P6 todo (status: `.agents/STATUS.md`). Source of truth: `specs/`.
 
 ## Layout
 | Path | Responsibility |
@@ -16,15 +16,15 @@ Last updated: 2026-11-22 · HEAD: a28b7b5 · branch feat/household-planner-p2 (P
 | `src/Todo.Domain/Settings` | `PlannerSettings.cs:7` |
 | `src/Todo.Domain/Households` | `HouseholdMemberProjection.cs:4` (member projection from MemberJoined/Left) |
 | `src/Todo.Contracts` | integration message `TaskCompleted` (`TaskCompleted.cs`) |
-| `src/Todo.Application` | `TodoPlugin.cs` (manifest, line 12/23), commands/queries per folder, `Abstractions/` ports, `Events/` (calendar commands/queries: Create/Update/DeleteCalendarEvent, GetCalendarEvent, GetCalendarItems, ModifySeriesInstance, DeleteSeriesInstance, `ScopeParser.cs`; plus integration handlers), `Households/` |
-| `src/Todo.Infrastructure` | `TodoDbContext` (`Persistence/TodoDbContext.cs:10`; DbSets :15-33 incl. planner), `Persistence/Configurations/` (EF maps per aggregate, `Converters.cs`), repos (`CalendarEventRepository.cs`), `Persistence/CalendarReader.cs` (calendar read model), `Persistence/Migrations/` (Initial, `20261122012643_AddPlannerModule`), `Households/HouseholdsConsumer.cs:15`, `Jobs/LeftListsCleanup.cs:13` (6 h purge), `DependencyInjection.cs:15` |
+| `src/Todo.Application` | `TodoPlugin.cs` (manifest, line 12/23), commands/queries per folder, `Abstractions/` ports, `Events/` (calendar commands/queries: Create/Update/DeleteCalendarEvent, GetCalendarEvent, GetCalendarItems, ModifySeriesInstance, DeleteSeriesInstance, `ScopeParser.cs`; plus integration handlers), `Households/` (+ `MemberRoleChanged`, `HouseholdArchived`, `HouseholdRestored` handlers), `Subscriptions/`, `Accounts/` |
+| `src/Todo.Infrastructure` | `TodoDbContext` (`Persistence/TodoDbContext.cs:10`; DbSets :15-33 incl. planner), `Persistence/Configurations/` (EF maps per aggregate, `Converters.cs`), repos (`CalendarEventRepository.cs`), `Persistence/CalendarReader.cs` (calendar read model), `Persistence/Migrations/` (Initial, `20261122012643_AddPlannerModule`, `20261122023712_AddMemberProjectionIsArchived`), `Feeds/IcsFeedGenerator.cs` (ICS feed), `Households/HouseholdsConsumer.cs:15`, `Jobs/LeftListsCleanup.cs:13` (6 h purge), `DependencyInjection.cs:15` |
 | `src/Todo.Api` | host: `Program.cs` (entry, MigrateDatabaseOnStartup), `Endpoints/`, `Mcp/TaskTools.cs:30`, `wwwroot/ui` |
 | `src/Todo.Web` | Vue UI source: `src/TasksPage.vue`, `TodayWidget.vue`, `TaskEditor.vue`, `ListDialog.vue`, `TaskRow.vue`, `api.ts`, `useTodo.ts`, `dates.ts`, `main.ts` (definePlugin, pl/en texts) |
-| `tests/Todo.Domain.Tests` | domain tests (no Docker): `TaskRecurrenceTests`, `CalendarEventTests`, `CalendarEventGuestTests`, `EventSeriesTests`, `EventSeriesOccurrenceTests`, `EventSeriesEdgeTests`, `RecurrenceEvaluatorTests`, `RecurrenceRfcTests`, `EventOverrideTests`, `CalendarSubscriptionTests`, `ExternalCalendarImportTests`, `HouseholdMemberProjectionTests`, `PlannerSettingsTests` |
-| `tests/Todo.Api.Tests` | API tests on Testcontainers Postgres (`TodoFactory.cs:12`, `TodoApi.cs`, `FakeHouseholds.cs`, `McpTests.cs:14`, `TodoTests.cs`); no `Todo.Application.Tests` project exists: handler tests go through API tests |
+| `tests/Todo.Domain.Tests` | domain tests (no Docker): `TaskRecurrenceTests`, `CalendarEventTests`, `CalendarEventGuestTests`, `EventSeriesTests`, `EventSeriesOccurrenceTests`, `EventSeriesEdgeTests`, `RecurrenceEvaluatorTests`, `RecurrenceRfcTests`, `EventOverrideTests`, `CalendarSubscriptionTests`, `ExternalCalendarImportTests`, `HouseholdMemberProjectionTests`, `PlannerSettingsTests`, `FeedTokenTests` |
+| `tests/Todo.Api.Tests` | API tests on Testcontainers Postgres (`TodoFactory.cs:12`, `TodoApi.cs`, `FakeHouseholds.cs`, `McpTests.cs:14`, `TodoTests.cs`, `CalendarTests.cs`, `SubscriptionTests.cs`, `IcsFeedGeneratorTests.cs`); no `Todo.Application.Tests` project exists: handler tests go through API tests |
 | `specs/` | READ-ONLY for agents: `household-planner.md` (spec), `household-planner-adr.md` (binding ADR) |
 | `docs/plan.md` | Todo v1 plan and progress log (section 8) |
-| `.claude/skills/` | project skills: `dotnet-conventions`, `vue-conventions`, `testing-standards`, `code-review-checklist` |
+| `.claude/skills/` | project skills: `dotnet-conventions`, `vue-conventions`, `testing-standards` (API tests listed NOT RUN if Docker is down), `code-review-checklist` (developer pre-submit section) |
 | `.agents/runs/` | run artifacts (gitignored, never commit) |
 | `.agents/STATUS.md` | planner feature stage table (P1-P6), decisions, blockers |
 
@@ -33,6 +33,7 @@ Last updated: 2026-11-22 · HEAD: a28b7b5 · branch feat/household-planner-p2 (P
 - Endpoints (all under `/plugins/todo/api`, households `/households/{householdId:guid}`):
   - `Endpoints/ListEndpoints.cs:19` lists: GET/POST `/lists`, PUT `/lists/{id}`, POST `archive|restore`, DELETE.
   - `Endpoints/CalendarEndpoints.cs` calendar events/items and series instances (P2; contract in ADR).
+  - `Endpoints/FeedEndpoints.cs` (ICS feed), `Endpoints/SubscriptionEndpoints.cs` (calendar subscriptions, P3).
   - `Endpoints/TaskEndpoints.cs:22-49` tasks: GET `/tasks`, POST `/lists/{id}/tasks`, PUT/DELETE `/tasks/{id}`, POST `complete|reopen|move`.
 - Also: `/plugins/todo/manifest`, `/openapi/v1.json`, `/health/{live,ready}`, MCP at `/plugins/todo/mcp` (tools `add_task`, `my_tasks`, `complete_task` in `Mcp/TaskTools.cs`).
 - Events: publishes `TaskCompleted` (shared lists only; `Application/Events/PublishTaskCompleted.cs:9`); consumes `MemberLeft`/`MemberJoined` (`HouseholdsConsumer.cs:15`); `SeedDefaultList.cs:9` on `PluginSwitchedOn`.

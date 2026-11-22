@@ -28,6 +28,17 @@ public sealed class HouseholdMemberProjectionTests
     }
 
     [Fact]
+    public void Enabling_a_member_who_has_left_keeps_them_inactive()
+    {
+        var m = New();
+        m.Disable();
+        m.Left(A.Now.AddDays(1));
+        m.Enable();
+
+        Assert.False(m.IsActive);
+    }
+
+    [Fact]
     public void DisableAndEnable_ToggleActive()
     {
         var m = New();
@@ -36,5 +47,16 @@ public sealed class HouseholdMemberProjectionTests
         m.Enable();
 
         Assert.Equal((false, true), (disabled, m.IsActive));
+    }
+
+    [Fact]
+    public void ArchiveAndRestore_ToggleActive()
+    {
+        var m = New();
+        m.Archive();
+        var archived = m.IsActive;
+        m.Restore();
+
+        Assert.Equal((false, true), (archived, m.IsActive));
     }
 }

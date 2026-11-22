@@ -83,6 +83,27 @@ Wydarzenia i serie cykliczne (RRULE). Zapisy wymagają roli Członek domu lub wy
 - Obsługiwany podzbiór RRULE: `FREQ` DAILY/WEEKLY/MONTHLY/YEARLY z `INTERVAL`, `COUNT`, `UNTIL`, `BYDAY` (z porządkowymi w miesiącu/roku), `BYMONTHDAY` (tylko MONTHLY/YEARLY), `BYMONTH`; `WKST` tylko domyślny. Reszta (np. `BYSETPOS`, `INTERVAL=0`) jest odrzucana przy zapisie.
 - Kody błędów: `400 planner.invalid_date_range`, `400 planner.empty_title`, `400 planner.invalid_scope`, `403 planner.cannot_edit_event`, `403 planner.cannot_edit_private`, `403 planner.cannot_delete_event`, `404 planner.event_not_found`, `404 planner.series_not_found`.
 
+## ICS subscriptions (under `/api/households/{hid}/calendar/subscriptions`, stage P3)
+
+Read-only ICS link so a phone calendar can show the household calendar. Each subscription has its own random token.
+
+| Method | Path | What |
+|---|---|---|
+| GET | `subscriptions` | the caller's subscriptions in this household (no token) |
+| POST | `subscriptions` `{label, includeHouseholdEvents?, includePrivateEvents?, tasksMode?}` | new subscription; 201 with `token` and `feedPath` |
+| DELETE | `subscriptions/{id}` | revoke the link; 204 |
+| GET | `/plugins/todo/feed/{token}.ics` (outside `/api`, anonymous) | `text/calendar` feed (RFC 5545) |
+
+- The token (43 Base64Url characters, 256 bits) is returned **only once**, in the `POST` response. The database stores only its SHA-256 hash. A lost token cannot be recovered: create a new subscription and revoke the old one.
+- `feedPath` is `/plugins/todo/feed/{token}.ics`; prepend your HomeApps domain when adding it to the calendar app.
+- `includeHouseholdEvents` (default `true`) adds household-wide events. `includePrivateEvents` (default `false`) adds private events, but only for the subscription owner's own events.
+- `tasksMode`: `None` (default, no tasks), `Assigned` (only tasks assigned to the caller) or `All` (all household tasks with a due date). Tasks are taken from a window of 30 days back to 366 days ahead.
+- The feed contains events and series occurrences in that window, with overrides applied. Guests get only events they attend and household-wide events.
+- Errors: `400 validation.problem` (empty or too long label, invalid `tasksMode`), `404 household.not_found`, `404 planner.subscription_not_found` (on `DELETE`, a subscription that is missing or belongs to someone else).
+- The feed returns a bare `404 Not Found` when the token is unknown, the subscription is suspended, the member has left the household, the household is archived, or the account is disabled. Responses carry `Cache-Control: private, no-store` and `Referrer-Policy: no-referrer`.
+- Account lifecycle: `UserDisabled` suspends all of the user's subscriptions (the feed returns 404 at once), `UserEnabled` restores them without changing the link, and `UserErased` deletes them permanently.
+- A role change in the household is reflected in the feed immediately. Leaving the household (`MemberLeft`) and archiving it (`HouseholdArchived`) block the feed until membership is restored (`HouseholdRestored`).
+
 ## MCP (pod `/plugins/todo/mcp`, HomeApps 2.3.0+)
 
 Dla JARVIS-a i innych klientów MCP, z tokenem osoby (też delegowanym), te same sprawdzenia uprawnień co API. Dom,
