@@ -67,7 +67,7 @@ Wydarzenia i serie cykliczne (RRULE). Zapisy wymagają roli Członek domu lub wy
 
 | Metoda | Ścieżka | Co |
 |---|---|---|
-| GET | `events?from=&to=&layers=` | widok okna czasu: wydarzenia, wystąpienia serii i zadania z terminem; `layers` = `events,private,tasks` (domyślnie te trzy), `external` jest przyjmowane, ale bez danych do etapu P4 |
+| GET | `events?from=&to=&layers=` | widok okna czasu: wydarzenia, wystąpienia serii i zadania z terminem; `layers` = `events,private,tasks` (domyślnie te trzy), `external` = zaimportowane kalendarze ICS (etap P4, patrz niżej) |
 | POST | `events` | nowe wydarzenie albo seria (gdy podano `rrule`); 201 |
 | GET | `events/{id}` | szczegóły wydarzenia |
 | PUT | `events/{id}` | zmiana całego pojedynczego wydarzenia |
@@ -103,6 +103,49 @@ Read-only ICS link so a phone calendar can show the household calendar. Each sub
 - The feed returns a bare `404 Not Found` when the token is unknown, the subscription is suspended, the member has left the household, the household is archived, or the account is disabled. Responses carry `Cache-Control: private, no-store` and `Referrer-Policy: no-referrer`.
 - Account lifecycle: `UserDisabled` suspends all of the user's subscriptions (the feed returns 404 at once), `UserEnabled` restores them without changing the link, and `UserErased` deletes them permanently.
 - A role change in the household is reflected in the feed immediately. Leaving the household (`MemberLeft`) and archiving it (`HouseholdArchived`) block the feed until membership is restored (`HouseholdRestored`).
+
+## External calendars (under `/api/households/{hid}/calendar/external`, stage P4)
+
+Imports a calendar from an ICS address (for example a work or school calendar) into the household view. Each import belongs to the member who added it. Writes require the Member role or higher (`tasks.write`); guests see no imported events.
+
+| Method | Path | What |
+|---|---|---|
+| GET | `external` | the caller's imports in this household (no address) |
+| POST | `external` `{url, name, color?, visibility}` | new import; 201 with `Location` and the import view; the first download runs at once |
+| POST | `external/{id}/sync` | download the calendar now; 200 with the import view |
+| DELETE | `external/{id}` | remove the import; 204 |
+
+- The address (`url`) is secret: it is stored on the server, returned to no one, and never appears in responses, logs of the view or the feed. Only the owner can sync or remove an import; somebody else's import is `404 planner.calendar_not_found` (on `DELETE`, `403 planner.not_owner` for an import the caller can see but did not add).
+- `url` must be `http` or `https`, up to 2048 characters, without user name and password. `name` is 1-100 characters without control characters. `color` (up to 16 characters) defaults to `#3b82f6`.
+- `visibility` controls what other household members see (the owner always sees everything):
+  - `OnlyMe`: nobody else sees the import;
+  - `Busy`: others see the time blocks with the title `Zajęty` and no details;
+  - `Details`: others see titles, descriptions and locations.
+- The import view has `id`, `name`, `color`, `visibility`, `lastSyncedAt`, `lastSyncFailedAt`, `lastErrorMessage` and `isStale`. `isStale` is `true` while the last attempt failed; the data shown is then the last one downloaded successfully.
+- Imported events appear in `GET events` under the `external` layer (`layers=events,private,tasks,external`), with the import's `color`.
+- Errors: `400 planner.invalid_url` (address not http(s), too long or with credentials), `400 planner.invalid_import` (bad name or color), `400 planner.ssrf_rejected` (the address points inside the server's network), `400 planner.parse_error` (the download is not an iCalendar file), `400 planner.sync_failed` (on `sync`, the calendar could not be downloaded), `404 household.not_found`, `404 planner.calendar_not_found`, `403 planner.not_owner`, `403 plugin.forbidden`.
+- On `POST`, an address that is refused (SSRF, not a calendar) is rejected and not saved. An address that is only unreachable right now is saved: the job tries again, and the view shows `lastErrorMessage` and `isStale`.
+
+### Synchronisation
+
+- A background job runs every 5 minutes and refreshes each import whose last attempt is at least 30 minutes old. Failures count as attempts, so a broken address is retried every 30 minutes.
+- After 144 consecutive failures (three days at the 30-minute rhythm) the owner gets one push notification, "Kalendarz nie odświeża się" (the calendar does not refresh). Further failures do not repeat it; the next successful sync resets the count.
+
+### Address checks (SSRF guard)
+
+Every download, including the first one, goes through the same guard:
+
+- **Scheme:** `https` only in Production; `http` is also accepted outside Production (development).
+- **Destination:** the host name is resolved and every address is checked before connecting. Loopback, private (RFC 1918), link-local (including cloud metadata `169.254.169.254`), CGNAT `100.64.0.0/10`, multicast and unspecified addresses are refused, including IPv4-mapped IPv6 forms. The connection is made to the checked address (the TLS certificate is still checked against the host name), so the address cannot change between the check and the connection.
+- **Time:** 10 seconds in total for one download.
+- **Size:** at most 2 MB; a larger response is cut off and counts as a failure.
+- **Redirects:** followed by hand, at most 3 hops; each target goes through the full check again. A redirect to a refused address or to a non-https scheme in Production fails the download.
+
+### Retention after the owner leaves
+
+- On `MemberLeft` the import is hidden at once, its sync stops, and it is kept with the owner's leaving time.
+- If the member joins the household again within 30 days, the import comes back as it was (sync resumes).
+- After 30 days the import is deleted by the cleanup job (the same job that purges left private lists). Deleting the account (`UserErased`) removes all of the user's imports at once.
 
 ## MCP (pod `/plugins/todo/mcp`, HomeApps 2.3.0+)
 
