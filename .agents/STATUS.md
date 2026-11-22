@@ -23,8 +23,10 @@
 - 2026-11-22 nightly: P5 DA noted: NextInstance uses UTC date for FromCompletionDate (off by a day near local midnight). Owner decision/P7.
 - 2026-11-22 nightly: P7 fixed manifest Events.Consumes. Owner decision: ADR keeps local HouseholdMemberProjection, but plugins.md says plugins keep no membership copy and ask Households with the caller's token; projection may be stale on a second plugin replica.
 - 2026-11-22 nightly (owner feedback): HouseholdMemberProjection removed per plugins.md (plugin keeps no membership copy; only event-derived InactiveMarker); math stays UTC, zone only for digest/due time. Open: whole-household reminders reach only users the plugin knows; guests known to the plugin may get whole-household reminders (ADR Q1 policy check).
+- 2026-11-22 nightly: P6 finished after owner feedback: added PUT/GET calendar/settings and task ?scope= + UI. Choices to confirm: no ?scope= on a repeating task means All; delete All/ThisAndFuture ends the series; wall widget drops external layer (no display endpoint exists); widget id planner-agenda. Calendar grid still renders in device zone.
 
 ## Blockers
+- Run `dotnet test tests/Todo.Api.Tests` (PlannerSettingsTests, TaskScopeTests, SubscriptionTests incl. rejoin, migration ReplaceMemberProjectionWithInactiveMarkers) on a Docker host before merging P6/P7.
 - Run `dotnet test tests/Todo.Api.Tests` (HasOpenInSeriesTests, ReminderSchedulerTests, migration AddPlannerSettingsTimeZone) on a Docker host before merging P5.
 - Run `dotnet test tests/Todo.Api.Tests` (ExternalCalendarApiTests, new) on a Docker host before merging P4.
 - Run `dotnet test tests/Todo.Api.Tests` (SubscriptionTests, new) on a Docker host before merging P3.

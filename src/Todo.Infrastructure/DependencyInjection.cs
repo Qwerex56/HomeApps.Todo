@@ -27,6 +27,7 @@ public static class DependencyInjection
         services.AddScoped<ICalendarReader, CalendarReader>();
         services.AddScoped<IReminderReader, ReminderReader>();
         services.AddScoped<ICalendarSubscriptionRepository, CalendarSubscriptionRepository>();
+        services.AddScoped<IPlannerSettingsRepository, PlannerSettingsRepository>();
         services.AddScoped<IExternalCalendarRepository, ExternalCalendarRepository>();
         services.AddSingleton<ISsrfSafeClient, SsrfSafeHttpClient>();
         services.AddScoped<ExternalCalendarSyncer>();

@@ -52,7 +52,7 @@ internal sealed class CalendarReader(TodoDbContext db) : ICalendarReader
         return found
             .Select(t => new TaskView(
                 t.Id, t.ListId, t.Title.Value, t.Notes?.Value, t.Due?.Date, t.Due?.Time, t.AssigneeId, t.Priority, t.Status,
-                t.Position, t.CreatedBy, t.CreatedAt, t.CompletedBy, t.CompletedAt))
+                t.Position, t.CreatedBy, t.CreatedAt, t.CompletedBy, t.CompletedAt, t.Rule?.Value, t.RecurrenceAnchor))
             .ToList();
     }
 }

@@ -17,4 +17,6 @@ public sealed record TaskView(
     Guid CreatedBy,
     DateTimeOffset CreatedAt,
     Guid? CompletedBy,
-    DateTimeOffset? CompletedAt);
+    DateTimeOffset? CompletedAt,
+    string? Rrule = null,
+    RecurrenceAnchor? Anchor = null);

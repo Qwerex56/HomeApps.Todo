@@ -26,6 +26,17 @@ public sealed class TaskRecurrenceTests
     }
 
     [Fact]
+    public void Skip_OpensTheNextInstanceFromTheDueDateWithoutCompleting()
+    {
+        var (task, _, _) = Recurring();
+
+        var next = task.Skip(_time);
+
+        Assert.Equal((A.Today.AddDays(7), TodoStatus.Open, task.SeriesId), (next!.Due!.Date, next.Status, next.SeriesId));
+        Assert.Equal(TodoStatus.Open, task.Status);
+    }
+
+    [Fact]
     public void ThisInstance_LeavesTheSeries()
     {
         var (task, list, by) = Recurring();

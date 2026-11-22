@@ -1,7 +1,7 @@
 import { computed, toValue, type MaybeRefOrGetter } from 'vue'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { useHost } from '@homeapps/plugin-sdk'
-import { todoApi, type HouseholdMember, type TaskQuery, type TodoApi } from './api'
+import { todoApi, type CalendarLayer, type HouseholdMember, type TaskQuery, type TodoApi } from './api'
 
 /** How often open views ask again (plan 4.6: no realtime in 1.0, 30 s plus right after one's own changes). */
 export const REFRESH_MS = 30_000
@@ -39,11 +39,28 @@ export function useTodo(householdId: MaybeRefOrGetter<string>) {
   const memberName = (userId: string | null) =>
     userId ? (members.data.value?.find((m: HouseholdMember) => m.userId === userId)?.displayName ?? null) : null
 
+  /** The caller's planner preferences; `timeZone` is the zone the UI shows planner times in (device zone when unset). */
+  const settings = useQuery({
+    queryKey: computed(() => ['plugins', 'todo', id.value, 'settings'] as const),
+    queryFn: () => api.value.plannerSettings(),
+    staleTime: 60_000,
+  })
+  const timeZone = computed(() => settings.data.value?.timeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone)
+
   function tasks(query: MaybeRefOrGetter<TaskQuery>, enabled: MaybeRefOrGetter<boolean> = true) {
     return useQuery({
       queryKey: computed(() => keys.tasks(id.value, toValue(query))),
       queryFn: () => api.value.tasks(toValue(query)),
       enabled: computed(() => toValue(enabled)),
+      refetchInterval: REFRESH_MS,
+    })
+  }
+
+  /** Calendar items of a window (ISO instants) for the chosen layers. */
+  function calendar(range: MaybeRefOrGetter<{ from: string; to: string }>, layers: MaybeRefOrGetter<CalendarLayer[]>) {
+    return useQuery({
+      queryKey: computed(() => ['plugins', 'todo', id.value, 'calendar', toValue(range), toValue(layers)] as const),
+      queryFn: () => api.value.calendarItems(toValue(range).from, toValue(range).to, toValue(layers)),
       refetchInterval: REFRESH_MS,
     })
   }
@@ -64,7 +81,10 @@ export function useTodo(householdId: MaybeRefOrGetter<string>) {
     lists,
     members,
     memberName,
+    settings,
+    timeZone,
     tasks,
+    calendar,
     change,
     canWrite: computed(() => host.can('tasks.write')),
     canManage: computed(() => host.can('tasks.manage')),

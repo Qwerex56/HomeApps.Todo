@@ -269,15 +269,32 @@ public sealed class TodoTask : IHasDomainEvents
 
         var completed = DateOnly.FromDateTime(CompletedAt.Value.UtcDateTime);
         var basis = RecurrenceAnchor == Tasks.RecurrenceAnchor.FromDueDate && Due is not null ? Due.Date : completed;
-        var next = RecurrenceEvaluator.Dates(Rule.Value, basis, null, basis.AddDays(1), basis.AddYears(5));
+        return Successor(basis, time);
+    }
+
+    /// <summary>
+    /// ADR 3.7 (delete, <c>ThisInstance</c>): skips the current due date. Returns the next open instance of a recurring
+    /// task counted from its due date (or today when it has none), without a completion record; null when the rule has no
+    /// further date or the task does not repeat. The caller removes this task.
+    /// </summary>
+    public TodoTask? Skip(TimeProvider time)
+    {
+        ArgumentNullException.ThrowIfNull(time);
+        return Rule is null ? null : Successor(Due?.Date ?? DateOnly.FromDateTime(time.GetUtcNow().UtcDateTime), time);
+    }
+
+    private TodoTask? Successor(DateOnly basis, TimeProvider time)
+    {
+        var rule = Rule!;
+        var next = RecurrenceEvaluator.Dates(rule.Value, basis, null, basis.AddDays(1), basis.AddYears(5));
         if (next.Count == 0)
         {
             return null;
         }
 
         // COUNT is per series, so each instance carries what is left of it.
-        var nextRule = Rule;
-        var parts = Rule.Value.Split(';');
+        var nextRule = rule;
+        var parts = rule.Value.Split(';');
         var countIndex = Array.FindIndex(parts, p => p.StartsWith("COUNT=", StringComparison.Ordinal));
         if (countIndex >= 0 && int.TryParse(parts[countIndex]["COUNT=".Length..], out var count))
         {
