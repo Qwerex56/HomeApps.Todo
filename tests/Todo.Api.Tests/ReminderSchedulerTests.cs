@@ -153,6 +153,23 @@ public sealed class ReminderSchedulerTests
         Assert.Equal("Zadania na dziś", digest.Due[0].Title);
     }
 
+    [Fact]
+    public void A_task_reminder_over_60_minutes_late_is_dropped_and_the_digest_too()
+    {
+        var user = Guid.NewGuid();
+        var list = TodoList.CreateDefault(Household, user, _time);
+        var task = TodoTask.Create(list, Actor.Member(user), "Zakupy", null, new TaskDue(new DateOnly(2030, 7, 10), new TimeOnly(9, 0)), TaskPriority.Normal, user, 1m, _time).Value;
+        var settings = new PlannerSettings(Household, user, Now);
+        Assert.True(settings.Update(null, [30], DayOfWeek.Monday, _time, "Europe/Warsaw").IsSuccess);
+        var sources = new ReminderSources([], [], [], [], [settings], [Member(user)], [task]);
+
+        // Reminder due 06:30 UTC (70 min before the scan) and digest due 05:30 UTC; both fall in the window and are stale.
+        var scan = ReminderScanner.Scan(sources, new DateTimeOffset(2030, 7, 10, 5, 29, 0, TimeSpan.Zero), new DateTimeOffset(2030, 7, 10, 7, 40, 0, TimeSpan.Zero));
+
+        Assert.Empty(scan.Due);
+        Assert.Equal(2, scan.Dropped);
+    }
+
     private sealed class FakeReader(ReminderSources sources) : IReminderReader
     {
         public Task<ReminderSources> LoadAsync(DateTimeOffset from, DateTimeOffset horizon, CancellationToken cancellationToken) => Task.FromResult(sources);
