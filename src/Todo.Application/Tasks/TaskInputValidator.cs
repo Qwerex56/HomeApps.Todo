@@ -8,6 +8,8 @@ internal sealed class TaskInputValidator : AbstractValidator<TaskInput>
     {
         RuleFor(t => t.Title).NotNull();
         RuleFor(t => t.Priority).IsInEnum();
+        RuleFor(t => t.Anchor).IsInEnum().When(t => t.Anchor is not null);
+        RuleFor(t => t.Rrule).MaximumLength(500);
         RuleFor(t => t.DueTime).Null().When(t => t.DueDate is null).WithMessage("A due time needs a due date.");
     }
 }

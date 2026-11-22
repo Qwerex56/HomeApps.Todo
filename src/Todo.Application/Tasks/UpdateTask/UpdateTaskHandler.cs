@@ -2,6 +2,8 @@ using FluentResults;
 using HomeApps.BuildingBlocks.Application.Messaging;
 using Todo.Application.Abstractions;
 using Todo.Application.Common;
+using Todo.Application.Events;
+using Todo.Domain.Tasks;
 
 namespace Todo.Application.Tasks.UpdateTask;
 
@@ -19,7 +21,25 @@ internal sealed class UpdateTaskHandler(ITodoListRepository lists, ITodoTaskRepo
 
         var (task, list) = found.Value;
         var input = command.Task;
-        var edited = task.Edit(list, actor, input.Title, input.Notes, input.Due, input.Priority, time);
+        Result edited;
+        if (command.Scope is null && !task.IsRecurring && string.IsNullOrWhiteSpace(input.Rrule))
+        {
+            edited = task.Edit(list, actor, input.Title, input.Notes, input.Due, input.Priority, time);
+        }
+        else
+        {
+            var scope = command.Scope is null ? Result.Ok(RecurrenceScope.All) : ScopeParser.Parse(command.Scope);
+            if (scope.IsFailed)
+            {
+                return scope.ToResult();
+            }
+
+            var rrule = scope.Value == RecurrenceScope.ThisInstance || string.IsNullOrWhiteSpace(input.Rrule) ? null : input.Rrule;
+            edited = task.EditRecurring(
+                list, actor, scope.Value, input.Title, input.Notes, input.Due, input.Priority, rrule,
+                input.Anchor ?? task.RecurrenceAnchor ?? RecurrenceAnchor.FromDueDate, time);
+        }
+
         return edited.IsFailed ? edited : task.Assign(list, actor, input.AssigneeId, time);
     }
 }
