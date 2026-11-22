@@ -1,6 +1,6 @@
 # Project map: HomeApps.Todo
 
-Last updated: 2026-11-22 · HEAD: a28b7b5 · branch feat/household-planner-p2 (PRs go to integration branch named by owner; master is protected)
+Last updated: 2026-11-22 · HEAD: b99be2d · branch feat/household-planner-p3 (PRs go to integration branch named by owner; master is protected)
 
 ## Overview
 - Plugin "Zadania" (Todo) for HomeApps, plus in-progress "Planer" (calendar + recurring tasks). Lives outside HomeApps repo.
@@ -24,7 +24,7 @@ Last updated: 2026-11-22 · HEAD: a28b7b5 · branch feat/household-planner-p2 (P
 | `tests/Todo.Api.Tests` | API tests on Testcontainers Postgres (`TodoFactory.cs:12`, `TodoApi.cs`, `FakeHouseholds.cs`, `McpTests.cs:14`, `TodoTests.cs`); no `Todo.Application.Tests` project exists: handler tests go through API tests |
 | `specs/` | READ-ONLY for agents: `household-planner.md` (spec), `household-planner-adr.md` (binding ADR) |
 | `docs/plan.md` | Todo v1 plan and progress log (section 8) |
-| `.claude/skills/` | project skills: `dotnet-conventions`, `vue-conventions`, `testing-standards`, `code-review-checklist` |
+| `.claude/skills/` | project skills: `dotnet-conventions`, `vue-conventions`, `testing-standards` (API tests listed NOT RUN if Docker is down), `code-review-checklist` (developer pre-submit section) |
 | `.agents/runs/` | run artifacts (gitignored, never commit) |
 | `.agents/STATUS.md` | planner feature stage table (P1-P6), decisions, blockers |
 
