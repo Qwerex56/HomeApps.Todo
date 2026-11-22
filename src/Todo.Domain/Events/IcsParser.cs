@@ -25,11 +25,21 @@ public static class IcsParser
 
         var events = new List<ExternalEvent>();
         List<Property>? current = null;
+        var nested = 0;
         foreach (var property in Unfold(text).Select(ParseLine).OfType<Property>())
         {
             if (property.Name == "BEGIN" && property.Value.Equals("VEVENT", StringComparison.OrdinalIgnoreCase))
             {
                 current = [];
+                nested = 0;
+            }
+            else if (current is not null && property.Name == "BEGIN")
+            {
+                nested++;
+            }
+            else if (current is not null && property.Name == "END" && nested > 0)
+            {
+                nested--;
             }
             else if (property.Name == "END" && property.Value.Equals("VEVENT", StringComparison.OrdinalIgnoreCase))
             {
@@ -44,7 +54,7 @@ public static class IcsParser
 
                 current = null;
             }
-            else
+            else if (nested == 0)
             {
                 current?.Add(property);
             }

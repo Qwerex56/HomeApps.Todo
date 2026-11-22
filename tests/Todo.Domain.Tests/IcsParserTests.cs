@@ -97,4 +97,24 @@ public sealed class IcsParserTests
         Assert.Single(e.OccurrencesBetween(new DateTimeOffset(2026, 3, 10, 0, 0, 0, TimeSpan.Zero), new DateTimeOffset(2026, 3, 11, 0, 0, 0, TimeSpan.Zero)));
         Assert.Empty(e.OccurrencesBetween(new DateTimeOffset(2026, 3, 11, 0, 0, 0, TimeSpan.Zero), new DateTimeOffset(2026, 3, 12, 0, 0, 0, TimeSpan.Zero)));
     }
+
+    [Fact]
+    public void Parse_IgnoresPropertiesOfNestedAlarms()
+    {
+        var e = IcsParser.Parse(Wrap(
+            "BEGIN:VEVENT\r\nUID:a\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nSUMMARY:Alarm text\r\nDESCRIPTION:Alarm description\r\nEND:VALARM\r\n" +
+            "DTSTART:20260310T090000Z\r\nEND:VEVENT\r\n")).Value[0];
+
+        Assert.Equal("(no title)", e.Title);
+        Assert.Null(e.Description);
+    }
+
+    [Fact]
+    public void Parse_ReadsPropertiesAfterANestedAlarm()
+    {
+        var e = IcsParser.Parse(Wrap(
+            "BEGIN:VEVENT\r\nUID:a\r\nSUMMARY:Real\r\nBEGIN:VALARM\r\nSUMMARY:Alarm\r\nEND:VALARM\r\nLOCATION:Home\r\nDTSTART:20260310T090000Z\r\nEND:VEVENT\r\n")).Value[0];
+
+        Assert.Equal(("Real", "Home"), (e.Title, e.Location));
+    }
 }
