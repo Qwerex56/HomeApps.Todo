@@ -6,7 +6,7 @@ namespace Todo.Application.Events.GetCalendarItems;
 /// <summary>
 /// Events, series occurrences and tasks with a due day in [From, To), by start. <c>Layers</c> is a comma separated
 /// subset of <c>events</c> (household events), <c>private</c> (own private events), <c>tasks</c> and <c>external</c>
-/// (not yet filled); empty means events, private and tasks. Month, week, day and agenda views are all this query
+/// (imported calendars, as their owners allow; not for guests); empty means all four. Month, week, day and agenda views are all this query
 /// with a different window of at most <see cref="MaxDays"/> days.
 /// </summary>
 public sealed record GetCalendarItemsQuery(Guid HouseholdId, DateTimeOffset From, DateTimeOffset To, string? Layers)

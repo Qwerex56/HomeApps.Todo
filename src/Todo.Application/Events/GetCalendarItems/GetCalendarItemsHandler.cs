@@ -4,15 +4,16 @@ using HomeApps.BuildingBlocks.Application.Messaging;
 using HomeApps.Contracts.Households;
 using HomeApps.Plugins;
 using Todo.Application.Abstractions;
+using Todo.Domain.Events;
 
 namespace Todo.Application.Events.GetCalendarItems;
 
-internal sealed class GetCalendarItemsHandler(ICalendarReader reader, IHouseholdAccess access, ICurrentUser user)
+internal sealed class GetCalendarItemsHandler(ICalendarReader reader, IExternalCalendarRepository calendars, IHouseholdAccess access, ICurrentUser user)
     : IQueryHandler<GetCalendarItemsQuery, IReadOnlyList<CalendarItemView>>
 {
     public async Task<Result<IReadOnlyList<CalendarItemView>>> Handle(GetCalendarItemsQuery query, CancellationToken cancellationToken)
     {
-        var layers = string.IsNullOrWhiteSpace(query.Layers) ? ["events", "private", "tasks"] : GetCalendarItemsValidator.Split(query.Layers);
+        var layers = string.IsNullOrWhiteSpace(query.Layers) ? ["events", "private", "tasks", "external"] : GetCalendarItemsValidator.Split(query.Layers);
         var showEvents = layers.Contains("events");
         var showPrivate = layers.Contains("private");
         var userId = user.RequiredUserId;
@@ -30,6 +31,23 @@ internal sealed class GetCalendarItemsHandler(ICalendarReader reader, IHousehold
             foreach (var (series, overrides) in all.Where(s => s.Series.IsPrivate ? showPrivate : showEvents))
             {
                 items.AddRange(series.OccurrencesBetween(from, to, overrides).Select(o => (o.StartUtc, CalendarItemView.Of(series, o))));
+            }
+        }
+
+        if (layers.Contains("external") && !guest)
+        {
+            foreach (var calendar in await calendars.ListVisibleAsync(query.HouseholdId, userId, cancellationToken))
+            {
+                var details = calendar.UserId == userId || calendar.Visibility == ExternalCalendarVisibility.Details;
+                if (calendar.CachedIcsData is null || IcsParser.Parse(calendar.CachedIcsData) is not { IsSuccess: true } parsed)
+                {
+                    continue;
+                }
+
+                foreach (var e in parsed.Value)
+                {
+                    items.AddRange(e.OccurrencesBetween(from, to).Select(o => (o.StartUtc, CalendarItemView.Of(calendar, e, o.StartUtc, o.EndUtc, details))));
+                }
             }
         }
 
