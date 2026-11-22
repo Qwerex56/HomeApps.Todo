@@ -336,7 +336,7 @@ public sealed class ExternalCalendarHandlerTests
 
         public Task<decimal?> PositionBeforeAsync(Guid listId, decimal position, Guid exceptTaskId, CancellationToken ct) => Task.FromResult<decimal?>(null);
 
-        public Task<bool> HasOpenInSeriesAsync(Guid householdId, Guid seriesId, CancellationToken ct) => Task.FromResult(false);
+        public Task<bool> HasOpenInSeriesAsync(Guid householdId, Guid seriesId, Guid exceptTaskId, CancellationToken ct) => Task.FromResult(false);
 
         public void Add(TodoTask task)
         {

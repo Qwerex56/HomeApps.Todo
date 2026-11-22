@@ -22,7 +22,7 @@ internal sealed class CompleteTaskHandler(ITodoListRepository lists, ITodoTaskRe
         var wasOpen = found.Value.Task.Status == TodoStatus.Open;
         var done = found.Value.Task.Complete(found.Value.List, actor, time);
         if (done.IsSuccess && wasOpen && found.Value.Task.NextInstance(time) is { } next
-            && !await tasks.HasOpenInSeriesAsync(command.HouseholdId, next.SeriesId!.Value, cancellationToken))
+            && !await tasks.HasOpenInSeriesAsync(command.HouseholdId, next.SeriesId!.Value, found.Value.Task.Id, cancellationToken))
         {
             tasks.Add(next);
         }

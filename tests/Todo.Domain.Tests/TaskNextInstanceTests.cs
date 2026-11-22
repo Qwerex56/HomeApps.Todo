@@ -78,4 +78,20 @@ public sealed class TaskNextInstanceTests
         Assert.Equal("FREQ=DAILY;COUNT=1", second.Rule!.Value);
         Assert.Null(second.NextInstance(_time));
     }
+
+    [Fact]
+    public void NextInstance_ChainsAcrossThreeSequentialCompletions()
+    {
+        var (task, list, by) = Done("FREQ=DAILY", RecurrenceAnchor.FromDueDate, new TaskDue(A.Today));
+        var seriesId = task.SeriesId;
+        for (var i = 0; i < 3; i++)
+        {
+            var next = task.NextInstance(_time)!;
+            Assert.NotNull(next);
+            Assert.Equal(seriesId, next.SeriesId);
+            Assert.Equal(A.Today.AddDays(i + 1), next.Due!.Date);
+            Assert.True(next.Complete(list, by, _time).IsSuccess);
+            task = next;
+        }
+    }
 }

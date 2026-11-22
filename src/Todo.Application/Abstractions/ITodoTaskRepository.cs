@@ -17,7 +17,7 @@ public interface ITodoTaskRepository
     Task<decimal?> PositionBeforeAsync(Guid listId, decimal position, Guid exceptTaskId, CancellationToken cancellationToken);
 
     /// <summary>Whether the recurring series still has an open instance.</summary>
-    Task<bool> HasOpenInSeriesAsync(Guid householdId, Guid seriesId, CancellationToken cancellationToken);
+    Task<bool> HasOpenInSeriesAsync(Guid householdId, Guid seriesId, Guid exceptTaskId, CancellationToken cancellationToken);
 
     void Add(TodoTask task);
 
