@@ -3,7 +3,7 @@ using Todo.Domain.Common;
 
 namespace Todo.Domain.Events;
 
-/// <summary>An RFC 5545 RRULE value such as <c>FREQ=WEEKLY;BYDAY=TU,TH</c>. Only the shape is checked here; evaluation is P2.</summary>
+/// <summary>An RFC 5545 RRULE value such as <c>FREQ=WEEKLY;BYDAY=TU,TH</c>. Checked against what <see cref="RecurrenceEvaluator"/> supports.</summary>
 public sealed record RecurrenceRule
 {
     public const int MaxLength = 500;
@@ -20,7 +20,7 @@ public sealed record RecurrenceRule
             value = value["RRULE:".Length..];
         }
 
-        if (value.Length > MaxLength || !HasValidFrequency(value)
+        if (value.Length > MaxLength || !HasValidFrequency(value) || !RecurrenceEvaluator.IsSupported(value)
             || value.Any(c => !(char.IsAsciiLetterOrDigit(c) || c is '=' or ';' or ',' or '-' or '+')))
         {
             return Result.Fail<RecurrenceRule>(PlannerErrors.InvalidRule);

@@ -38,6 +38,9 @@ public static class PlannerErrors
     public static Error CannotDeleteEvent => new AppError("planner.cannot_delete_event",
         "Only the author or a household admin deletes a household event.", ErrorKind.Forbidden);
 
+    public static Error SeriesNotFound => new AppError("planner.series_not_found",
+        "The recurring event does not exist.", ErrorKind.NotFound);
+
     public static Error SubscriptionNotFound => new AppError("planner.subscription_not_found",
         "The subscription does not exist.", ErrorKind.NotFound);
 }
