@@ -37,6 +37,15 @@ public sealed class ExternalCalendarImport
 
     public DateTimeOffset? OwnerLeftAt { get; private set; }
 
+    /// <summary>How long an imported calendar is kept after its owner left the household (like private lists).</summary>
+    public static readonly TimeSpan KeptAfterOwnerLeft = TimeSpan.FromDays(30);
+
+    /// <summary>The synchronisation period (spec 2.8).</summary>
+    public static readonly TimeSpan SyncInterval = TimeSpan.FromMinutes(30);
+
+    /// <summary>Three days of failures at one try per <see cref="SyncInterval"/>: the owner is told once.</summary>
+    public const int NotifyAfterFailures = 144;
+
     public bool IsPaused => OwnerLeftAt is not null;
 
     public const int MaxColorLength = 16;
@@ -85,4 +94,25 @@ public sealed class ExternalCalendarImport
     public void OwnerLeft(DateTimeOffset now) => OwnerLeftAt ??= now;
 
     public void OwnerReturned() => OwnerLeftAt = null;
+
+    /// <summary>True once the owner has been gone for <see cref="KeptAfterOwnerLeft"/>; a job deletes the import.</summary>
+    public bool IsDueForPurge(DateTimeOffset now) => OwnerLeftAt is { } left && now - left >= KeptAfterOwnerLeft;
+
+    /// <summary>The background job syncs imports whose owner is present and whose last attempt is at least <see cref="SyncInterval"/> old.</summary>
+    public bool IsDueForSync(DateTimeOffset now)
+    {
+        if (IsPaused)
+        {
+            return false;
+        }
+
+        var last = LastSyncedAt is { } synced && LastSyncFailedAt is { } failed ? (synced > failed ? synced : failed) : LastSyncedAt ?? LastSyncFailedAt;
+        return last is null || now - last.Value >= SyncInterval;
+    }
+
+    /// <summary>True exactly once, when the failure streak reaches <see cref="NotifyAfterFailures"/>.</summary>
+    public bool ShouldNotifyOwner => SyncFailureCount == NotifyAfterFailures;
+
+    /// <summary>True while the last attempt failed: the cached data is the last known one and may be stale.</summary>
+    public bool IsStale => LastSyncFailedAt is not null;
 }

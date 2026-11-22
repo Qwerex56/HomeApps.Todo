@@ -20,6 +20,9 @@ public static class TodoPlugin
     /// <summary>Rename, archive and delete shared lists; delete anyone's task on them.</summary>
     public const string Manage = "tasks.manage";
 
+    /// <summary>Notification category: an imported calendar could not be refreshed for days.</summary>
+    public const string CalendarSyncNotification = "calendar-sync";
+
     public static PluginManifest Manifest { get; } = new()
     {
         Id = "todo",
@@ -41,6 +44,7 @@ public static class TodoPlugin
             Routes = [new PluginRoute("", new LocalizedText("Zadania", "Tasks"))],
             Widgets = [new PluginWidget("today", new LocalizedText("Na dziś", "Today"), WidgetSize.Medium, [WidgetPlace.Household, WidgetPlace.Wall])],
         },
+        Notifications = [new PluginNotificationCategory(CalendarSyncNotification, new LocalizedText("Kalendarze importowane", "Imported calendars"))],
         Mcp = new PluginMcp(["add_task", "my_tasks", "complete_task"]),
         Events = new PluginEvents([typeof(TaskCompleted)], [typeof(MemberLeft), typeof(MemberJoined)]),
     };

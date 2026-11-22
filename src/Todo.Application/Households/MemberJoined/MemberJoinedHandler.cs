@@ -5,7 +5,7 @@ using Todo.Domain.Households;
 
 namespace Todo.Application.Households.MemberJoined;
 
-internal sealed class MemberJoinedHandler(ITodoListRepository lists, IHouseholdMemberRepository members, TimeProvider time) : ICommandHandler<MemberJoinedCommand>
+internal sealed class MemberJoinedHandler(ITodoListRepository lists, IHouseholdMemberRepository members, IExternalCalendarRepository calendars, TimeProvider time) : ICommandHandler<MemberJoinedCommand>
 {
     public async Task<Result> Handle(MemberJoinedCommand command, CancellationToken cancellationToken)
     {
@@ -22,6 +22,11 @@ internal sealed class MemberJoinedHandler(ITodoListRepository lists, IHouseholdM
         foreach (var list in await lists.ListPrivateOfAsync(command.HouseholdId, command.UserId, cancellationToken))
         {
             list.OwnerReturned(time);
+        }
+
+        foreach (var calendar in await calendars.ListAllOfUserAsync(command.HouseholdId, command.UserId, cancellationToken))
+        {
+            calendar.OwnerReturned();
         }
 
         return Result.Ok();

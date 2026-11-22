@@ -43,4 +43,22 @@ public static class PlannerErrors
 
     public static Error SubscriptionNotFound => new AppError("planner.subscription_not_found",
         "The subscription does not exist.", ErrorKind.NotFound);
+
+    public static Error InvalidUrl => new AppError("planner.invalid_url",
+        "The calendar address must be an http(s) URL of up to 2048 characters.", ErrorKind.Validation);
+
+    public static Error SsrfRejected => new AppError("planner.ssrf_rejected",
+        "The address points to a resource inside the server's network, not to an external calendar.", ErrorKind.Validation);
+
+    public static Error ParseError => new AppError("planner.parse_error",
+        "The address did not return a valid iCalendar file.", ErrorKind.Validation);
+
+    public static Error SyncFailed => new AppError("planner.sync_failed",
+        "The calendar could not be downloaded.", ErrorKind.Validation);
+
+    public static Error CalendarNotFound => new AppError("planner.calendar_not_found",
+        "The imported calendar does not exist.", ErrorKind.NotFound);
+
+    public static Error NotOwner => new AppError("planner.not_owner",
+        "Only the person who imported the calendar removes it.", ErrorKind.Forbidden);
 }
