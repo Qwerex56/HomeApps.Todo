@@ -327,6 +327,9 @@ namespace Todo.Infrastructure.Persistence.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsGuest")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsSuspended")
                         .HasColumnType("boolean");
 
@@ -565,41 +568,25 @@ namespace Todo.Infrastructure.Persistence.Migrations
                     b.ToTable("ExternalCalendarImports", (string)null);
                 });
 
-            modelBuilder.Entity("Todo.Domain.Households.HouseholdMemberProjection", b =>
+            modelBuilder.Entity("Todo.Domain.Households.InactiveMarker", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("HouseholdId")
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("HouseholdId")
                         .HasColumnType("uuid");
 
-                    b.Property<bool>("IsArchived")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsDisabled")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTimeOffset>("JoinedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTimeOffset?>("LeftAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
-
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid?>("UserId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("HouseholdId", "UserId")
-                        .IsUnique()
-                        .HasDatabaseName("ux_household_member_proj_household_user");
+                    b.HasIndex("HouseholdId", "UserId");
 
-                    b.ToTable("HouseholdMemberProjections", (string)null);
+                    b.ToTable("InactiveMarkers", (string)null);
                 });
 
             modelBuilder.Entity("Todo.Domain.Lists.TodoList", b =>
@@ -669,12 +656,12 @@ namespace Todo.Infrastructure.Persistence.Migrations
                         .HasMaxLength(16)
                         .HasColumnType("character varying(16)");
 
+                    b.Property<Guid>("HouseholdId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("TimeZoneId")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
-
-                    b.Property<Guid>("HouseholdId")
-                        .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");

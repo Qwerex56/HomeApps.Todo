@@ -1,3 +1,4 @@
+using HomeApps.Contracts.Accounts;
 using HomeApps.Contracts.Households;
 using HomeApps.Plugins.Manifest;
 using HomeApps.Todo.Contracts;
@@ -57,6 +58,6 @@ public static class TodoPlugin
             new PluginNotificationCategory(TaskReminderNotification, new LocalizedText("Przypomnienia o zadaniach", "Task reminders")),
         ],
         Mcp = new PluginMcp(["add_task", "my_tasks", "complete_task"]),
-        Events = new PluginEvents([typeof(TaskCompleted)], [typeof(MemberLeft), typeof(MemberJoined)]),
+        Events = new PluginEvents([typeof(TaskCompleted)], [typeof(MemberLeft), typeof(MemberJoined), typeof(MemberRoleChanged), typeof(HouseholdArchived), typeof(HouseholdRestored), typeof(UserDisabled), typeof(UserEnabled), typeof(UserErased)]),
     };
 }

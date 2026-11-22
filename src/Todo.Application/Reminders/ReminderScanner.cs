@@ -1,13 +1,12 @@
 using Todo.Domain.Events;
-using Todo.Domain.Households;
 using Todo.Domain.Reminders;
 using Todo.Domain.Tasks;
 
 namespace Todo.Application.Reminders;
 
 /// <summary>
-/// ADR 3.8: works out which reminders fire in (from, now]. Skips people who left, are disabled or whose household is
-/// archived (<see cref="HouseholdMemberProjection.IsActive"/>) and drops reminders more than 60 minutes late.
+/// ADR 3.8: works out which reminders fire in (from, now]. People who left, are disabled or whose household is archived
+/// are already left out of <see cref="ReminderSources.Members"/> by the reader; reminders more than 60 minutes late are dropped.
 /// </summary>
 public static class ReminderScanner
 {
@@ -21,7 +20,7 @@ public static class ReminderScanner
         ArgumentNullException.ThrowIfNull(sources);
         var due = new List<DueReminder>();
         var dropped = 0;
-        var members = sources.Members.Where(m => m.IsActive).ToLookup(m => m.HouseholdId, m => m.UserId);
+        var members = sources.Members.ToLookup(m => m.HouseholdId, m => m.UserId);
         var userSets = sources.UserOverrides.ToDictionary(o => (o.EventId, o.UserId), o => (IReadOnlyList<int>)o.Reminders.Select(r => r.MinutesBefore).ToList());
         var defaults = sources.Settings.ToDictionary(s => (s.HouseholdId, s.UserId), s => (IReadOnlyList<int>)s.DefaultEventReminders.Select(r => r.MinutesBefore).ToList());
 

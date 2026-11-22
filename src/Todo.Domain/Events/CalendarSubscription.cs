@@ -52,9 +52,14 @@ public sealed class CalendarSubscription
     /// <summary>True while the user's account is disabled; the feed answers 404 meanwhile.</summary>
     public bool IsSuspended { get; private set; }
 
+    /// <summary>True while the owner is a guest in the household (from <c>GetMembershipAsync</c>, then <c>MemberRoleChanged</c>); guests get no private or attendee-only events.</summary>
+    public bool IsGuest { get; private set; }
+
     public bool Serves => IsActive && !IsSuspended;
 
     public void Revoke() => IsActive = false;
+
+    public void MarkGuest(bool guest) => IsGuest = guest;
 
     public void Suspend() => IsSuspended = true;
 

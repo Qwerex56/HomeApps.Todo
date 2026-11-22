@@ -1,22 +1,20 @@
 using FluentResults;
 using HomeApps.BuildingBlocks.Application.Messaging;
+using HomeApps.Contracts.Households;
 using Todo.Application.Abstractions;
-using Todo.Domain.Households;
 
 namespace Todo.Application.Households.MemberJoined;
 
-internal sealed class MemberJoinedHandler(ITodoListRepository lists, IHouseholdMemberRepository members, IExternalCalendarRepository calendars, TimeProvider time) : ICommandHandler<MemberJoinedCommand>
+internal sealed class MemberJoinedHandler(ITodoListRepository lists, IInactiveMarkerRepository markers, IExternalCalendarRepository calendars, ICalendarSubscriptionRepository subscriptions, TimeProvider time) : ICommandHandler<MemberJoinedCommand>
 {
     public async Task<Result> Handle(MemberJoinedCommand command, CancellationToken cancellationToken)
     {
-        var member = await members.GetAsync(command.HouseholdId, command.UserId, cancellationToken);
-        if (member is null)
+        await markers.ClearAsync(command.HouseholdId, command.UserId, cancellationToken);
+
+        var guest = !Enum.TryParse<HouseholdRole>(command.Role, out var role) || role < HouseholdRole.Member;
+        foreach (var subscription in await subscriptions.ListAsync(command.HouseholdId, command.UserId, cancellationToken))
         {
-            members.Add(new HouseholdMemberProjection(command.HouseholdId, command.UserId, command.Role, time.GetUtcNow()));
-        }
-        else
-        {
-            member.Returned(command.Role, time.GetUtcNow());
+            subscription.MarkGuest(guest);
         }
 
         foreach (var list in await lists.ListPrivateOfAsync(command.HouseholdId, command.UserId, cancellationToken))
