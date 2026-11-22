@@ -22,6 +22,7 @@
 - 2026-11-22 nightly: owner supplied ../HomeApps/docs; P5 time zone decided by Coordinator: per-user zone in PlannerSettings.TimeZoneId, fallback Planner:DefaultTimeZone=Europe/Warsaw (confirm). Settings endpoint to set it does not exist yet (not in ADR contract). Reviewer/DA via agy OK after adding sed, diff to allowlist. Notification Url confirmed correct by docs.
 - 2026-11-22 nightly: P5 DA noted: NextInstance uses UTC date for FromCompletionDate (off by a day near local midnight). Owner decision/P7.
 - 2026-11-22 nightly: P7 fixed manifest Events.Consumes. Owner decision: ADR keeps local HouseholdMemberProjection, but plugins.md says plugins keep no membership copy and ask Households with the caller's token; projection may be stale on a second plugin replica.
+- 2026-11-22 nightly (owner feedback): HouseholdMemberProjection removed per plugins.md (plugin keeps no membership copy; only event-derived InactiveMarker); math stays UTC, zone only for digest/due time. Open: whole-household reminders reach only users the plugin knows; guests known to the plugin may get whole-household reminders (ADR Q1 policy check).
 
 ## Blockers
 - Run `dotnet test tests/Todo.Api.Tests` (HasOpenInSeriesTests, ReminderSchedulerTests, migration AddPlannerSettingsTimeZone) on a Docker host before merging P5.
