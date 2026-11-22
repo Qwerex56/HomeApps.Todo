@@ -1,6 +1,6 @@
-import { A as e, D as t, E as n, O as r, S as i, T as a, _ as o, b as s, d as c, g as l, h as u, k as d, l as f, m as p, n as m, p as h, t as g, u as _, v, w as y, x as b, y as x } from "./_plugin-vue_export-helper-BiWouYOk.js";
-import { n as S, r as C, s as w, t as T } from "./CalendarChip-_Bz4g5ye.js";
-import { t as E } from "./TaskRow-BkXZN4_D.js";
+import { A as e, D as t, E as n, O as r, S as i, T as a, _ as o, b as s, d as c, g as l, h as u, k as d, l as f, m as p, n as m, p as h, t as g, u as _, v, w as y, x as b, y as x } from "./_plugin-vue_export-helper-Ntn7wuVI.js";
+import { n as S, r as C, s as w, t as T } from "./CalendarChip-CPNvSX1x.js";
+import { t as E } from "./TaskRow-Cjsj_ntn.js";
 // src/PlannerAgendaWidget.vue?vue&type=script&setup=true&lang.ts
 var D = {
 	key: 0,
@@ -34,24 +34,24 @@ var D = {
 				from: e.toISOString(),
 				to: S(e, 2).toISOString()
 			};
-		}), L = _.calendar(I, [
+		}), L = p(() => g.place === "Wall"), R = _.calendar(I, () => L.value ? ["events", "tasks"] : [
 			"events",
 			"tasks",
 			"external"
-		]), R = p(() => g.place === "Wall"), z = p(() => [0, 1].map((e) => {
+		]), z = p(() => [0, 1].map((e) => {
 			let t = f(S(P.value, e));
 			return {
 				iso: t,
 				label: b.t(e === 0 ? "due.today" : "due.tomorrow"),
-				items: C(L.data.value ?? [], t).slice(0, N)
+				items: C(R.data.value ?? [], t).slice(0, N)
 			};
 		})), B = p(() => z.value.every((e) => e.items.length === 0)), V = (e) => x.value && e.itemType === "Task", H = E((e, t) => t.isDone ? e.reopenTask(t.id) : e.completeTask(t.id)), U = (e) => `${e.itemType}-${e.id}-${e.occurrenceDate ?? w(e)}`;
 		return (n, c) => {
 			let f = r("Skeleton");
-			return a(), o("div", { class: i(["agenda-widget", { "agenda-widget--large": R.value }]) }, [e(L).isPending.value ? (a(), o("div", D, [(a(), o(h, null, t(3, (e) => s(f, {
+			return a(), o("div", { class: i(["agenda-widget", { "agenda-widget--large": L.value }]) }, [e(R).isPending.value ? (a(), o("div", D, [(a(), o(h, null, t(3, (e) => s(f, {
 				key: e,
 				height: "2rem"
-			})), 64))])) : e(L).isError.value ? (a(), o("p", O, d(e(b).errorMessage(e(L).error.value)), 1)) : B.value ? (a(), o("p", k, d(e(b).t("calendar.widgetEmpty")), 1)) : (a(!0), o(h, { key: 3 }, t(z.value, (n) => (a(), o("section", {
+			})), 64))])) : e(R).isError.value ? (a(), o("p", O, d(e(b).errorMessage(e(R).error.value)), 1)) : B.value ? (a(), o("p", k, d(e(b).t("calendar.widgetEmpty")), 1)) : (a(!0), o(h, { key: 3 }, t(z.value, (n) => (a(), o("section", {
 				key: n.iso,
 				"aria-label": n.label
 			}, [n.items.length ? (a(), o("h4", j, d(n.label), 1)) : l("", !0), v("div", M, [(a(!0), o(h, null, t(n.items, (t) => (a(), u(T, {
@@ -68,7 +68,7 @@ var D = {
 			]))), 128))])], 8, A))), 128))], 2);
 		};
 	}
-}), [["__scopeId", "data-v-cce2f65f"]]), F = {
+}), [["__scopeId", "data-v-1badfdc5"]]), F = {
 	key: 0,
 	class: "todo-widget__loading"
 }, I = {
@@ -83,8 +83,8 @@ var D = {
 }, z = 8, B = c({
 	id: "todo",
 	routes: {
-		"": () => import("./TasksPage-rRtKY1Wn.js"),
-		calendar: () => import("./CalendarPage-BvC6YhSQ.js")
+		"": () => import("./TasksPage-D67PzAZj.js"),
+		calendar: () => import("./CalendarPage-DgPHK3xG.js")
 	},
 	widgets: {
 		today: /* @__PURE__ */ g(/* @__PURE__ */ b({

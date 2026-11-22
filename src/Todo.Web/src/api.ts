@@ -8,6 +8,14 @@ export type TodoStatus = 'Open' | 'Done'
 export type RecurrenceAnchor = 'FromDueDate' | 'FromCompletionDate'
 
 /** The caller's own planner preferences; reminders are minutes before, timeZone is IANA (null = default). */
+// The API writes System.DayOfWeek as its name; the UI works with 0 (Sunday) to 6.
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+type WirePlannerSettings = Omit<PlannerSettings, 'firstDayOfWeek'> & { firstDayOfWeek: string | number }
+function fromWireSettings(s: WirePlannerSettings): PlannerSettings {
+  const day = typeof s.firstDayOfWeek === 'number' ? s.firstDayOfWeek : DAY_NAMES.indexOf(s.firstDayOfWeek)
+  return { ...s, firstDayOfWeek: day < 0 ? 1 : day }
+}
+
 export interface PlannerSettings {
   eventReminders: number[]
   taskReminders: number[]
@@ -215,8 +223,9 @@ export function todoApi(http: AxiosInstance, apiBase: string, householdId: strin
     syncExternal: async (id: string) => (await http.post<ExternalCalendarView>(`${base}/calendar/external/${id}/sync`)).data,
     removeExternal: (id: string) => http.delete(`${base}/calendar/external/${id}`),
 
-    plannerSettings: async () => (await http.get<PlannerSettings>(`${base}/calendar/settings`)).data,
-    savePlannerSettings: async (input: PlannerSettings) => (await http.put<PlannerSettings>(`${base}/calendar/settings`, input)).data,
+    plannerSettings: async () => fromWireSettings((await http.get<WirePlannerSettings>(`${base}/calendar/settings`)).data),
+    savePlannerSettings: async (input: PlannerSettings) =>
+      fromWireSettings((await http.put<WirePlannerSettings>(`${base}/calendar/settings`, { ...input, firstDayOfWeek: DAY_NAMES[input.firstDayOfWeek] })).data),
 
     members: async () => (await http.get<HouseholdMember[]>(`/households/${householdId}/members`)).data,
   }

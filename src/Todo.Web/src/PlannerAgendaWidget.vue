@@ -23,8 +23,9 @@ const range = computed(() => {
   const start = new Date(today.value.getFullYear(), today.value.getMonth(), today.value.getDate())
   return { from: start.toISOString(), to: addDays(start, 2).toISOString() }
 })
-const calendar = todo.calendar(range, ['events', 'tasks', 'external'])
 const large = computed(() => props.place === 'Wall')
+// A shared wall screen never shows imported calendars (their owners' details); private events are a separate layer, never asked for.
+const calendar = todo.calendar(range, () => (large.value ? ['events', 'tasks'] : ['events', 'tasks', 'external']))
 const MAX = 8
 
 const days = computed(() =>
