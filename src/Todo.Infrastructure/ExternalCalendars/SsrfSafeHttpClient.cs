@@ -25,32 +25,39 @@ internal sealed class SsrfSafeHttpClient : ISsrfSafeClient, IDisposable
     private readonly bool _httpsOnly;
 
     public SsrfSafeHttpClient(IHostEnvironment environment)
+        : this(environment.IsProduction(), CreatePinnedHandler(), Timeout)
     {
-        _httpsOnly = environment.IsProduction();
-        var handler = new SocketsHttpHandler
-        {
-            AllowAutoRedirect = false,
-            ConnectTimeout = Timeout,
-            PooledConnectionLifetime = TimeSpan.FromMinutes(1),
-            UseProxy = false,
-            ConnectCallback = async (context, ct) =>
-            {
-                var target = await ResolveAndValidateAsync(context.DnsEndPoint.Host, ct);
-                var socket = new Socket(target.AddressFamily, SocketType.Stream, ProtocolType.Tcp) { NoDelay = true };
-                try
-                {
-                    await socket.ConnectAsync(new IPEndPoint(target, context.DnsEndPoint.Port), ct);
-                    return new NetworkStream(socket, ownsSocket: true);
-                }
-                catch
-                {
-                    socket.Dispose();
-                    throw;
-                }
-            },
-        };
-        _http = new HttpClient(handler, disposeHandler: true) { Timeout = Timeout, MaxResponseContentBufferSize = MaxBytes };
     }
+
+    /// <summary>For tests: a stub handler instead of the pinned sockets, and a shorter timeout.</summary>
+    internal SsrfSafeHttpClient(bool httpsOnly, HttpMessageHandler handler, TimeSpan timeout)
+    {
+        _httpsOnly = httpsOnly;
+        _http = new HttpClient(handler, disposeHandler: true) { Timeout = timeout, MaxResponseContentBufferSize = MaxBytes };
+    }
+
+    private static SocketsHttpHandler CreatePinnedHandler() => new()
+    {
+        AllowAutoRedirect = false,
+        ConnectTimeout = Timeout,
+        PooledConnectionLifetime = TimeSpan.FromMinutes(1),
+        UseProxy = false,
+        ConnectCallback = async (context, ct) =>
+        {
+            var target = await ResolveAndValidateAsync(context.DnsEndPoint.Host, ct);
+            var socket = new Socket(target.AddressFamily, SocketType.Stream, ProtocolType.Tcp) { NoDelay = true };
+            try
+            {
+                await socket.ConnectAsync(new IPEndPoint(target, context.DnsEndPoint.Port), ct);
+                return new NetworkStream(socket, ownsSocket: true);
+            }
+            catch
+            {
+                socket.Dispose();
+                throw;
+            }
+        },
+    };
 
     public async Task<Result<string>> DownloadAsync(string url, CancellationToken cancellationToken)
     {

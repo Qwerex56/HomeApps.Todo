@@ -57,6 +57,8 @@ internal sealed partial class ExternalCalendarSyncJob(IServiceScopeFactory scope
                 }
                 catch (Exception exception) when (exception is not OperationCanceledException)
                 {
+                    // Drop this calendar's dirty state and queued outbox messages so the next one starts clean.
+                    db.ChangeTracker.Clear();
                     LogFailed(exception);
                 }
             }
