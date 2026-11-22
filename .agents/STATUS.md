@@ -4,8 +4,9 @@
 | household-planner | P2 Events & Calendar API | done (Api tests with Docker pending) | feat/household-planner-p2 | specs/household-planner-adr.md | 2026-11-22 |
 | household-planner | P3 ICS Subscriptions | done (Api tests with Docker pending) | feat/household-planner-p3 | specs/household-planner-adr.md | 2026-11-22 |
 | household-planner | P4 External Calendar Import & SSRF | done (Api tests with Docker pending) | feat/household-planner-p4 |
-| household-planner | P5 Reminders & task recurrence | blocked (developer PARTIAL: no household time zone in ADR) | feat/household-planner-p5 (local, not pushed) | specs/household-planner-adr.md | 2026-11-22 |
-| household-planner | P6 Front-end & wall widget | todo (skipped: depends on P5) | - | specs/household-planner-adr.md | 2026-11-22 |
+| household-planner | P5 Reminders & task recurrence | done (Api tests with Docker pending) | feat/household-planner-p5 | specs/household-planner-adr.md | 2026-11-22 |
+| household-planner | P6 Front-end & wall widget | todo | - | specs/household-planner-adr.md | 2026-11-22 |
+| household-planner | P7 Fix API guesses against HomeApps docs (owner-added) | todo | - | - | 2026-11-22 |
 
 ## Decisions
 - 2026-11-22: MemberLeft emptying an event's Attendees keeps the author as attendee (when the author is not the leaver), so the event does not become "whole household".
@@ -18,7 +19,11 @@
 
 - 2026-11-22 nightly: P5 stopped, developer PARTIAL. Due-time task reminders and morning digest need a household time zone (ADR 3.8 does not define it); only TodoTask.ReminderAt reminders implemented. P6 skipped (depends on P5). Nothing pushed.
 
+- 2026-11-22 nightly: owner supplied ../HomeApps/docs; P5 time zone decided by Coordinator: per-user zone in PlannerSettings.TimeZoneId, fallback Planner:DefaultTimeZone=Europe/Warsaw (confirm). Settings endpoint to set it does not exist yet (not in ADR contract). Reviewer/DA via agy OK after adding sed, diff to allowlist. Notification Url confirmed correct by docs.
+- 2026-11-22 nightly: P5 DA noted: NextInstance uses UTC date for FromCompletionDate (off by a day near local midnight). Owner decision/P7.
+
 ## Blockers
+- Run `dotnet test tests/Todo.Api.Tests` (HasOpenInSeriesTests, ReminderSchedulerTests, migration AddPlannerSettingsTimeZone) on a Docker host before merging P5.
 - Run `dotnet test tests/Todo.Api.Tests` (ExternalCalendarApiTests, new) on a Docker host before merging P4.
 - Run `dotnet test tests/Todo.Api.Tests` (SubscriptionTests, new) on a Docker host before merging P3.
 - Run `dotnet test tests/Todo.Api.Tests` (incl. new CalendarTests) on a Docker host before merging P2.
