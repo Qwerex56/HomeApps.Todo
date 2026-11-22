@@ -726,8 +726,8 @@ namespace Todo.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(16)");
 
                     b.Property<string>("RecurrenceAnchor")
-                        .HasMaxLength(16)
-                        .HasColumnType("character varying(16)");
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
 
                     b.Property<DateTimeOffset?>("ReminderAt")
                         .HasColumnType("timestamp with time zone");

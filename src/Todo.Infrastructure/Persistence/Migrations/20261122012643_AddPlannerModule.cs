@@ -20,8 +20,8 @@ namespace Todo.Infrastructure.Persistence.Migrations
             migrationBuilder.AddColumn<string>(
                 name: "RecurrenceAnchor",
                 table: "Tasks",
-                type: "character varying(16)",
-                maxLength: 16,
+                type: "character varying(32)",
+                maxLength: 32,
                 nullable: true);
 
             migrationBuilder.AddColumn<DateTimeOffset>(
