@@ -1,26 +1,26 @@
 # Project map: HomeApps.Todo
 
-Last updated: 2026-11-22 · HEAD: d189716 · branch feat/household-planner-p3 (PRs go to integration branch named by owner; master is protected)
+Last updated: 2026-11-22 · HEAD: c1c3df7 · branch feat/household-planner-p4 (PRs go to integration branch named by owner; master is protected)
 
 ## Overview
 - Plugin "Zadania" (Todo) for HomeApps, plus in-progress "Planer" (calendar + recurring tasks). Lives outside HomeApps repo.
 - Stack: .NET 10 (Minimal API, MediatR 12, FluentValidation, FluentResults, EF Core, Postgres, MassTransit/RabbitMQ), kit `HomeApps.*` packages from `~/.homeapps/packages`; UI Vue 3.5 + TS + Vite + TanStack Query + Axios + `@homeapps/plugin-sdk`.
 - Built UI is committed: `src/Todo.Api/wwwroot/ui` (entry.js, entry.css, chunks).
-- Planner: P1-P3 in code (P3 API tests pending Docker); P4-P6 todo (status: `.agents/STATUS.md`). Source of truth: `specs/`.
+- Planner: P1-P4 in code (P4 Docker API tests pending); P5-P6 todo (status: `.agents/STATUS.md`). Source of truth: `specs/`.
 
 ## Layout
 | Path | Responsibility |
 |---|---|
 | `src/Todo.Domain` | `TodoList` (`Lists/TodoList.cs:11`), `TodoTask` (`Tasks/TodoTask.cs:14`, recurrence: `Rule` :69, `RecurrenceAnchor` :72, `EditRecurring` :153), `Tasks/RecurrenceScope.cs`, `Tasks/RecurrenceAnchor.cs`, value objects, `Common/Actor.cs`, `Common/TodoErrors.cs`, `Common/PlannerErrors.cs` |
-| `src/Todo.Domain/Events` | planner aggregates: `CalendarEvent.cs:11`, `EventSeries.cs:11` (RRULE), `EventOverride.cs:7`, `EventReminderOverride.cs:6`, `CalendarSubscription.cs:7`, `ExternalCalendarImport.cs:7`, `RecurrenceRule.cs:7` (record), `EventTime.cs`, `EventTitle.cs`, `EventReminder.cs`, enums `SubscriptionTasksMode`, `ExternalCalendarVisibility` |
+| `src/Todo.Domain/Events` | planner aggregates: `CalendarEvent.cs:11`, `EventSeries.cs:11` (RRULE), `EventOverride.cs:7`, `EventReminderOverride.cs:6`, `CalendarSubscription.cs:7`, `ExternalCalendarImport.cs:7`, `RecurrenceRule.cs:7` (record), `ExternalEvent.cs`, `IcsParser.cs`, `SsrfIpPolicy.cs`, `EventTime.cs`, `EventTitle.cs`, `EventReminder.cs`, enums `SubscriptionTasksMode`, `ExternalCalendarVisibility` |
 | `src/Todo.Domain/Settings` | `PlannerSettings.cs:7` |
 | `src/Todo.Domain/Households` | `HouseholdMemberProjection.cs:4` (member projection from MemberJoined/Left) |
 | `src/Todo.Contracts` | integration message `TaskCompleted` (`TaskCompleted.cs`) |
-| `src/Todo.Application` | `TodoPlugin.cs` (manifest, line 12/23), commands/queries per folder, `Abstractions/` ports, `Events/` (calendar commands/queries: Create/Update/DeleteCalendarEvent, GetCalendarEvent, GetCalendarItems, ModifySeriesInstance, DeleteSeriesInstance, `ScopeParser.cs`; plus integration handlers), `Households/` (+ `MemberRoleChanged`, `HouseholdArchived`, `HouseholdRestored` handlers), `Subscriptions/`, `Accounts/` |
-| `src/Todo.Infrastructure` | `TodoDbContext` (`Persistence/TodoDbContext.cs:10`; DbSets :15-33 incl. planner), `Persistence/Configurations/` (EF maps per aggregate, `Converters.cs`), repos (`CalendarEventRepository.cs`), `Persistence/CalendarReader.cs` (calendar read model), `Persistence/Migrations/` (Initial, `20261122012643_AddPlannerModule`, `20261122023712_AddMemberProjectionIsArchived`), `Feeds/IcsFeedGenerator.cs` (ICS feed), `Households/HouseholdsConsumer.cs:15`, `Jobs/LeftListsCleanup.cs:13` (6 h purge), `DependencyInjection.cs:15` |
+| `src/Todo.Application` | `TodoPlugin.cs` (manifest, line 12/23), commands/queries per folder, `Abstractions/` ports, `Events/` (calendar commands/queries: Create/Update/DeleteCalendarEvent, GetCalendarEvent, GetCalendarItems, ModifySeriesInstance, DeleteSeriesInstance, `ScopeParser.cs`; plus integration handlers), `Households/` (+ `MemberRoleChanged`, `HouseholdArchived`, `HouseholdRestored` handlers), `Subscriptions/`, `Accounts/`, `ExternalCalendars/` (Add/Remove/Sync/Get commands+queries, `ExternalCalendarSyncer.cs`) |
+| `src/Todo.Infrastructure` | `TodoDbContext` (`Persistence/TodoDbContext.cs:10`; DbSets :15-33 incl. planner), `Persistence/Configurations/` (EF maps per aggregate, `Converters.cs`), repos (`CalendarEventRepository.cs`), `Persistence/CalendarReader.cs` (calendar read model), `Persistence/Migrations/` (Initial, `20261122012643_AddPlannerModule`, `20261122023712_AddMemberProjectionIsArchived`), `Feeds/IcsFeedGenerator.cs` (ICS feed), `Households/HouseholdsConsumer.cs:15`, `Jobs/LeftListsCleanup.cs:13` (6 h purge), `Jobs/ExternalCalendarSyncJob.cs`, `ExternalCalendars/SsrfSafeHttpClient.cs` (SSRF guard), `Persistence/ExternalCalendarRepository.cs`, `DependencyInjection.cs:15` |
 | `src/Todo.Api` | host: `Program.cs` (entry, MigrateDatabaseOnStartup), `Endpoints/`, `Mcp/TaskTools.cs:30`, `wwwroot/ui` |
 | `src/Todo.Web` | Vue UI source: `src/TasksPage.vue`, `TodayWidget.vue`, `TaskEditor.vue`, `ListDialog.vue`, `TaskRow.vue`, `api.ts`, `useTodo.ts`, `dates.ts`, `main.ts` (definePlugin, pl/en texts) |
-| `tests/Todo.Domain.Tests` | domain tests (no Docker): `TaskRecurrenceTests`, `CalendarEventTests`, `CalendarEventGuestTests`, `EventSeriesTests`, `EventSeriesOccurrenceTests`, `EventSeriesEdgeTests`, `RecurrenceEvaluatorTests`, `RecurrenceRfcTests`, `EventOverrideTests`, `CalendarSubscriptionTests`, `ExternalCalendarImportTests`, `HouseholdMemberProjectionTests`, `PlannerSettingsTests`, `FeedTokenTests` |
+| `tests/Todo.Domain.Tests` | domain tests (no Docker): `TaskRecurrenceTests`, `CalendarEventTests`, `CalendarEventGuestTests`, `EventSeriesTests`, `EventSeriesOccurrenceTests`, `EventSeriesEdgeTests`, `RecurrenceEvaluatorTests`, `RecurrenceRfcTests`, `EventOverrideTests`, `CalendarSubscriptionTests`, `ExternalCalendarImportTests`, `IcsParserTests`, `SsrfIpPolicyTests`, `SsrfIpPolicyBoundaryTests`, `HouseholdMemberProjectionTests`, `PlannerSettingsTests`, `FeedTokenTests` |
 | `tests/Todo.Api.Tests` | API tests on Testcontainers Postgres (`TodoFactory.cs:12`, `TodoApi.cs`, `FakeHouseholds.cs`, `McpTests.cs:14`, `TodoTests.cs`, `CalendarTests.cs`, `SubscriptionTests.cs`, `IcsFeedGeneratorTests.cs`); no `Todo.Application.Tests` project exists: handler tests go through API tests |
 | `specs/` | READ-ONLY for agents: `household-planner.md` (spec), `household-planner-adr.md` (binding ADR) |
 | `docs/plan.md` | Todo v1 plan and progress log (section 8) |
