@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Todo.Domain.Events;
 using Todo.Domain.Lists;
 using Todo.Domain.Tasks;
 
@@ -24,10 +25,14 @@ internal sealed class TodoTaskConfiguration : IEntityTypeConfiguration<TodoTask>
         builder.Property(t => t.Priority).HasConversion<string>().HasMaxLength(Converters.EnumLength);
         builder.Property(t => t.Status).HasConversion<string>().HasMaxLength(Converters.EnumLength);
         builder.Property(t => t.Position).HasColumnType("numeric");
+        builder.Property(t => t.Rule).HasColumnName("Rrule").HasConversion(Converters.RecurrenceRuleOrNull).HasMaxLength(RecurrenceRule.MaxLength);
+        builder.Property(t => t.RecurrenceAnchor).HasConversion<string>().HasMaxLength(Converters.EnumLength);
+        builder.Ignore(t => t.IsRecurring);
         builder.Ignore(t => t.DomainEvents);
 
         builder.HasOne<TodoList>().WithMany().HasForeignKey(t => t.ListId).OnDelete(DeleteBehavior.Cascade);
         builder.HasIndex(t => new { t.ListId, t.Position });
         builder.HasIndex(t => new { t.HouseholdId, t.AssigneeId });
+        builder.HasIndex(t => t.SeriesId).HasFilter("\"SeriesId\" IS NOT NULL");
     }
 }
