@@ -107,6 +107,9 @@ public sealed class CalendarEvent
         return !IsPrivate || (actor.UserId == CreatedBy && OwnerLeftAt is null);
     }
 
+    /// <summary>A guest sees only events that attend them or are for the whole household, never private ones.</summary>
+    public bool IsVisibleToGuest(Guid userId) => !IsPrivate && (IsForWholeHousehold || Attendees.Contains(userId));
+
     /// <summary>The author, an attendee, or anyone when the event is for the whole household. Private: the author alone.</summary>
     public Result CanEdit(Actor actor)
     {

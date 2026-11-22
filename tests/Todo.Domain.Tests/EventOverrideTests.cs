@@ -59,14 +59,14 @@ public sealed class EventOverrideTests
     }
 
     [Fact]
-    public void Replace_WithNullFieldsFallsBackToTheSeriesValues()
+    public void Replace_WithNullFieldsKeepsTheCurrentValues()
     {
         var start = A.Now.AddDays(7);
         var o = EventOverride.Change(_series, Instance, "Nowy tytuł", start, start.AddHours(1), null, _time).Value;
 
         o.Replace(null, null, null, [15], _time);
 
-        Assert.Equal((null, null, 15), (o.OverrideTitle?.Value, o.OverrideStartUtc, o.OverrideReminders!.Single().MinutesBefore));
+        Assert.Equal(("Nowy tytuł", (DateTimeOffset?)start, 15), (o.OverrideTitle?.Value, o.OverrideStartUtc, o.OverrideReminders!.Single().MinutesBefore));
     }
 
     [Fact]

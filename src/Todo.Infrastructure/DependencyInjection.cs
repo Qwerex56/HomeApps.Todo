@@ -19,6 +19,9 @@ public static class DependencyInjection
         services.AddScoped<ITodoListRepository, TodoListRepository>();
         services.AddScoped<ITodoTaskRepository, TodoTaskRepository>();
         services.AddScoped<ITodoReader, TodoReader>();
+        services.AddScoped<ICalendarEventRepository, CalendarEventRepository>();
+        services.AddScoped<IEventSeriesRepository, EventSeriesRepository>();
+        services.AddScoped<ICalendarReader, CalendarReader>();
         services.AddHostedService<LeftListsCleanup>();
 
         return services;

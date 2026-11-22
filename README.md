@@ -61,6 +61,28 @@ docker compose -f compose.yaml up -d --build   # -f, bo .env HomeApps może usta
 
 Poza `/api`: `GET /plugins/todo/manifest`, `/plugins/todo/openapi/v1.json`, `/plugins/todo/health/{live,ready}`.
 
+## Kalendarz (pod `/api/households/{hid}/calendar`, etap P2)
+
+Wydarzenia i serie cykliczne (RRULE). Zapisy wymagają roli Członek domu lub wyższej (`tasks.write`).
+
+| Metoda | Ścieżka | Co |
+|---|---|---|
+| GET | `events?from=&to=&layers=` | widok okna czasu: wydarzenia, wystąpienia serii i zadania z terminem; `layers` = `events,private,tasks` (domyślnie te trzy), `external` jest przyjmowane, ale bez danych do etapu P4 |
+| POST | `events` | nowe wydarzenie albo seria (gdy podano `rrule`); 201 |
+| GET | `events/{id}` | szczegóły wydarzenia |
+| PUT | `events/{id}` | zmiana całego pojedynczego wydarzenia |
+| DELETE | `events/{id}` | usunięcie wydarzenia |
+| PUT | `events/{seriesId}/instances/{date}` `{scope, title?, description?, location?, startUtc?, endUtc?, reminderMinutes?, rrule?}` | zmiana jednego wystąpienia serii (`date` = lokalna data oryginalnego wystąpienia) |
+| DELETE | `events/{seriesId}/instances/{date}?scope=` | usunięcie wystąpienia |
+
+- `scope` przy zmianie i usuwaniu wystąpienia jest wymagany: `ThisInstance`, `ThisAndFuture` albo `All` (bez względu na wielkość liter). Brak lub zła wartość to `400 planner.invalid_scope`.
+- `ThisInstance` nadpisuje tytuł, czas i przypomnienia tylko tego wystąpienia; `ThisAndFuture` dzieli serię od tego dnia (nowa seria zachowuje autora, licznik `COUNT` zaczyna się od nowa); `All` zmienia całą serię.
+- Pola pominięte w `PUT` wystąpienia zostają bez zmian.
+- Wydarzenia prywatne widzi tylko autor. Gość widzi wyłącznie wydarzenia, w których uczestniczy, i te dla całego domu.
+- Serie zapisane w tym etapie nie przechowują uczestników ani przypomnień: `rrule` razem z uczestnikami lub przypomnieniami daje błąd walidacji.
+- Obsługiwany podzbiór RRULE: `FREQ` DAILY/WEEKLY/MONTHLY/YEARLY z `INTERVAL`, `COUNT`, `UNTIL`, `BYDAY` (z porządkowymi w miesiącu/roku), `BYMONTHDAY` (tylko MONTHLY/YEARLY), `BYMONTH`; `WKST` tylko domyślny. Reszta (np. `BYSETPOS`, `INTERVAL=0`) jest odrzucana przy zapisie.
+- Kody błędów: `400 planner.invalid_date_range`, `400 planner.empty_title`, `400 planner.invalid_scope`, `403 planner.cannot_edit_event`, `403 planner.cannot_edit_private`, `403 planner.cannot_delete_event`, `404 planner.event_not_found`, `404 planner.series_not_found`.
+
 ## MCP (pod `/plugins/todo/mcp`, HomeApps 2.3.0+)
 
 Dla JARVIS-a i innych klientów MCP, z tokenem osoby (też delegowanym), te same sprawdzenia uprawnień co API. Dom,

@@ -61,7 +61,7 @@ public sealed class EventOverride
         return created;
     }
 
-    /// <summary>Replaces what this override changes and un-cancels the occurrence. Null fields keep the series' value.</summary>
+    /// <summary>Replaces what this override changes and un-cancels the occurrence. Null fields keep the current value (the earlier override's, else the series').</summary>
     public Result Replace(string? title, DateTimeOffset? startUtc, DateTimeOffset? endUtc, IEnumerable<int>? reminders, TimeProvider time)
     {
         ArgumentNullException.ThrowIfNull(time);
@@ -75,10 +75,10 @@ public sealed class EventOverride
         }
 
         IsCancelled = false;
-        OverrideTitle = validTitle?.Value;
-        OverrideStartUtc = startUtc?.ToUniversalTime();
-        OverrideEndUtc = endUtc?.ToUniversalTime();
-        OverrideReminders = rems?.Value;
+        OverrideTitle = validTitle?.Value ?? OverrideTitle;
+        OverrideStartUtc = startUtc?.ToUniversalTime() ?? OverrideStartUtc;
+        OverrideEndUtc = endUtc?.ToUniversalTime() ?? OverrideEndUtc;
+        OverrideReminders = rems?.Value ?? OverrideReminders;
         UpdatedAt = time.GetUtcNow();
         return Result.Ok();
     }
