@@ -10,7 +10,9 @@ using Todo.Application.Reminders;
 using Todo.Domain.Common;
 using Todo.Domain.Events;
 using Todo.Domain.Households;
+using Todo.Domain.Lists;
 using Todo.Domain.Settings;
+using Todo.Domain.Tasks;
 using Todo.Infrastructure.Jobs;
 using Todo.Infrastructure.Persistence;
 
@@ -129,6 +131,26 @@ public sealed class ReminderSchedulerTests
         public override DateTimeOffset GetUtcNow() => _now;
 
         public void Advance(TimeSpan by) => _now += by;
+    }
+
+    [Fact]
+    public void A_task_due_time_reminder_and_the_morning_digest_use_the_zone()
+    {
+        var user = Guid.NewGuid();
+        var list = TodoList.CreateDefault(Household, user, _time);
+        var task = TodoTask.Create(list, Actor.Member(user), "Zakupy", null, new TaskDue(new DateOnly(2030, 7, 10), new TimeOnly(9, 0)), TaskPriority.Normal, user, 1m, _time).Value;
+        var settings = new PlannerSettings(Household, user, Now);
+        Assert.True(settings.Update(null, [30], DayOfWeek.Monday, _time, "Europe/Warsaw").IsSuccess);
+        var sources = new ReminderSources([], [], [], [], [settings], [Member(user)], [task]);
+
+        // 09:00 Warsaw in July is 07:00 UTC; 30 minutes before is 06:30 UTC; digest 07:30 Warsaw is 05:30 UTC.
+        var reminder = ReminderScanner.Scan(sources, new DateTimeOffset(2030, 7, 10, 6, 29, 0, TimeSpan.Zero), new DateTimeOffset(2030, 7, 10, 6, 31, 0, TimeSpan.Zero));
+        var digest = ReminderScanner.Scan(sources, new DateTimeOffset(2030, 7, 10, 5, 29, 0, TimeSpan.Zero), new DateTimeOffset(2030, 7, 10, 5, 31, 0, TimeSpan.Zero));
+
+        Assert.Single(reminder.Due);
+        Assert.Equal("Zakupy", reminder.Due[0].Title);
+        Assert.Single(digest.Due);
+        Assert.Equal("Zadania na dziś", digest.Due[0].Title);
     }
 
     private sealed class FakeReader(ReminderSources sources) : IReminderReader

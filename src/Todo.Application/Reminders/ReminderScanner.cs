@@ -14,7 +14,9 @@ public static class ReminderScanner
     /// <summary>How far ahead of an event the longest reminder can be set.</summary>
     public static readonly TimeSpan Horizon = TimeSpan.FromMinutes(EventReminder.MaxMinutes);
 
-    public static ReminderScan Scan(ReminderSources sources, DateTimeOffset from, DateTimeOffset now)
+    public const string DefaultZoneId = "Europe/Warsaw";
+
+    public static ReminderScan Scan(ReminderSources sources, DateTimeOffset from, DateTimeOffset now, string defaultTimeZone = DefaultZoneId)
     {
         ArgumentNullException.ThrowIfNull(sources);
         var due = new List<DueReminder>();
@@ -45,6 +47,19 @@ public static class ReminderScanner
             }
         }
 
+        void Judge(DateTimeOffset at, Guid user, TodoTask t, string body, string key)
+        {
+            switch (ReminderRules.Judge(at, from, now))
+            {
+                case ReminderVerdict.Send:
+                    due.Add(new DueReminder(user, t.HouseholdId, TodoPlugin.TaskReminderNotification, t.Title.Value, body, $"task-{t.Id}-{key}-{user}"));
+                    break;
+                case ReminderVerdict.Drop:
+                    dropped++;
+                    break;
+            }
+        }
+
         foreach (var e in sources.Events.Where(e => e.OwnerLeftAt is null))
         {
             IEnumerable<Guid> recipients = e.IsPrivate ? new[] { e.CreatedBy } : e.IsForWholeHousehold ? members[e.HouseholdId] : e.Attendees;
@@ -61,7 +76,10 @@ public static class ReminderScanner
             }
         }
 
-        foreach (var t in sources.Tasks.Where(t => t.Status == TodoStatus.Open && t.ReminderAt is not null))
+        var settingsOf = sources.Settings.ToDictionary(s => (s.HouseholdId, s.UserId));
+        var openTasks = sources.Tasks.Where(t => t.Status == TodoStatus.Open).ToList();
+
+        foreach (var t in openTasks)
         {
             var user = t.AssigneeId ?? t.CreatedBy;
             if (!members[t.HouseholdId].Contains(user))
@@ -69,14 +87,51 @@ public static class ReminderScanner
                 continue;
             }
 
-            switch (ReminderRules.Judge(t.ReminderAt!.Value, from, now))
+            if (t.ReminderAt is not null)
             {
-                case ReminderVerdict.Send:
-                    due.Add(new DueReminder(user, t.HouseholdId, TodoPlugin.TaskReminderNotification, t.Title.Value, "Termin zadania", $"task-{t.Id}-{t.ReminderAt.Value.ToUnixTimeSeconds()}-{user}"));
-                    break;
-                case ReminderVerdict.Drop:
-                    dropped++;
-                    break;
+                Judge(t.ReminderAt.Value, user, t, "Termin zadania", t.ReminderAt.Value.ToUnixTimeSeconds().ToString(System.Globalization.CultureInfo.InvariantCulture));
+            }
+
+            settingsOf.TryGetValue((t.HouseholdId, user), out var mine);
+            if (t.Due?.Time is { } dueTime && mine is not null)
+            {
+                var zone = ReminderRules.ResolveZone(mine.TimeZoneId, defaultTimeZone);
+                var dueAt = ReminderRules.LocalToUtc(t.Due.Date, dueTime, zone);
+                foreach (var minutes in mine.DefaultTaskReminders.Select(r => r.MinutesBefore).Distinct())
+                {
+                    Judge(dueAt.AddMinutes(-minutes), user, t, minutes == 0 ? "Termin zadania: teraz" : $"Termin zadania za {minutes} min", $"due-{minutes}");
+                }
+            }
+        }
+
+        foreach (var group in openTasks.Where(t => t.Due is not null).GroupBy(t => (t.HouseholdId, User: t.AssigneeId ?? t.CreatedBy)))
+        {
+            if (!members[group.Key.HouseholdId].Contains(group.Key.User))
+            {
+                continue;
+            }
+
+            settingsOf.TryGetValue(group.Key, out var mine);
+            var zone = ReminderRules.ResolveZone(mine?.TimeZoneId, defaultTimeZone);
+            foreach (var date in new[] { DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(from, zone).Date), DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(now, zone).Date) }.Distinct())
+            {
+                var count = group.Count(t => t.Due!.Date == date);
+                if (count == 0)
+                {
+                    continue;
+                }
+
+                var body = count == 1 ? "Dziś masz 1 zadanie" : $"Dziś masz zadań: {count}";
+                var tag = $"digest-{group.Key.HouseholdId}-{date:yyyyMMdd}-{group.Key.User}";
+                switch (ReminderRules.Judge(ReminderRules.LocalToUtc(date, ReminderRules.DigestTime, zone), from, now))
+                {
+                    case ReminderVerdict.Send:
+                        due.Add(new DueReminder(group.Key.User, group.Key.HouseholdId, TodoPlugin.TaskReminderNotification, "Zadania na dziś", body, tag));
+                        break;
+                    case ReminderVerdict.Drop:
+                        dropped++;
+                        break;
+                }
             }
         }
 

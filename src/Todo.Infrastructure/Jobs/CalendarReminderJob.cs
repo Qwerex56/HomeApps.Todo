@@ -1,4 +1,5 @@
 using HomeApps.Plugins.Notifications;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -40,7 +41,7 @@ internal sealed partial class CalendarReminderJob(IServiceScopeFactory scopes, I
             var now = sp.GetRequiredService<TimeProvider>().GetUtcNow();
             var from = _lastScan ?? now.AddMinutes(-1);
             var sources = await sp.GetRequiredService<IReminderReader>().LoadAsync(from, now.Add(ReminderScanner.Horizon), cancellationToken);
-            var scan = ReminderScanner.Scan(sources, from, now);
+            var scan = ReminderScanner.Scan(sources, from, now, sp.GetService<IConfiguration>()?["Planner:DefaultTimeZone"] ?? ReminderScanner.DefaultZoneId);
             var notifier = sp.GetRequiredService<INotifier>();
             var db = sp.GetRequiredService<TodoDbContext>();
 
