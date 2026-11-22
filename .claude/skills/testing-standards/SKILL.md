@@ -110,7 +110,9 @@ dotnet test HomeApps.Todo.slnx --blame-hang-timeout 120s 2>&1 | grep -E "error|F
 ```
 
 There is no `Category` trait in use: to skip Docker, run only `*.Domain.Tests` and `*.Application.Tests` projects.
+Preflight: `docker info >/dev/null 2>&1 || echo "API NOT RUN"`. If it prints that, the test report's first line must state `API NOT RUN`, and the PR is not marked ready until the API tests run or the owner accepts the gap.
 If Docker is not running, say so in the report (`Api.Tests` will fail on container start); don't mark them passed.
+Still write the API tests and list them as NOT RUN in the dev report. Every new handler needs a test; `Todo.Application.Tests` does not exist, so cover handlers via API tests.
 
 ## Front end (src/Todo.Web)
 

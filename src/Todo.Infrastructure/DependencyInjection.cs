@@ -4,6 +4,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Todo.Application;
 using Todo.Application.Abstractions;
 using Todo.Application.Common;
+using Todo.Application.ExternalCalendars;
+using Todo.Infrastructure.ExternalCalendars;
+using Todo.Infrastructure.Feeds;
 using Todo.Infrastructure.Jobs;
 using Todo.Infrastructure.Persistence;
 
@@ -19,7 +22,20 @@ public static class DependencyInjection
         services.AddScoped<ITodoListRepository, TodoListRepository>();
         services.AddScoped<ITodoTaskRepository, TodoTaskRepository>();
         services.AddScoped<ITodoReader, TodoReader>();
+        services.AddScoped<ICalendarEventRepository, CalendarEventRepository>();
+        services.AddScoped<IEventSeriesRepository, EventSeriesRepository>();
+        services.AddScoped<ICalendarReader, CalendarReader>();
+        services.AddScoped<IReminderReader, ReminderReader>();
+        services.AddScoped<ICalendarSubscriptionRepository, CalendarSubscriptionRepository>();
+        services.AddScoped<IPlannerSettingsRepository, PlannerSettingsRepository>();
+        services.AddScoped<IExternalCalendarRepository, ExternalCalendarRepository>();
+        services.AddSingleton<ISsrfSafeClient, SsrfSafeHttpClient>();
+        services.AddScoped<ExternalCalendarSyncer>();
+        services.AddScoped<IInactiveMarkerRepository, InactiveMarkerRepository>();
+        services.AddSingleton<ICalendarFeedGenerator, IcsFeedGenerator>();
         services.AddHostedService<LeftListsCleanup>();
+        services.AddHostedService<ExternalCalendarSyncJob>();
+        services.AddHostedService<CalendarReminderJob>();
 
         return services;
     }

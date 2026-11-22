@@ -16,6 +16,14 @@ most important first. Don't restyle working code and don't ask for abstractions 
 - Nothing out of scope (spec section 5) was built. No changes under `specs/` by the developer.
 - No unrelated files (`.idea/`, `.env`, `bin/`, `obj/`, `node_modules/`, secrets, local paths).
 
+## Developer pre-submit (before the dev report)
+
+- [ ] Grep the ADR for each route, route constraint, error code and test-plan line of the stage; each exists in code and tests.
+- [ ] Window bounds (inclusive/exclusive) and "null keeps the current value" semantics match the ADR.
+- [ ] One commit per slice (domain, application, infrastructure, endpoints, tests, docs); run `git log --oneline <base>..HEAD` and split before DONE.
+- [ ] Grep the ADR for each entity the feature touches; map every listed event/consumer to a handler and a test before DONE.
+- [ ] Status-code matrix: for each ADR route, list every success and error code with its test name in the dev report; a code without a test is not DONE. Dev report must state `API tests written: n, run: n`.
+
 ## 1. .NET security
 
 - [ ] Every endpoint requires a token; each `.AllowAnonymous()` is intended by the spec and commented.

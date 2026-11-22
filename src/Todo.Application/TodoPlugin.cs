@@ -1,3 +1,4 @@
+using HomeApps.Contracts.Accounts;
 using HomeApps.Contracts.Households;
 using HomeApps.Plugins.Manifest;
 using HomeApps.Todo.Contracts;
@@ -20,6 +21,15 @@ public static class TodoPlugin
     /// <summary>Rename, archive and delete shared lists; delete anyone's task on them.</summary>
     public const string Manage = "tasks.manage";
 
+    /// <summary>Notification category: an imported calendar could not be refreshed for days.</summary>
+    public const string CalendarSyncNotification = "calendar-sync";
+
+    /// <summary>Notification category: an event is about to start.</summary>
+    public const string EventReminderNotification = "event-reminder";
+
+    /// <summary>Notification category: the reminder of a task came due.</summary>
+    public const string TaskReminderNotification = "task-reminder";
+
     public static PluginManifest Manifest { get; } = new()
     {
         Id = "todo",
@@ -38,10 +48,20 @@ public static class TodoPlugin
         ],
         Ui = new PluginUi
         {
-            Routes = [new PluginRoute("", new LocalizedText("Zadania", "Tasks"))],
-            Widgets = [new PluginWidget("today", new LocalizedText("Na dziś", "Today"), WidgetSize.Medium, [WidgetPlace.Household, WidgetPlace.Wall])],
+            Routes = [new PluginRoute("", new LocalizedText("Zadania", "Tasks")), new PluginRoute("calendar", new LocalizedText("Planer", "Planner"))],
+            Widgets =
+            [
+                new PluginWidget("today", new LocalizedText("Na dziś", "Today"), WidgetSize.Medium, [WidgetPlace.Household, WidgetPlace.Wall]),
+                new PluginWidget("planner-agenda", new LocalizedText("Planer: dziś i jutro", "Planner: today and tomorrow"), WidgetSize.Medium, [WidgetPlace.Household, WidgetPlace.Wall]),
+            ],
         },
+        Notifications =
+        [
+            new PluginNotificationCategory(CalendarSyncNotification, new LocalizedText("Kalendarze importowane", "Imported calendars")),
+            new PluginNotificationCategory(EventReminderNotification, new LocalizedText("Przypomnienia o wydarzeniach", "Event reminders")),
+            new PluginNotificationCategory(TaskReminderNotification, new LocalizedText("Przypomnienia o zadaniach", "Task reminders")),
+        ],
         Mcp = new PluginMcp(["add_task", "my_tasks", "complete_task"]),
-        Events = new PluginEvents([typeof(TaskCompleted)], [typeof(MemberLeft), typeof(MemberJoined)]),
+        Events = new PluginEvents([typeof(TaskCompleted)], [typeof(MemberLeft), typeof(MemberJoined), typeof(MemberRoleChanged), typeof(HouseholdArchived), typeof(HouseholdRestored), typeof(UserDisabled), typeof(UserEnabled), typeof(UserErased)]),
     };
 }

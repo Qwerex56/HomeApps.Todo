@@ -4,6 +4,8 @@ using HomeApps.BuildingBlocks.Testing;
 using HomeApps.Contracts;
 using HomeApps.Plugins;
 using Microsoft.Extensions.DependencyInjection;
+using Todo.Application.Abstractions;
+using Todo.Infrastructure.ExternalCalendars;
 using Todo.Infrastructure.Persistence;
 
 namespace Todo.Api.Tests;
@@ -12,6 +14,9 @@ namespace Todo.Api.Tests;
 public sealed class TodoFactory : HomeAppsApiFactory<Program, TodoDbContext>
 {
     public FakeHouseholds Households { get; } = new();
+
+    /// <summary>Queue downloads here; with nothing queued the real SSRF-safe client answers.</summary>
+    public FakeSsrfSafeClient Ssrf { get; } = new();
 
     public MovableTime Time { get; } = new();
 
@@ -26,6 +31,12 @@ public sealed class TodoFactory : HomeAppsApiFactory<Program, TodoDbContext>
         services.AddHttpClient(nameof(IHouseholdAccess)).ConfigurePrimaryHttpMessageHandler(() => Households);
         services.AddHttpClient(nameof(IHouseholdDirectory)).ConfigurePrimaryHttpMessageHandler(() => Households);
         services.AddSingleton<TimeProvider>(Time);
+        services.AddSingleton<SsrfSafeHttpClient>();
+        services.AddSingleton<ISsrfSafeClient>(sp =>
+        {
+            Ssrf.Fallback ??= sp.GetRequiredService<SsrfSafeHttpClient>();
+            return Ssrf;
+        });
 
         var real = services.Last(d => d.ServiceType == typeof(IEventBus));
         services.Remove(real);

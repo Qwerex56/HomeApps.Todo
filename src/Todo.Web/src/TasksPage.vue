@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useHost } from '@homeapps/plugin-sdk'
-import { emptyInput, type ListVisibility, type TaskInput, type TaskQuery, type TaskView, type TodoListView } from './api'
+import { emptyInput, type ListVisibility, type SeriesScope, type TaskInput, type TaskQuery, type TaskView, type TodoListView } from './api'
 import { todayIso } from './dates'
 import { useTodo } from './useTodo'
 import ListDialog from './ListDialog.vue'
+import SeriesScopeDialog from './SeriesScopeDialog.vue'
 import TaskEditor from './TaskEditor.vue'
 import TaskRow from './TaskRow.vue'
 
@@ -103,18 +104,31 @@ const toggle = change((api, task: TaskView) => (task.status === 'Done' ? api.reo
 
 // Editing in the side panel.
 const editing = ref<TaskView | null>(null)
-const save = change(async (api, { task, input, listId }: { task: TaskView; input: TaskInput; listId: string }) => {
-  await api.updateTask(task.id, input)
+const save = change(async (api, { task, input, listId, scope }: { task: TaskView; input: TaskInput; listId: string; scope?: SeriesScope }) => {
+  await api.updateTask(task.id, input, scope)
   if (listId !== task.listId) await api.moveTask(task.id, listId, null)
 })
-const remove = change((api, task: TaskView) => api.deleteTask(task.id))
+const remove = change((api, { task, scope }: { task: TaskView; scope?: SeriesScope }) => api.deleteTask(task.id, scope))
+// A repeating task (it has a rule, or the form gives it one) asks which occurrences the change reaches (ADR 3.7).
+const pending = ref<{ mode: 'edit' | 'delete'; input?: TaskInput; listId?: string } | null>(null)
 function onSave(input: TaskInput, listId: string) {
   if (!editing.value) return
-  save.mutate({ task: editing.value, input, listId }, { onSuccess: () => (editing.value = null) })
+  if (editing.value.rrule) pending.value = { mode: 'edit', input, listId }
+  else save.mutate({ task: editing.value, input, listId }, { onSuccess: () => (editing.value = null) })
 }
 function onDelete() {
   if (!editing.value) return
-  remove.mutate(editing.value, { onSuccess: () => (editing.value = null) })
+  if (editing.value.rrule) pending.value = { mode: 'delete' }
+  else remove.mutate({ task: editing.value }, { onSuccess: () => (editing.value = null) })
+}
+function onScope(scope: SeriesScope) {
+  const task = editing.value
+  const choice = pending.value
+  pending.value = null
+  if (!task || !choice) return
+  const done = { onSuccess: () => (editing.value = null) }
+  if (choice.mode === 'edit') save.mutate({ task, input: choice.input!, listId: choice.listId!, scope }, done)
+  else remove.mutate({ task, scope }, done)
 }
 
 // Drag and drop (desktop): onto a task = before it, onto the list's end or another list in the sidebar = at its end.
@@ -327,6 +341,13 @@ const title = computed(() =>
         @close="editing = null"
       />
     </Drawer>
+
+    <SeriesScopeDialog
+      :visible="pending !== null"
+      :mode="pending?.mode ?? 'edit'"
+      @update:visible="!$event && (pending = null)"
+      @choose="onScope"
+    />
 
     <ListDialog
       :visible="dialog !== null"

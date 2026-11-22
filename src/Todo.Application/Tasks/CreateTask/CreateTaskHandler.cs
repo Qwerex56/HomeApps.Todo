@@ -26,6 +26,17 @@ internal sealed class CreateTaskHandler(ITodoListRepository lists, ITodoTaskRepo
             return task.ToResult<Guid>();
         }
 
+        if (!string.IsNullOrWhiteSpace(input.Rrule))
+        {
+            var repeated = task.Value.EditRecurring(
+                list.Value, actor, RecurrenceScope.All, input.Title, input.Notes, input.Due, input.Priority, input.Rrule,
+                input.Anchor ?? RecurrenceAnchor.FromDueDate, time);
+            if (repeated.IsFailed)
+            {
+                return repeated.ToResult<Guid>();
+            }
+        }
+
         tasks.Add(task.Value);
         return task.Value.Id;
     }

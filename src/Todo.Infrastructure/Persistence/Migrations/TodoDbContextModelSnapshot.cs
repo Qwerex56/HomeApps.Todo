@@ -218,6 +218,377 @@ namespace Todo.Infrastructure.Persistence.Migrations
                     b.ToTable("OutboxState");
                 });
 
+            modelBuilder.Entity("Todo.Domain.Events.CalendarEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.PrimitiveCollection<string>("Attendees")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<DateTimeOffset>("EndUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("HouseholdId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsAllDay")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsPrivate")
+                        .HasColumnType("boolean");
+
+                    b.Property<TimeOnly>("LocalEndTime")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<TimeOnly>("LocalStartTime")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<string>("Location")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTimeOffset?>("OwnerLeftAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Reminders")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid?>("SeriesId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("StartUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TimeZoneId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SeriesId");
+
+                    b.HasIndex("CreatedBy", "IsPrivate")
+                        .HasDatabaseName("ix_calendar_events_created_by_private");
+
+                    b.HasIndex("HouseholdId", "OwnerLeftAt")
+                        .HasDatabaseName("ix_calendar_events_owner_left");
+
+                    b.HasIndex("HouseholdId", "StartUtc", "EndUtc")
+                        .HasDatabaseName("ix_calendar_events_household_start_end");
+
+                    b.ToTable("CalendarEvents", (string)null);
+                });
+
+            modelBuilder.Entity("Todo.Domain.Events.CalendarSubscription", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("HouseholdId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IncludeHouseholdEvents")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IncludePrivateEvents")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsGuest")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsSuspended")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTimeOffset?>("LastAccessedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TasksMode")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique()
+                        .HasDatabaseName("ux_calendar_subscriptions_token_hash");
+
+                    b.HasIndex("HouseholdId", "UserId");
+
+                    b.ToTable("CalendarSubscriptions", (string)null);
+                });
+
+            modelBuilder.Entity("Todo.Domain.Events.EventOverride", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsCancelled")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateOnly>("OriginalInstanceDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateTimeOffset?>("OverrideEndUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("OverrideReminders")
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTimeOffset?>("OverrideStartUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("OverrideTitle")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("SeriesId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SeriesId", "OriginalInstanceDate")
+                        .IsUnique()
+                        .HasDatabaseName("ux_event_overrides_series_date");
+
+                    b.ToTable("EventOverrides", (string)null);
+                });
+
+            modelBuilder.Entity("Todo.Domain.Events.EventReminderOverride", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Reminders")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EventId", "UserId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_event_reminder_overrides_event_user");
+
+                    b.ToTable("EventReminderOverrides", (string)null);
+                });
+
+            modelBuilder.Entity("Todo.Domain.Events.EventSeries", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<Guid>("HouseholdId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsAllDay")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsPrivate")
+                        .HasColumnType("boolean");
+
+                    b.Property<TimeOnly>("LocalEndTime")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<TimeOnly>("LocalStartTime")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<string>("Location")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTimeOffset?>("OwnerLeftAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Rule")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("Rrule");
+
+                    b.Property<DateTimeOffset?>("SeriesEndUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("SeriesStartUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TimeZoneId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HouseholdId");
+
+                    b.HasIndex("HouseholdId", "OwnerLeftAt");
+
+                    b.ToTable("EventSeries", (string)null);
+                });
+
+            modelBuilder.Entity("Todo.Domain.Events.ExternalCalendarImport", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CachedIcsData")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<Guid>("HouseholdId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("LastErrorMessage")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTimeOffset?>("LastSyncFailedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("LastSyncedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTimeOffset?>("OwnerLeftAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("SyncFailureCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Visibility")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HouseholdId", "OwnerLeftAt")
+                        .HasDatabaseName("ix_external_calendars_owner_left");
+
+                    b.HasIndex("HouseholdId", "UserId");
+
+                    b.ToTable("ExternalCalendarImports", (string)null);
+                });
+
+            modelBuilder.Entity("Todo.Domain.Households.InactiveMarker", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("HouseholdId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HouseholdId", "UserId");
+
+                    b.ToTable("InactiveMarkers", (string)null);
+                });
+
             modelBuilder.Entity("Todo.Domain.Lists.TodoList", b =>
                 {
                     b.Property<Guid>("Id")
@@ -267,6 +638,46 @@ namespace Todo.Infrastructure.Persistence.Migrations
                     b.ToTable("Lists", (string)null);
                 });
 
+            modelBuilder.Entity("Todo.Domain.Settings.PlannerSettings", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("DefaultEventReminders")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("DefaultTaskReminders")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("FirstDayOfWeek")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<Guid>("HouseholdId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("TimeZoneId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HouseholdId", "UserId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_planner_settings_household_user");
+
+                    b.ToTable("PlannerSettings", (string)null);
+                });
+
             modelBuilder.Entity("Todo.Domain.Tasks.TodoTask", b =>
                 {
                     b.Property<Guid>("Id")
@@ -290,6 +701,9 @@ namespace Todo.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("HouseholdId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTimeOffset?>("LastRecurrenceCompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<Guid>("ListId")
                         .HasColumnType("uuid");
 
@@ -304,6 +718,21 @@ namespace Todo.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(16)
                         .HasColumnType("character varying(16)");
+
+                    b.Property<string>("RecurrenceAnchor")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<DateTimeOffset?>("ReminderAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Rule")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("Rrule");
+
+                    b.Property<Guid?>("SeriesId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -326,6 +755,9 @@ namespace Todo.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("SeriesId")
+                        .HasFilter("\"SeriesId\" IS NOT NULL");
+
                     b.HasIndex("HouseholdId", "AssigneeId");
 
                     b.HasIndex("ListId", "Position");
@@ -343,6 +775,32 @@ namespace Todo.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("InboxMessageId", "InboxConsumerId")
                         .HasPrincipalKey("MessageId", "ConsumerId");
+                });
+
+            modelBuilder.Entity("Todo.Domain.Events.CalendarEvent", b =>
+                {
+                    b.HasOne("Todo.Domain.Events.EventSeries", null)
+                        .WithMany()
+                        .HasForeignKey("SeriesId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Todo.Domain.Events.EventOverride", b =>
+                {
+                    b.HasOne("Todo.Domain.Events.EventSeries", null)
+                        .WithMany()
+                        .HasForeignKey("SeriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Todo.Domain.Events.EventReminderOverride", b =>
+                {
+                    b.HasOne("Todo.Domain.Events.CalendarEvent", null)
+                        .WithMany()
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Todo.Domain.Tasks.TodoTask", b =>

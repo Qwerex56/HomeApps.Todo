@@ -34,8 +34,8 @@ internal sealed class TaskEndpoints : IEndpoint
             .ToCreatedHttpResult(created => $"/plugins/todo/api/households/{householdId}/tasks/{created.Id}"))
             .Produces<IdResponse>(StatusCodes.Status201Created);
 
-        household.MapPut("/tasks/{taskId:guid}", async (Guid householdId, Guid taskId, TaskInput body, ISender sender, CancellationToken ct) =>
-            (await sender.Send(new UpdateTaskCommand(householdId, taskId, body), ct)).ToHttpResult());
+        household.MapPut("/tasks/{taskId:guid}", async (Guid householdId, Guid taskId, TaskInput body, string? scope, ISender sender, CancellationToken ct) =>
+            (await sender.Send(new UpdateTaskCommand(householdId, taskId, body, scope), ct)).ToHttpResult());
 
         household.MapPost("/tasks/{taskId:guid}/complete", async (Guid householdId, Guid taskId, ISender sender, CancellationToken ct) =>
             (await sender.Send(new CompleteTaskCommand(householdId, taskId), ct)).ToHttpResult());
@@ -46,7 +46,7 @@ internal sealed class TaskEndpoints : IEndpoint
         household.MapPost("/tasks/{taskId:guid}/move", async (Guid householdId, Guid taskId, MoveTaskRequest body, ISender sender, CancellationToken ct) =>
             (await sender.Send(new MoveTaskCommand(householdId, taskId, body.ListId, body.BeforeTaskId), ct)).ToHttpResult());
 
-        household.MapDelete("/tasks/{taskId:guid}", async (Guid householdId, Guid taskId, ISender sender, CancellationToken ct) =>
-            (await sender.Send(new DeleteTaskCommand(householdId, taskId), ct)).ToHttpResult());
+        household.MapDelete("/tasks/{taskId:guid}", async (Guid householdId, Guid taskId, string? scope, ISender sender, CancellationToken ct) =>
+            (await sender.Send(new DeleteTaskCommand(householdId, taskId, scope), ct)).ToHttpResult());
     }
 }
