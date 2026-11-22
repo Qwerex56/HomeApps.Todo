@@ -25,6 +25,7 @@ public static class DependencyInjection
         services.AddScoped<ICalendarEventRepository, CalendarEventRepository>();
         services.AddScoped<IEventSeriesRepository, EventSeriesRepository>();
         services.AddScoped<ICalendarReader, CalendarReader>();
+        services.AddScoped<IReminderReader, ReminderReader>();
         services.AddScoped<ICalendarSubscriptionRepository, CalendarSubscriptionRepository>();
         services.AddScoped<IExternalCalendarRepository, ExternalCalendarRepository>();
         services.AddSingleton<ISsrfSafeClient, SsrfSafeHttpClient>();
@@ -33,6 +34,7 @@ public static class DependencyInjection
         services.AddSingleton<ICalendarFeedGenerator, IcsFeedGenerator>();
         services.AddHostedService<LeftListsCleanup>();
         services.AddHostedService<ExternalCalendarSyncJob>();
+        services.AddHostedService<CalendarReminderJob>();
 
         return services;
     }

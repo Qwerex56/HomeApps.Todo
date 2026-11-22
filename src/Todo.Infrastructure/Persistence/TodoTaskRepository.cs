@@ -19,6 +19,9 @@ internal sealed class TodoTaskRepository(TodoDbContext db) : ITodoTaskRepository
         db.Tasks.Where(t => t.ListId == listId && t.Position < position && t.Id != exceptTaskId)
             .MaxAsync(t => (decimal?)t.Position, cancellationToken);
 
+    public Task<bool> HasOpenInSeriesAsync(Guid householdId, Guid seriesId, Guid exceptTaskId, CancellationToken cancellationToken) =>
+        db.Tasks.AnyAsync(t => t.HouseholdId == householdId && (t.SeriesId == seriesId || t.Id == seriesId) && t.Id != exceptTaskId && t.Status == TodoStatus.Open, cancellationToken);
+
     public void Add(TodoTask task) => db.Tasks.Add(task);
 
     public void Remove(TodoTask task) => db.Tasks.Remove(task);

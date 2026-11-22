@@ -29,13 +29,25 @@ public sealed class PlannerSettings
 
     public DayOfWeek FirstDayOfWeek { get; private set; }
 
+    /// <summary>IANA time zone for task and digest reminders; <c>null</c> means the configured default.</summary>
+    public string? TimeZoneId { get; private set; }
+
     public DateTimeOffset UpdatedAt { get; private set; }
 
-    public Result Update(IEnumerable<int>? eventReminders, IEnumerable<int>? taskReminders, DayOfWeek firstDay, TimeProvider time)
+    public Result Update(IEnumerable<int>? eventReminders, IEnumerable<int>? taskReminders, DayOfWeek firstDay, TimeProvider time, string? timeZoneId = null)
     {
         ArgumentNullException.ThrowIfNull(time);
         var events = EventReminder.CreateMany(eventReminders);
         var tasks = EventReminder.CreateMany(taskReminders);
+        if (!string.IsNullOrWhiteSpace(timeZoneId))
+        {
+            var zone = EventTime.CheckZone(timeZoneId);
+            if (zone.IsFailed)
+            {
+                return zone;
+            }
+        }
+
         var check = Result.Merge((ResultBase)events, tasks);
         if (check.IsFailed)
         {
@@ -45,6 +57,7 @@ public sealed class PlannerSettings
         DefaultEventReminders = events.Value;
         DefaultTaskReminders = tasks.Value;
         FirstDayOfWeek = firstDay;
+        TimeZoneId = string.IsNullOrWhiteSpace(timeZoneId) ? TimeZoneId : timeZoneId;
         UpdatedAt = time.GetUtcNow();
         return Result.Ok();
     }

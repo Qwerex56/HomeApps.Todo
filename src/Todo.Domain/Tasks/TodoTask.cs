@@ -254,6 +254,59 @@ public sealed class TodoTask : IHasDomainEvents
         return Result.Ok();
     }
 
+    /// <summary>
+    /// ADR 3.7: the next open instance of a done recurring task, in the same series and list with the same content, or
+    /// null when the task does not repeat, is not done or its rule has no further date. The next date counts from the due
+    /// date or the completion date (<see cref="RecurrenceAnchor"/>); a task without a due date counts from completion.
+    /// </summary>
+    public TodoTask? NextInstance(TimeProvider time)
+    {
+        ArgumentNullException.ThrowIfNull(time);
+        if (Rule is null || RecurrenceAnchor is null || Status != TodoStatus.Done || CompletedAt is null)
+        {
+            return null;
+        }
+
+        var completed = DateOnly.FromDateTime(CompletedAt.Value.UtcDateTime);
+        var basis = RecurrenceAnchor == Tasks.RecurrenceAnchor.FromDueDate && Due is not null ? Due.Date : completed;
+        var next = RecurrenceEvaluator.Dates(Rule.Value, basis, null, basis.AddDays(1), basis.AddYears(5));
+        if (next.Count == 0)
+        {
+            return null;
+        }
+
+        // COUNT is per series, so each instance carries what is left of it.
+        var nextRule = Rule;
+        var parts = Rule.Value.Split(';');
+        var countIndex = Array.FindIndex(parts, p => p.StartsWith("COUNT=", StringComparison.Ordinal));
+        if (countIndex >= 0 && int.TryParse(parts[countIndex]["COUNT=".Length..], out var count))
+        {
+            parts[countIndex] = $"COUNT={count - 1}";
+            nextRule = RecurrenceRule.Create(string.Join(';', parts)).Value;
+        }
+
+        var now = time.GetUtcNow();
+        return new TodoTask
+        {
+            Id = Guid.CreateVersion7(now),
+            HouseholdId = HouseholdId,
+            ListId = ListId,
+            Title = Title,
+            Notes = Notes,
+            Due = new TaskDue(next[0], Due?.Time),
+            AssigneeId = AssigneeId,
+            Priority = Priority,
+            Status = TodoStatus.Open,
+            Position = Position,
+            CreatedBy = CreatedBy,
+            CreatedAt = now,
+            UpdatedAt = now,
+            SeriesId = SeriesId ?? Id,
+            Rule = nextRule,
+            RecurrenceAnchor = RecurrenceAnchor,
+        };
+    }
+
     /// <summary>Opens a done task again. Idempotent like <see cref="Complete"/>.</summary>
     public Result Reopen(TodoList list, Actor actor, TimeProvider time)
     {

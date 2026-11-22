@@ -14,6 +14,7 @@ internal sealed class PlannerSettingsConfiguration : IEntityTypeConfiguration<Pl
         builder.Property(s => s.DefaultEventReminders).HasConversion(Converters.Reminders, Converters.RemindersComparer).HasColumnType("jsonb");
         builder.Property(s => s.DefaultTaskReminders).HasConversion(Converters.Reminders, Converters.RemindersComparer).HasColumnType("jsonb");
         builder.Property(s => s.FirstDayOfWeek).HasConversion<string>().HasMaxLength(Converters.EnumLength);
+        builder.Property(s => s.TimeZoneId).HasMaxLength(100);
 
         builder.HasIndex(s => new { s.HouseholdId, s.UserId }).IsUnique().HasDatabaseName("ux_planner_settings_household_user");
     }
