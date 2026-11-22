@@ -23,6 +23,12 @@ public static class TodoPlugin
     /// <summary>Notification category: an imported calendar could not be refreshed for days.</summary>
     public const string CalendarSyncNotification = "calendar-sync";
 
+    /// <summary>Notification category: an event is about to start.</summary>
+    public const string EventReminderNotification = "event-reminder";
+
+    /// <summary>Notification category: the reminder of a task came due.</summary>
+    public const string TaskReminderNotification = "task-reminder";
+
     public static PluginManifest Manifest { get; } = new()
     {
         Id = "todo",
@@ -44,7 +50,12 @@ public static class TodoPlugin
             Routes = [new PluginRoute("", new LocalizedText("Zadania", "Tasks"))],
             Widgets = [new PluginWidget("today", new LocalizedText("Na dziś", "Today"), WidgetSize.Medium, [WidgetPlace.Household, WidgetPlace.Wall])],
         },
-        Notifications = [new PluginNotificationCategory(CalendarSyncNotification, new LocalizedText("Kalendarze importowane", "Imported calendars"))],
+        Notifications =
+        [
+            new PluginNotificationCategory(CalendarSyncNotification, new LocalizedText("Kalendarze importowane", "Imported calendars")),
+            new PluginNotificationCategory(EventReminderNotification, new LocalizedText("Przypomnienia o wydarzeniach", "Event reminders")),
+            new PluginNotificationCategory(TaskReminderNotification, new LocalizedText("Przypomnienia o zadaniach", "Task reminders")),
+        ],
         Mcp = new PluginMcp(["add_task", "my_tasks", "complete_task"]),
         Events = new PluginEvents([typeof(TaskCompleted)], [typeof(MemberLeft), typeof(MemberJoined)]),
     };
