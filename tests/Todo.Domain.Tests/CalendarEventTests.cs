@@ -67,6 +67,8 @@ public sealed class CalendarEventTests
     [InlineData("FREQ=WEEKLY;BYDAY=TU,TH", true)]
     [InlineData("rrule:freq=daily", true)]
     [InlineData("BYDAY=TU", false)]
+    [InlineData("FREQ=", false)]
+    [InlineData("FREQ=HOURLY", false)]
     [InlineData("FREQ=DAILY;X=<", false)]
     public void RecurrenceRule_ChecksShape(string raw, bool ok) => Assert.Equal(ok, RecurrenceRule.Create(raw).IsSuccess);
 }
