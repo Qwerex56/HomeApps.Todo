@@ -173,8 +173,8 @@ public sealed class CalendarTests(TodoFactory factory) : IClassFixture<TodoFacto
     {
         var h = await AHousehold.SwitchedOnAsync(factory);
         var home = await h.HomeListAsync();
-        await h.AddTaskAsync(h.Member, home.Id, "W oknie", new { due = new { date = "2030-03-31" } });
-        await h.AddTaskAsync(h.Member, home.Id, "Poza oknem", new { due = new { date = "2030-04-01" } });
+        await h.AddTaskAsync(h.Member, home.Id, "W oknie", new { dueDate = "2030-03-31" });
+        await h.AddTaskAsync(h.Member, home.Id, "Poza oknem", new { dueDate = "2030-04-01" });
 
         var items = await Window(h, h.Member, "tasks");
 

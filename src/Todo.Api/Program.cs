@@ -1,5 +1,6 @@
 using HomeApps.BuildingBlocks.Infrastructure.Persistence;
 using HomeApps.Plugins.Hosting;
+using Todo.Api.Endpoints;
 using Todo.Application;
 using Todo.Infrastructure;
 using Todo.Infrastructure.Persistence;
@@ -13,6 +14,7 @@ builder.Services.AddTodoInfrastructure(builder.Configuration);
 var app = builder.Build();
 
 app.UseHomeAppsPlugin();
+app.MapFeed();
 
 await app.MigrateDatabaseOnStartupAsync<TodoDbContext>();
 
