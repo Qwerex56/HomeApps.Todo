@@ -8,6 +8,9 @@ public sealed class FakeSsrfSafeClient : ISsrfSafeClient
 {
     private readonly Queue<Result<string>> _answers = new();
 
+    /// <summary>Answers when nothing is queued (the factory passes the real client, so refusal tests keep working).</summary>
+    public ISsrfSafeClient? Fallback { get; set; }
+
     public List<string> Requested { get; } = [];
 
     public FakeSsrfSafeClient Answer(Result<string> result)
@@ -19,6 +22,8 @@ public sealed class FakeSsrfSafeClient : ISsrfSafeClient
     public Task<Result<string>> DownloadAsync(string url, CancellationToken cancellationToken)
     {
         Requested.Add(url);
-        return Task.FromResult(_answers.Dequeue());
+        return _answers.Count == 0 && Fallback is not null
+            ? Fallback.DownloadAsync(url, cancellationToken)
+            : Task.FromResult(_answers.Dequeue());
     }
 }
