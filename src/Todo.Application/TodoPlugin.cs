@@ -48,8 +48,12 @@ public static class TodoPlugin
         ],
         Ui = new PluginUi
         {
-            Routes = [new PluginRoute("", new LocalizedText("Zadania", "Tasks"))],
-            Widgets = [new PluginWidget("today", new LocalizedText("Na dziś", "Today"), WidgetSize.Medium, [WidgetPlace.Household, WidgetPlace.Wall])],
+            Routes = [new PluginRoute("", new LocalizedText("Zadania", "Tasks")), new PluginRoute("calendar", new LocalizedText("Planer", "Planner"))],
+            Widgets =
+            [
+                new PluginWidget("today", new LocalizedText("Na dziś", "Today"), WidgetSize.Medium, [WidgetPlace.Household, WidgetPlace.Wall]),
+                new PluginWidget("agenda", new LocalizedText("Planer: dziś i jutro", "Planner: today and tomorrow"), WidgetSize.Medium, [WidgetPlace.Household, WidgetPlace.Wall]),
+            ],
         },
         Notifications =
         [
