@@ -12,11 +12,17 @@ internal sealed class GetCalendarFeedHandler(
     ICalendarSubscriptionRepository subscriptions, IHouseholdMemberRepository members, ICalendarReader reader,
     ICalendarFeedGenerator generator, TimeProvider time) : IQueryHandler<GetCalendarFeedQuery, string>
 {
+    private const int TokenLength = 43;
     private static readonly TimeSpan Past = TimeSpan.FromDays(30);
     private static readonly TimeSpan Future = TimeSpan.FromDays(366);
 
     public async Task<Result<string>> Handle(GetCalendarFeedQuery query, CancellationToken cancellationToken)
     {
+        if (query.Token.Length != TokenLength || !query.Token.All(c => char.IsAsciiLetterOrDigit(c) || c is '-' or '_'))
+        {
+            return Result.Fail(PlannerErrors.SubscriptionNotFound);
+        }
+
         var subscription = await subscriptions.FindByTokenHashAsync(FeedToken.Hash(query.Token), cancellationToken);
         if (subscription is not { Serves: true })
         {
@@ -48,6 +54,11 @@ internal sealed class GetCalendarFeedHandler(
             var found = await reader.TasksDueAsync(
                 subscription.HouseholdId, subscription.UserId, DateOnly.FromDateTime(from.UtcDateTime), DateOnly.FromDateTime(to.UtcDateTime), cancellationToken);
             tasks = subscription.TasksMode == SubscriptionTasksMode.Assigned ? found.Where(t => t.AssigneeId == subscription.UserId).ToList() : found;
+        }
+
+        if (subscription.LastAccessedAt is null || now - subscription.LastAccessedAt > TimeSpan.FromMinutes(1))
+        {
+            await subscriptions.TouchAsync(subscription.Id, now, cancellationToken);
         }
 
         return Result.Ok(generator.Generate(subscription.Label, events, occurrences, tasks, now));

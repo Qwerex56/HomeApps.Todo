@@ -33,7 +33,10 @@ internal sealed class IcsFeedGenerator : ICalendarFeedGenerator
             lines.Add($"DTSTAMP:{stamp}");
             if (t.DueTime is { } time)
             {
-                lines.Add($"DTSTART:{Utc(new DateTimeOffset(t.DueDate!.Value.ToDateTime(time), TimeSpan.Zero))}");
+                // A task's due time has no zone: floating local time, one hour long.
+                var startLocal = t.DueDate!.Value.ToDateTime(time);
+                lines.Add($"DTSTART:{startLocal:yyyyMMdd'T'HHmmss}");
+                lines.Add($"DTEND:{startLocal.AddHours(1):yyyyMMdd'T'HHmmss}");
             }
             else
             {
@@ -93,13 +96,30 @@ internal sealed class IcsFeedGenerator : ICalendarFeedGenerator
         lines.Add("END:VEVENT");
     }
 
-    /// <summary>All-day events are whole local days; DTEND is the day after the last one.</summary>
+    /// <summary>All-day events are whole local days; DTEND is the day after the last one. An unknown zone counts as UTC.</summary>
     private static (DateOnly Start, DateOnly EndExclusive) LocalDates(DateTimeOffset start, DateTimeOffset end, string timeZoneId)
     {
-        var zone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+        TimeZoneInfo zone;
+        try
+        {
+            zone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+        }
+        catch (Exception ex) when (ex is TimeZoneNotFoundException or InvalidTimeZoneException)
+        {
+            zone = TimeZoneInfo.Utc;
+        }
+
         var s = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(start, zone).DateTime);
-        var e = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(end, zone).DateTime);
-        return (s, e > s ? e : s.AddDays(1));
+        var endLocal = TimeZoneInfo.ConvertTime(end, zone).DateTime;
+        var e = DateOnly.FromDateTime(endLocal);
+
+        // The end is either the next midnight (exclusive) or any time on the last day (inclusive).
+        if (endLocal.TimeOfDay != TimeSpan.Zero || e <= s)
+        {
+            e = e.AddDays(1);
+        }
+
+        return (s, e);
     }
 
     private static string Utc(DateTimeOffset value) => value.UtcDateTime.ToString("yyyyMMdd'T'HHmmss'Z'", CultureInfo.InvariantCulture);

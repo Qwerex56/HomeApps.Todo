@@ -13,6 +13,9 @@ public interface ICalendarSubscriptionRepository
 
     Task<CalendarSubscription?> FindByTokenHashAsync(string tokenHash, CancellationToken cancellationToken);
 
+    /// <summary>Sets the last access time straight in the database, without tracking.</summary>
+    Task TouchAsync(Guid id, DateTimeOffset now, CancellationToken cancellationToken);
+
     void Add(CalendarSubscription subscription);
 
     void Remove(CalendarSubscription subscription);

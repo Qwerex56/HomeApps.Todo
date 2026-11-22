@@ -8,10 +8,17 @@ namespace Todo.Api.Endpoints;
 internal sealed class FeedEndpoints : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app) =>
-        app.MapGet("/feed/{token}.ics", async (string token, ISender sender, CancellationToken ct) =>
+        app.MapGet("/feed/{token}.ics", async (string token, HttpContext http, ISender sender, CancellationToken ct) =>
             {
                 var result = await sender.Send(new GetCalendarFeedQuery(token), ct);
-                return result.IsSuccess ? Results.Content(result.Value, "text/calendar; charset=utf-8") : Results.NotFound();
+                if (result.IsFailed)
+                {
+                    return Results.NotFound();
+                }
+
+                http.Response.Headers.CacheControl = "private, no-store";
+                http.Response.Headers["Referrer-Policy"] = "no-referrer";
+                return Results.Content(result.Value, "text/calendar; charset=utf-8");
             })
             .AllowAnonymous()
             .WithName("GetCalendarFeedIcs");

@@ -19,6 +19,9 @@ internal sealed class CalendarSubscriptionRepository(TodoDbContext db) : ICalend
     public Task<CalendarSubscription?> FindByTokenHashAsync(string tokenHash, CancellationToken cancellationToken) =>
         db.CalendarSubscriptions.AsNoTracking().FirstOrDefaultAsync(s => s.TokenHash == tokenHash, cancellationToken);
 
+    public Task TouchAsync(Guid id, DateTimeOffset now, CancellationToken cancellationToken) =>
+        db.CalendarSubscriptions.Where(s => s.Id == id).ExecuteUpdateAsync(u => u.SetProperty(s => s.LastAccessedAt, now), cancellationToken);
+
     public void Add(CalendarSubscription subscription) => db.CalendarSubscriptions.Add(subscription);
 
     public void Remove(CalendarSubscription subscription) => db.CalendarSubscriptions.Remove(subscription);

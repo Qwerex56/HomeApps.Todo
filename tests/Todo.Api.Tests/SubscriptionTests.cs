@@ -88,6 +88,19 @@ public sealed class SubscriptionTests(TodoFactory factory) : IClassFixture<TodoF
         return (await response.Content.ReadFromJsonAsync<CreatedSubscriptionView>(AHousehold.Json))!.Token;
     }
 
+    [Fact]
+    public async Task A_member_the_plugin_never_saw_joining_still_gets_a_working_feed_and_last_access_is_recorded()
+    {
+        var h = await AHousehold.SwitchedOnAsync(factory);
+        var response = await h.As(h.Other).PostAsJsonAsync($"{h.Api}/calendar/subscriptions", new { label = "Phone" });
+        var created = (await response.Content.ReadFromJsonAsync<CreatedSubscriptionView>(AHousehold.Json))!;
+
+        var feed = await StatusAsync(created.Token);
+        var listed = await h.As(h.Other).GetFromJsonAsync<List<CalendarSubscriptionView>>($"{h.Api}/calendar/subscriptions", AHousehold.Json);
+
+        Assert.Equal((HttpStatusCode.OK, true), (feed, listed![0].LastAccessedAt is not null));
+    }
+
     private async Task<HttpStatusCode> StatusAsync(string token) => (await factory.CreateClient().GetAsync($"/plugins/todo/feed/{token}.ics")).StatusCode;
 
     private async Task<(AHousehold Household, string Token)> SubscribedAsync()
