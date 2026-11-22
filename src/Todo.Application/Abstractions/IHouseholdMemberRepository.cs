@@ -9,5 +9,7 @@ public interface IHouseholdMemberRepository
 
     Task<IReadOnlyList<HouseholdMemberProjection>> ListOfUserAsync(Guid userId, CancellationToken cancellationToken);
 
+    Task<IReadOnlyList<HouseholdMemberProjection>> ListOfHouseholdAsync(Guid householdId, CancellationToken cancellationToken);
+
     void Add(HouseholdMemberProjection member);
 }

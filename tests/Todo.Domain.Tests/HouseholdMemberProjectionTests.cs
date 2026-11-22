@@ -48,4 +48,15 @@ public sealed class HouseholdMemberProjectionTests
 
         Assert.Equal((false, true), (disabled, m.IsActive));
     }
+
+    [Fact]
+    public void ArchiveAndRestore_ToggleActive()
+    {
+        var m = New();
+        m.Archive();
+        var archived = m.IsActive;
+        m.Restore();
+
+        Assert.Equal((false, true), (archived, m.IsActive));
+    }
 }

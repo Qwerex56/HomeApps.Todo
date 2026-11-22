@@ -101,6 +101,18 @@ public sealed class SubscriptionTests(TodoFactory factory) : IClassFixture<TodoF
         Assert.Equal((HttpStatusCode.OK, true), (feed, listed![0].LastAccessedAt is not null));
     }
 
+    [Fact]
+    public async Task A_role_change_to_guest_and_an_archived_household_are_followed_by_the_feed()
+    {
+        var (h, token) = await SubscribedAsync();
+        await factory.Harness.Bus.Publish(new MemberRoleChanged(h.Id, h.Member, HouseholdRole.Member, HouseholdRole.Guest));
+        await factory.Harness.Bus.Publish(new HouseholdArchived(h.Id));
+        await Eventually(async () => await StatusAsync(token) == HttpStatusCode.NotFound);
+
+        await factory.Harness.Bus.Publish(new HouseholdRestored(h.Id));
+        await Eventually(async () => await StatusAsync(token) == HttpStatusCode.OK);
+    }
+
     private async Task<HttpStatusCode> StatusAsync(string token) => (await factory.CreateClient().GetAsync($"/plugins/todo/feed/{token}.ics")).StatusCode;
 
     private async Task<(AHousehold Household, string Token)> SubscribedAsync()

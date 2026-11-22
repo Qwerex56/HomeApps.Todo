@@ -12,5 +12,8 @@ internal sealed class HouseholdMemberRepository(TodoDbContext db) : IHouseholdMe
     public async Task<IReadOnlyList<HouseholdMemberProjection>> ListOfUserAsync(Guid userId, CancellationToken cancellationToken) =>
         await db.HouseholdMembers.Where(m => m.UserId == userId).ToListAsync(cancellationToken);
 
+    public async Task<IReadOnlyList<HouseholdMemberProjection>> ListOfHouseholdAsync(Guid householdId, CancellationToken cancellationToken) =>
+        await db.HouseholdMembers.Where(m => m.HouseholdId == householdId).ToListAsync(cancellationToken);
+
     public void Add(HouseholdMemberProjection member) => db.HouseholdMembers.Add(member);
 }

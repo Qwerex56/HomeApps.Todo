@@ -2,8 +2,11 @@ using FluentResults;
 using HomeApps.Contracts.Households;
 using MassTransit;
 using MediatR;
+using Todo.Application.Households.HouseholdArchived;
+using Todo.Application.Households.HouseholdRestored;
 using Todo.Application.Households.MemberJoined;
 using Todo.Application.Households.MemberLeft;
+using Todo.Application.Households.MemberRoleChanged;
 
 namespace Todo.Infrastructure.Households;
 
@@ -12,7 +15,7 @@ namespace Todo.Infrastructure.Households;
 /// idempotent. A failed result throws, so the message is retried and ends in the <c>_error</c> queue rather than lost.
 /// Public because MassTransit's scan finds public consumers only.
 /// </summary>
-public sealed class HouseholdMembersConsumer(ISender sender) : IConsumer<MemberLeft>, IConsumer<MemberJoined>
+public sealed class HouseholdMembersConsumer(ISender sender) : IConsumer<MemberLeft>, IConsumer<MemberJoined>, IConsumer<MemberRoleChanged>, IConsumer<HouseholdArchived>, IConsumer<HouseholdRestored>
 {
     public async Task Consume(ConsumeContext<MemberLeft> context)
     {
@@ -26,6 +29,25 @@ public sealed class HouseholdMembersConsumer(ISender sender) : IConsumer<MemberL
         ArgumentNullException.ThrowIfNull(context);
         var m = context.Message;
         ThrowIfFailed(await sender.Send(new MemberJoinedCommand(m.HouseholdId, m.UserId, m.Role.ToString()), context.CancellationToken), m);
+    }
+
+    public async Task Consume(ConsumeContext<MemberRoleChanged> context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        var m = context.Message;
+        ThrowIfFailed(await sender.Send(new MemberRoleChangedCommand(m.HouseholdId, m.UserId, m.NewRole.ToString()), context.CancellationToken), m);
+    }
+
+    public async Task Consume(ConsumeContext<HouseholdArchived> context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        ThrowIfFailed(await sender.Send(new HouseholdArchivedCommand(context.Message.HouseholdId), context.CancellationToken), context.Message);
+    }
+
+    public async Task Consume(ConsumeContext<HouseholdRestored> context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        ThrowIfFailed(await sender.Send(new HouseholdRestoredCommand(context.Message.HouseholdId), context.CancellationToken), context.Message);
     }
 
     private static void ThrowIfFailed(Result result, object message)

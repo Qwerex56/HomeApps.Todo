@@ -573,6 +573,9 @@ namespace Todo.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("HouseholdId")
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsDisabled")
                         .HasColumnType("boolean");
 
