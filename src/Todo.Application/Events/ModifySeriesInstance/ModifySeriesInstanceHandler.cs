@@ -35,8 +35,10 @@ internal sealed class ModifySeriesInstanceHandler(IEventSeriesRepository seriesR
             return allowed.IsFailed ? allowed.ToResult<CalendarEventDetailView>() : Result.Fail<CalendarEventDetailView>(PlannerErrors.SeriesNotFound);
         }
 
-        var start = command.StartUtc ?? occurrence.StartUtc;
-        var end = command.EndUtc ?? (command.StartUtc is { } s ? s + (occurrence.EndUtc - occurrence.StartUtc) : occurrence.EndUtc);
+        // All / ThisAndFuture take base times from the series, not from an instance override.
+        var baseOccurrence = scope.Value == RecurrenceScope.ThisInstance ? occurrence : series.OccurrenceOn(command.Date, null) ?? occurrence;
+        var start = command.StartUtc ?? baseOccurrence.StartUtc;
+        var end = command.EndUtc ?? (command.StartUtc is { } s ? s + (baseOccurrence.EndUtc - baseOccurrence.StartUtc) : baseOccurrence.EndUtc);
         if (end < start)
         {
             return Result.Fail<CalendarEventDetailView>(PlannerErrors.InvalidDateRange);
@@ -49,10 +51,10 @@ internal sealed class ModifySeriesInstanceHandler(IEventSeriesRepository seriesR
 
         if (scope.Value == RecurrenceScope.ThisAndFuture && command.Date > series.StartDate)
         {
-            return ThisAndFuture(series, overrides, occurrence, command, start, end);
+            return ThisAndFuture(series, overrides, baseOccurrence, command, start, end);
         }
 
-        var timeChanged = command.Rrule is not null || EventTime.LocalTime(start, series.TimeZoneId) != series.LocalStartTime
+        var timeChanged = (command.Rrule is not null && command.Rrule != series.Rule.Value) || EventTime.LocalTime(start, series.TimeZoneId) != series.LocalStartTime
             || EventTime.LocalTime(end, series.TimeZoneId) != series.LocalEndTime;
         var edited = series.Edit(actor, command.Title ?? series.Title.Value, command.Description ?? series.Description, command.Location ?? series.Location,
             EventTime.LocalTime(start, series.TimeZoneId), EventTime.LocalTime(end, series.TimeZoneId), series.IsAllDay,

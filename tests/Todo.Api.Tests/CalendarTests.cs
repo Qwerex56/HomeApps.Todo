@@ -143,6 +143,20 @@ public sealed class CalendarTests(TodoFactory factory) : IClassFixture<TodoFacto
     }
 
     [Fact]
+    public async Task All_after_a_moved_instance_keeps_series_times_and_the_move()
+    {
+        var h = await AHousehold.SwitchedOnAsync(factory);
+        var id = await IdOf(await Create(h, h.Member, Event("Seria", rrule: "FREQ=DAILY;COUNT=3")));
+        var moved = Start.AddDays(1).AddHours(2);
+
+        (await Instance(h, h.Member, id, "2030-03-05", new { scope = "ThisInstance", startUtc = moved, endUtc = moved.AddHours(1) })).EnsureSuccessStatusCode();
+        (await Instance(h, h.Member, id, "2030-03-05", new { scope = "All", title = "Nowy" })).EnsureSuccessStatusCode();
+
+        var starts = (await Window(h, h.Member)).EnumerateArray().Select(i => i.GetProperty("startUtc").GetDateTimeOffset()).ToList();
+        Assert.Equal([Start, moved, Start.AddDays(2)], starts);
+    }
+
+    [Fact]
     public async Task An_unknown_series_is_404_and_a_malformed_date_does_not_route()
     {
         var h = await AHousehold.SwitchedOnAsync(factory);
