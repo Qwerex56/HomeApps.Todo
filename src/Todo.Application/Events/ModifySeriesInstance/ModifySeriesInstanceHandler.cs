@@ -27,14 +27,13 @@ internal sealed class ModifySeriesInstanceHandler(IEventSeriesRepository seriesR
         }
 
         var allowed = series.CanEdit(actor);
-        var occurrence = series.OccurrenceOn(command.Date, null);
+        var overrides = await seriesRepository.OverridesAsync(series.Id, cancellationToken);
+        var change = overrides.FirstOrDefault(o => o.OriginalInstanceDate == command.Date);
+        var occurrence = series.OccurrenceOn(command.Date, change);
         if (allowed.IsFailed || occurrence is null)
         {
             return allowed.IsFailed ? allowed.ToResult<CalendarEventDetailView>() : Result.Fail<CalendarEventDetailView>(PlannerErrors.SeriesNotFound);
         }
-
-        var overrides = await seriesRepository.OverridesAsync(series.Id, cancellationToken);
-        var change = overrides.FirstOrDefault(o => o.OriginalInstanceDate == command.Date);
 
         var start = command.StartUtc ?? occurrence.StartUtc;
         var end = command.EndUtc ?? (command.StartUtc is { } s ? s + (occurrence.EndUtc - occurrence.StartUtc) : occurrence.EndUtc);
@@ -53,10 +52,24 @@ internal sealed class ModifySeriesInstanceHandler(IEventSeriesRepository seriesR
             return ThisAndFuture(series, overrides, occurrence, command, start, end);
         }
 
+        var timeChanged = command.Rrule is not null || EventTime.LocalTime(start, series.TimeZoneId) != series.LocalStartTime
+            || EventTime.LocalTime(end, series.TimeZoneId) != series.LocalEndTime;
         var edited = series.Edit(actor, command.Title ?? series.Title.Value, command.Description ?? series.Description, command.Location ?? series.Location,
             EventTime.LocalTime(start, series.TimeZoneId), EventTime.LocalTime(end, series.TimeZoneId), series.IsAllDay,
             command.Rrule ?? series.Rule.Value, time);
-        return edited.IsFailed ? edited.ToResult<CalendarEventDetailView>() : Show(series, series.OccurrenceOn(command.Date, null) ?? series.FirstOccurrence());
+        if (edited.IsFailed)
+        {
+            return edited.ToResult<CalendarEventDetailView>();
+        }
+
+        if (timeChanged)
+        {
+            // Moved or rescheduled occurrences no longer match the new rule or time; cancellations stay.
+            seriesRepository.RemoveOverrides(overrides.Where(o => !o.IsCancelled));
+            change = null;
+        }
+
+        return Show(series, series.OccurrenceOn(command.Date, change) ?? series.FirstOccurrence());
     }
 
     private Result<CalendarEventDetailView> ThisInstance(EventSeries series, EventOverride? change, ModifySeriesInstanceCommand command, TimeProvider clock)

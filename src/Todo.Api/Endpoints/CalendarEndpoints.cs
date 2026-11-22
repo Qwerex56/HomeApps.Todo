@@ -36,12 +36,12 @@ internal sealed class CalendarEndpoints : IEndpoint
         group.MapDelete("/events/{id:guid}", async (Guid householdId, Guid id, ISender sender, CancellationToken ct) =>
             (await sender.Send(new DeleteCalendarEventCommand(householdId, id), ct)).ToHttpResult());
 
-        group.MapPut("/events/{seriesId:guid}/instances/{date}", async (
+        group.MapPut("/events/{seriesId:guid}/instances/{date:regex(^\\d{{4}}-\\d{{2}}-\\d{{2}}$)}", async (
                 Guid householdId, Guid seriesId, DateOnly date, ModifySeriesInstanceRequest body, ISender sender, CancellationToken ct) =>
             (await sender.Send(body.ToCommand(householdId, seriesId, date), ct)).ToHttpResult())
             .Produces<CalendarEventDetailView>();
 
-        group.MapDelete("/events/{seriesId:guid}/instances/{date}", async (
+        group.MapDelete("/events/{seriesId:guid}/instances/{date:regex(^\\d{{4}}-\\d{{2}}-\\d{{2}}$)}", async (
                 Guid householdId, Guid seriesId, DateOnly date, string? scope, ISender sender, CancellationToken ct) =>
             (await sender.Send(new DeleteSeriesInstanceCommand(householdId, seriesId, date, scope), ct)).ToHttpResult());
     }

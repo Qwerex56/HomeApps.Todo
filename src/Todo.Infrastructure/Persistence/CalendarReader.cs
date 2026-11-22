@@ -24,6 +24,7 @@ internal sealed class CalendarReader(TodoDbContext db) : ICalendarReader
     public async Task<IReadOnlyList<(EventSeries Series, IReadOnlyList<EventOverride> Overrides)>> SeriesAsync(
         Guid householdId, Guid userId, bool isGuest, DateTimeOffset fromUtc, DateTimeOffset toUtc, CancellationToken cancellationToken)
     {
+        // Known limit: an override that moves an occurrence of a series from outside the window into it is not found.
         var series = await db.EventSeries
             .Where(s => s.HouseholdId == householdId && s.SeriesStartUtc < toUtc && (s.SeriesEndUtc == null || s.SeriesEndUtc >= fromUtc)
                 && (!s.IsPrivate || s.CreatedBy == userId) && s.OwnerLeftAt == null && !(isGuest && s.IsPrivate))

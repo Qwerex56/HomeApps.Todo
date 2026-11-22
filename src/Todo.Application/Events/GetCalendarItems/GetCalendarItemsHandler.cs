@@ -35,7 +35,14 @@ internal sealed class GetCalendarItemsHandler(ICalendarReader reader, IHousehold
 
         if (layers.Contains("tasks"))
         {
-            var tasks = await reader.TasksDueAsync(query.HouseholdId, userId, DateOnly.FromDateTime(from.UtcDateTime), DateOnly.FromDateTime(to.UtcDateTime), cancellationToken);
+            // `to` is exclusive: a midnight `to` leaves out its own day. Task due dates are matched as UTC dates.
+            var lastDay = DateOnly.FromDateTime(to.UtcDateTime);
+            if (to.UtcDateTime.TimeOfDay == TimeSpan.Zero)
+            {
+                lastDay = lastDay.AddDays(-1);
+            }
+
+            var tasks = await reader.TasksDueAsync(query.HouseholdId, userId, DateOnly.FromDateTime(from.UtcDateTime), lastDay, cancellationToken);
             items.AddRange(tasks.Select(t => (new DateTimeOffset(t.DueDate!.Value.ToDateTime(t.DueTime ?? TimeOnly.MinValue), TimeSpan.Zero), CalendarItemView.Of(t))));
         }
 
