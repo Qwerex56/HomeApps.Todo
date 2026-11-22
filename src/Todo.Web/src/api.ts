@@ -5,6 +5,15 @@ import type { AxiosInstance } from 'axios'
 export type ListVisibility = 'Shared' | 'Private'
 export type TaskPriority = 'Low' | 'Normal' | 'High'
 export type TodoStatus = 'Open' | 'Done'
+export type RecurrenceAnchor = 'FromDueDate' | 'FromCompletionDate'
+
+/** The caller's own planner preferences; reminders are minutes before, timeZone is IANA (null = default). */
+export interface PlannerSettings {
+  eventReminders: number[]
+  taskReminders: number[]
+  firstDayOfWeek: number
+  timeZone: string | null
+}
 
 export interface TodoListView {
   id: string
@@ -31,6 +40,8 @@ export interface TaskView {
   createdAt: string
   completedBy: string | null
   completedAt: string | null
+  rrule: string | null
+  anchor: RecurrenceAnchor | null
 }
 
 export interface TaskInput {
@@ -40,6 +51,8 @@ export interface TaskInput {
   dueTime: string | null
   priority: TaskPriority
   assigneeId: string | null
+  rrule?: string | null
+  anchor?: RecurrenceAnchor | null
 }
 
 export interface TaskQuery {
@@ -170,12 +183,14 @@ export function todoApi(http: AxiosInstance, apiBase: string, householdId: strin
     tasks: async (query: TaskQuery) => (await http.get<TaskView[]>(`${base}/tasks`, { params: query })).data,
     createTask: async (listId: string, input: TaskInput) =>
       (await http.post<{ id: string }>(`${base}/lists/${listId}/tasks`, input)).data.id,
-    updateTask: (id: string, input: TaskInput) => http.put(`${base}/tasks/${id}`, input),
+    updateTask: (id: string, input: TaskInput, scope?: SeriesScope) =>
+      http.put(`${base}/tasks/${id}`, input, { params: scope ? { scope } : undefined }),
     completeTask: (id: string) => http.post(`${base}/tasks/${id}/complete`),
     reopenTask: (id: string) => http.post(`${base}/tasks/${id}/reopen`),
     moveTask: (id: string, listId: string, beforeTaskId: string | null) =>
       http.post(`${base}/tasks/${id}/move`, { listId, beforeTaskId }),
-    deleteTask: (id: string) => http.delete(`${base}/tasks/${id}`),
+    deleteTask: (id: string, scope?: SeriesScope) =>
+      http.delete(`${base}/tasks/${id}`, { params: scope ? { scope } : undefined }),
 
     calendarItems: async (from: string, to: string, layers: CalendarLayer[]) =>
       (await http.get<CalendarItem[]>(`${base}/calendar/events`, { params: { from, to, layers: layers.join(',') } })).data,
@@ -200,6 +215,9 @@ export function todoApi(http: AxiosInstance, apiBase: string, householdId: strin
     syncExternal: async (id: string) => (await http.post<ExternalCalendarView>(`${base}/calendar/external/${id}/sync`)).data,
     removeExternal: (id: string) => http.delete(`${base}/calendar/external/${id}`),
 
+    plannerSettings: async () => (await http.get<PlannerSettings>(`${base}/calendar/settings`)).data,
+    savePlannerSettings: async (input: PlannerSettings) => (await http.put<PlannerSettings>(`${base}/calendar/settings`, input)).data,
+
     members: async () => (await http.get<HouseholdMember[]>(`/households/${householdId}/members`)).data,
   }
 }
@@ -207,7 +225,7 @@ export function todoApi(http: AxiosInstance, apiBase: string, householdId: strin
 export type TodoApi = ReturnType<typeof todoApi>
 
 export function emptyInput(title = ''): TaskInput {
-  return { title, notes: null, dueDate: null, dueTime: null, priority: 'Normal', assigneeId: null }
+  return { title, notes: null, dueDate: null, dueTime: null, priority: 'Normal', assigneeId: null, rrule: null, anchor: null }
 }
 
 export function inputOf(task: TaskView): TaskInput {
@@ -218,5 +236,7 @@ export function inputOf(task: TaskView): TaskInput {
     dueTime: task.dueTime,
     priority: task.priority,
     assigneeId: task.assigneeId,
+    rrule: task.rrule,
+    anchor: task.anchor,
   }
 }

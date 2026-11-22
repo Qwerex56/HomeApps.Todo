@@ -1,6 +1,6 @@
-import { D as e, E as t, O as n, S as r, _ as i, b as a, d as o, g as s, h as c, k as l, l as u, m as d, n as f, p, t as m, u as h, v as g, w as _, x as v, y } from "./_plugin-vue_export-helper-DX_-5sjr.js";
-import { n as b, r as x, s as S, t as C } from "./CalendarChip-BDOUGRpB.js";
-import { t as w } from "./TaskRow-BojeEe0Q.js";
+import { D as e, E as t, O as n, S as r, _ as i, b as a, d as o, g as s, h as c, k as l, l as u, m as d, n as f, p, t as m, u as h, v as g, w as _, x as v, y } from "./_plugin-vue_export-helper-DRFww2dX.js";
+import { n as b, r as x, s as S, t as C } from "./CalendarChip-CsI3k0aj.js";
+import { t as w } from "./TaskRow-BDB1gJUc.js";
 // src/PlannerAgendaWidget.vue?vue&type=script&setup=true&lang.ts
 var T = {
 	key: 0,
@@ -75,8 +75,8 @@ var T = {
 }, L = 8, R = o({
 	id: "todo",
 	routes: {
-		"": () => import("./TasksPage-I87hl8f1.js"),
-		calendar: () => import("./CalendarPage-BHhlTHGz.js")
+		"": () => import("./TasksPage-ZSGmsNF2.js"),
+		calendar: () => import("./CalendarPage-CdgOsxA8.js")
 	},
 	widgets: {
 		today: /* @__PURE__ */ m(/* @__PURE__ */ v({
@@ -182,6 +182,18 @@ var T = {
 				listName: "Nazwa listy"
 			},
 			delete: "Usuń",
+			recurrence: {
+				label: "Powtarzanie",
+				none: "Nie powtarza się",
+				"FREQ=DAILY": "Codziennie",
+				"FREQ=WEEKLY": "Co tydzień",
+				"FREQ=MONTHLY": "Co miesiąc",
+				"FREQ=YEARLY": "Co rok",
+				custom: "Własna reguła",
+				anchorLabel: "Kolejny termin liczony od",
+				FromDueDate: "terminu zadania",
+				FromCompletionDate: "daty wykonania"
+			},
 			cancel: "Anuluj",
 			save: "Zapisz",
 			create: "Utwórz",
@@ -255,6 +267,16 @@ var T = {
 				readOnly: "Jako gość możesz tylko przeglądać kalendarz.",
 				deleteConfirm: "Usunąć wydarzenie „{name}”?",
 				settings: {
+					preferences: "Moje ustawienia",
+					eventReminders: "Domyślne przypomnienia o wydarzeniach",
+					taskReminders: "Domyślne przypomnienia o zadaniach",
+					timeZone: "Strefa czasowa",
+					firstDay: "Pierwszy dzień tygodnia",
+					weekDay: {
+						0: "Niedziela",
+						1: "Poniedziałek",
+						6: "Sobota"
+					},
 					title: "Ustawienia kalendarza",
 					subscriptions: "Subskrypcje kalendarza (ICS)",
 					subscriptionsHint: "Adres, który wklejasz do innej aplikacji kalendarza, żeby widzieć w niej wydarzenia domu.",
@@ -352,6 +374,18 @@ var T = {
 				listName: "List name"
 			},
 			delete: "Delete",
+			recurrence: {
+				label: "Repeat",
+				none: "Does not repeat",
+				"FREQ=DAILY": "Daily",
+				"FREQ=WEEKLY": "Weekly",
+				"FREQ=MONTHLY": "Monthly",
+				"FREQ=YEARLY": "Yearly",
+				custom: "Custom rule",
+				anchorLabel: "Next due date counts from",
+				FromDueDate: "the due date",
+				FromCompletionDate: "the completion date"
+			},
 			cancel: "Cancel",
 			save: "Save",
 			create: "Create",
@@ -425,6 +459,16 @@ var T = {
 				readOnly: "As a guest you can only view the calendar.",
 				deleteConfirm: "Delete the event “{name}”?",
 				settings: {
+					preferences: "My settings",
+					eventReminders: "Default event reminders",
+					taskReminders: "Default task reminders",
+					timeZone: "Time zone",
+					firstDay: "First day of the week",
+					weekDay: {
+						0: "Sunday",
+						1: "Monday",
+						6: "Saturday"
+					},
 					title: "Calendar settings",
 					subscriptions: "Calendar subscriptions (ICS)",
 					subscriptionsHint: "An address you paste into another calendar app to see the household events there.",

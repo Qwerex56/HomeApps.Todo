@@ -39,6 +39,14 @@ export function useTodo(householdId: MaybeRefOrGetter<string>) {
   const memberName = (userId: string | null) =>
     userId ? (members.data.value?.find((m: HouseholdMember) => m.userId === userId)?.displayName ?? null) : null
 
+  /** The caller's planner preferences; `timeZone` is the zone the UI shows planner times in (device zone when unset). */
+  const settings = useQuery({
+    queryKey: computed(() => ['plugins', 'todo', id.value, 'settings'] as const),
+    queryFn: () => api.value.plannerSettings(),
+    staleTime: 60_000,
+  })
+  const timeZone = computed(() => settings.data.value?.timeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone)
+
   function tasks(query: MaybeRefOrGetter<TaskQuery>, enabled: MaybeRefOrGetter<boolean> = true) {
     return useQuery({
       queryKey: computed(() => keys.tasks(id.value, toValue(query))),
@@ -73,6 +81,8 @@ export function useTodo(householdId: MaybeRefOrGetter<string>) {
     lists,
     members,
     memberName,
+    settings,
+    timeZone,
     tasks,
     calendar,
     change,

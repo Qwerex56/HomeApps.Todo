@@ -4,6 +4,8 @@ import { useHost } from '@homeapps/plugin-sdk'
 import { inputOf, type HouseholdMember, type TaskInput, type TaskPriority, type TaskView, type TodoListView } from './api'
 import { fromIso, isoDate } from './dates'
 
+const PRESETS = ['FREQ=DAILY', 'FREQ=WEEKLY', 'FREQ=MONTHLY', 'FREQ=YEARLY']
+
 // The side panel for one task: the whole form (PUT), moving to another list, deleting.
 const props = defineProps<{
   task: TaskView
@@ -48,6 +50,19 @@ const assignees = computed(() => {
     list.value?.visibility === 'Private' ? props.members.filter((m) => m.userId === props.userId) : props.members
   return [{ userId: null, displayName: host.t('nobody') }, ...people.map((m) => ({ userId: m.userId, displayName: m.displayName }))]
 })
+// A repeat rule from the presets; a rule set elsewhere (another RRULE) stays as it is and is shown as "custom".
+const repeatOptions = computed(() => [
+  { value: null, label: host.t('recurrence.none') },
+  ...PRESETS.map((value) => ({ value, label: host.t(`recurrence.${value}`) })),
+  ...(form.value.rrule && !PRESETS.includes(form.value.rrule) ? [{ value: form.value.rrule, label: host.t('recurrence.custom') }] : []),
+])
+const anchors = computed(() =>
+  (['FromDueDate', 'FromCompletionDate'] as const).map((value) => ({ value, label: host.t(`recurrence.${value}`) })),
+)
+watch(
+  () => form.value.rrule,
+  (rule) => (form.value.anchor = rule ? (form.value.anchor ?? 'FromDueDate') : null),
+)
 const targetLists = computed(() => props.lists.filter((l) => !l.archived || l.id === props.task.listId))
 </script>
 
@@ -82,6 +97,14 @@ const targetLists = computed(() => props.lists.filter((l) => !l.archived || l.id
         :disabled="!canEdit"
       />
     </div>
+    <label class="todo-editor__field">
+      <span>{{ host.t('recurrence.label') }}</span>
+      <Select v-model="form.rrule" :options="repeatOptions" option-label="label" option-value="value" :disabled="!canEdit" />
+    </label>
+    <label v-if="form.rrule" class="todo-editor__field">
+      <span>{{ host.t('recurrence.anchorLabel') }}</span>
+      <Select v-model="form.anchor" :options="anchors" option-label="label" option-value="value" :disabled="!canEdit" />
+    </label>
     <label v-if="members.length" class="todo-editor__field">
       <span>{{ host.t('fields.assignee') }}</span>
       <Select

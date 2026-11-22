@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import { useHost } from '@homeapps/plugin-sdk'
-import type { CreatedSubscription, ExternalVisibility, SubscriptionTasksMode } from './api'
+import type { CreatedSubscription, PlannerSettings, ExternalVisibility, SubscriptionTasksMode } from './api'
 import { useTodo } from './useTodo'
 
-// Calendar settings that exist in the API: ICS subscriptions (feed addresses to give other apps) and imports of
-// external calendars. Reminders are set per event in the editor; there is no household-level settings endpoint yet.
+// Calendar settings: the caller's own preferences (default reminders, first day of the week, time zone), ICS
+// subscriptions (feed addresses to give other apps) and imports of external calendars.
 const props = defineProps<{ visible: boolean; householdId: string }>()
 const emit = defineEmits<{ 'update:visible': [boolean] }>()
 
@@ -25,6 +25,22 @@ const externals = useQuery({
   queryFn: () => api.value.externals(),
   enabled: open,
 })
+
+// Own preferences. The server keeps instants in UTC; the zone only decides how the UI shows them.
+const REMINDERS = [0, 10, 30, 60, 1440]
+const prefs = ref<PlannerSettings>({ eventReminders: [], taskReminders: [], firstDayOfWeek: 1, timeZone: null })
+watch(
+  () => todo.settings.data.value,
+  (value) => value && (prefs.value = { ...value, timeZone: value.timeZone ?? todo.timeZone.value }),
+  { immediate: true },
+)
+const savePrefs = change((a, input: PlannerSettings) => a.savePlannerSettings(input))
+const reminderOptions = REMINDERS.map((value) => ({ value, label: value === 0 ? host.t('calendar.reminder.atStart') : host.t('calendar.reminder.before', { minutes: value }) }))
+const zones = computed(() => {
+  const all = (Intl as { supportedValuesOf?: (key: string) => string[] }).supportedValuesOf?.('timeZone') ?? []
+  return prefs.value.timeZone && !all.includes(prefs.value.timeZone) ? [prefs.value.timeZone, ...all] : all
+})
+const weekDays = [1, 0, 6].map((value) => ({ value, label: host.t(`calendar.settings.weekDay.${value}`) }))
 
 // Subscriptions.
 const label = ref('')
@@ -81,6 +97,29 @@ const ago = (iso: string | null) => (iso ? new Date(iso).toLocaleString('pl-PL')
     :style="{ width: '40rem', maxWidth: 'calc(100vw - 2rem)' }"
     @update:visible="emit('update:visible', $event)"
   >
+    <section class="settings" :aria-label="host.t('calendar.settings.preferences')">
+      <h3>{{ host.t('calendar.settings.preferences') }}</h3>
+      <form class="settings__form" @submit.prevent="savePrefs.mutate(prefs)">
+        <label class="settings__field">
+          <span>{{ host.t('calendar.settings.eventReminders') }}</span>
+          <MultiSelect v-model="prefs.eventReminders" :options="reminderOptions" option-label="label" option-value="value" display="chip" />
+        </label>
+        <label class="settings__field">
+          <span>{{ host.t('calendar.settings.taskReminders') }}</span>
+          <MultiSelect v-model="prefs.taskReminders" :options="reminderOptions" option-label="label" option-value="value" display="chip" />
+        </label>
+        <label class="settings__field">
+          <span>{{ host.t('calendar.settings.timeZone') }}</span>
+          <Select v-model="prefs.timeZone" :options="zones" filter />
+        </label>
+        <label class="settings__field">
+          <span>{{ host.t('calendar.settings.firstDay') }}</span>
+          <Select v-model="prefs.firstDayOfWeek" :options="weekDays" option-label="label" option-value="value" />
+        </label>
+        <Button type="submit" :label="host.t('save')" :loading="savePrefs.isPending.value" />
+      </form>
+    </section>
+
     <section class="settings" :aria-label="host.t('calendar.settings.subscriptions')">
       <h3>{{ host.t('calendar.settings.subscriptions') }}</h3>
       <p class="settings__hint">{{ host.t('calendar.settings.subscriptionsHint') }}</p>
@@ -166,6 +205,16 @@ const ago = (iso: string | null) => (iso ? new Date(iso).toLocaleString('pl-PL')
   gap: 0.5rem;
   align-items: center;
   margin-bottom: 1rem;
+}
+.settings__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1 1 14rem;
+}
+.settings__field > span {
+  font-size: 0.85rem;
+  color: var(--p-text-muted-color);
 }
 .settings__wide {
   width: 100%;

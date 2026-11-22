@@ -2,7 +2,7 @@
 var e = globalThis.__HOMEAPPS_SHARED__?.vue;
 if (!e) throw Error("HomeApps does not share vue; is this plugin loaded by the HomeApps web app?");
 e.default;
-var { BaseTransition: t, BaseTransitionPropsValidators: n, Comment: r, DeprecationTypes: i, EffectScope: a, ErrorCodes: o, ErrorTypeStrings: s, Fragment: c, KeepAlive: l, ReactiveEffect: u, Static: d, Suspense: f, Teleport: ee, Text: te, TrackOpTypes: ne, Transition: re, TransitionGroup: ie, TriggerOpTypes: ae, VueElement: oe, assertNumber: se, callWithAsyncErrorHandling: ce, callWithErrorHandling: le, camelize: ue, capitalize: de, cloneVNode: fe, compatUtils: pe, compile: me, computed: p, createApp: he, createBlock: m, createCommentVNode: h, createElementBlock: g, createElementVNode: _, createHydrationRenderer: ge, createPropsRestProxy: _e, createRenderer: ve, createSSRApp: ye, createSlots: be, createStaticVNode: xe, createTextVNode: v, createVNode: y, customRef: Se, defineAsyncComponent: Ce, defineComponent: b, defineCustomElement: we, defineEmits: Te, defineExpose: Ee, defineModel: De, defineOptions: Oe, defineProps: ke, defineSSRCustomElement: Ae, defineSlots: je, devtools: Me, effect: Ne, effectScope: Pe, getCurrentInstance: Fe, getCurrentScope: Ie, getCurrentWatcher: Le, getTransitionRawChildren: Re, guardReactiveProps: ze, h: Be, handleError: Ve, hasInjectionContext: He, hydrate: Ue, hydrateOnIdle: We, hydrateOnInteraction: Ge, hydrateOnMediaQuery: Ke, hydrateOnVisible: qe, initCustomFormatter: Je, initDirectivesForSSR: Ye, inject: x, isMemoSame: Xe, isProxy: Ze, isReactive: Qe, isReadonly: $e, isRef: et, isRuntimeOnly: tt, isShallow: nt, isVNode: rt, markRaw: it, mergeDefaults: at, mergeModels: ot, mergeProps: st, nextTick: ct, nodeOps: lt, normalizeClass: S, normalizeProps: ut, normalizeStyle: C, onActivated: dt, onBeforeMount: ft, onBeforeUnmount: pt, onBeforeUpdate: mt, onDeactivated: ht, onErrorCaptured: gt, onMounted: _t, onRenderTracked: vt, onRenderTriggered: yt, onScopeDispose: bt, onServerPrefetch: xt, onUnmounted: St, onUpdated: Ct, onWatcherCleanup: wt, openBlock: w, patchProp: Tt, popScopeId: Et, provide: Dt, proxyRefs: Ot, pushScopeId: kt, queuePostFlushCb: At, reactive: jt, readonly: Mt, ref: T, registerRuntimeCompiler: Nt, render: Pt, renderList: E, renderSlot: Ft, resolveComponent: D, resolveDirective: It, resolveDynamicComponent: Lt, resolveFilter: Rt, resolveTransitionHooks: zt, setBlockTracking: Bt, setDevtoolsHook: Vt, setTransitionHooks: Ht, shallowReactive: Ut, shallowReadonly: Wt, shallowRef: Gt, ssrContextKey: Kt, ssrUtils: qt, stop: Jt, toDisplayString: O, toHandlerKey: Yt, toHandlers: Xt, toRaw: Zt, toRef: Qt, toRefs: $t, toValue: k, transformVNodeArgs: en, triggerRef: tn, unref: A, useAttrs: nn, useCssModule: rn, useCssVars: an, useHost: on, useId: sn, useModel: cn, useSSRContext: ln, useShadowRoot: un, useSlots: dn, useTemplateRef: fn, useTransitionState: pn, vModelCheckbox: j, vModelDynamic: mn, vModelRadio: hn, vModelSelect: gn, vModelText: M, vShow: _n, version: vn, warn: yn, watch: N, watchEffect: bn, watchPostEffect: xn, watchSyncEffect: Sn, withAsyncContext: Cn, withCtx: P, withDefaults: wn, withDirectives: F, withKeys: Tn, withMemo: En, withModifiers: I, withScopeId: Dn } = e;
+var { BaseTransition: t, BaseTransitionPropsValidators: n, Comment: r, DeprecationTypes: i, EffectScope: a, ErrorCodes: o, ErrorTypeStrings: s, Fragment: c, KeepAlive: l, ReactiveEffect: u, Static: d, Suspense: f, Teleport: p, Text: m, TrackOpTypes: ee, Transition: te, TransitionGroup: ne, TriggerOpTypes: re, VueElement: ie, assertNumber: ae, callWithAsyncErrorHandling: oe, callWithErrorHandling: se, camelize: ce, capitalize: le, cloneVNode: ue, compatUtils: de, compile: fe, computed: h, createApp: pe, createBlock: g, createCommentVNode: _, createElementBlock: v, createElementVNode: me, createHydrationRenderer: he, createPropsRestProxy: ge, createRenderer: _e, createSSRApp: ve, createSlots: ye, createStaticVNode: be, createTextVNode: xe, createVNode: y, customRef: Se, defineAsyncComponent: Ce, defineComponent: b, defineCustomElement: we, defineEmits: Te, defineExpose: Ee, defineModel: De, defineOptions: Oe, defineProps: ke, defineSSRCustomElement: Ae, defineSlots: je, devtools: Me, effect: Ne, effectScope: Pe, getCurrentInstance: Fe, getCurrentScope: Ie, getCurrentWatcher: Le, getTransitionRawChildren: Re, guardReactiveProps: ze, h: Be, handleError: Ve, hasInjectionContext: He, hydrate: Ue, hydrateOnIdle: We, hydrateOnInteraction: Ge, hydrateOnMediaQuery: Ke, hydrateOnVisible: qe, initCustomFormatter: Je, initDirectivesForSSR: Ye, inject: x, isMemoSame: Xe, isProxy: Ze, isReactive: Qe, isReadonly: $e, isRef: et, isRuntimeOnly: tt, isShallow: nt, isVNode: rt, markRaw: it, mergeDefaults: at, mergeModels: ot, mergeProps: st, nextTick: ct, nodeOps: lt, normalizeClass: S, normalizeProps: ut, normalizeStyle: C, onActivated: dt, onBeforeMount: ft, onBeforeUnmount: pt, onBeforeUpdate: mt, onDeactivated: ht, onErrorCaptured: gt, onMounted: _t, onRenderTracked: vt, onRenderTriggered: yt, onScopeDispose: bt, onServerPrefetch: xt, onUnmounted: St, onUpdated: Ct, onWatcherCleanup: wt, openBlock: w, patchProp: Tt, popScopeId: Et, provide: Dt, proxyRefs: Ot, pushScopeId: kt, queuePostFlushCb: At, reactive: jt, readonly: Mt, ref: T, registerRuntimeCompiler: Nt, render: Pt, renderList: E, renderSlot: Ft, resolveComponent: D, resolveDirective: It, resolveDynamicComponent: Lt, resolveFilter: Rt, resolveTransitionHooks: zt, setBlockTracking: Bt, setDevtoolsHook: Vt, setTransitionHooks: Ht, shallowReactive: Ut, shallowReadonly: Wt, shallowRef: Gt, ssrContextKey: Kt, ssrUtils: qt, stop: Jt, toDisplayString: O, toHandlerKey: Yt, toHandlers: Xt, toRaw: Zt, toRef: Qt, toRefs: $t, toValue: k, transformVNodeArgs: en, triggerRef: tn, unref: A, useAttrs: nn, useCssModule: rn, useCssVars: an, useHost: on, useId: sn, useModel: cn, useSSRContext: ln, useShadowRoot: un, useSlots: dn, useTemplateRef: fn, useTransitionState: pn, vModelCheckbox: j, vModelDynamic: mn, vModelRadio: hn, vModelSelect: gn, vModelText: M, vShow: _n, version: vn, warn: yn, watch: N, watchEffect: bn, watchPostEffect: xn, watchSyncEffect: Sn, withAsyncContext: Cn, withCtx: P, withDefaults: wn, withDirectives: Tn, withKeys: F, withMemo: En, withModifiers: I, withScopeId: Dn } = e;
 // node_modules/@homeapps/plugin-sdk/dist/index.js
 function L(e) {
 	return e;
@@ -56,14 +56,14 @@ function Y(e, t, n) {
 		deleteList: (t) => e.delete(`${r}/lists/${t}`),
 		tasks: async (t) => (await e.get(`${r}/tasks`, { params: t })).data,
 		createTask: async (t, n) => (await e.post(`${r}/lists/${t}/tasks`, n)).data.id,
-		updateTask: (t, n) => e.put(`${r}/tasks/${t}`, n),
+		updateTask: (t, n, i) => e.put(`${r}/tasks/${t}`, n, { params: i ? { scope: i } : void 0 }),
 		completeTask: (t) => e.post(`${r}/tasks/${t}/complete`),
 		reopenTask: (t) => e.post(`${r}/tasks/${t}/reopen`),
 		moveTask: (t, n, i) => e.post(`${r}/tasks/${t}/move`, {
 			listId: n,
 			beforeTaskId: i
 		}),
-		deleteTask: (t) => e.delete(`${r}/tasks/${t}`),
+		deleteTask: (t, n) => e.delete(`${r}/tasks/${t}`, { params: n ? { scope: n } : void 0 }),
 		calendarItems: async (t, n, i) => (await e.get(`${r}/calendar/events`, { params: {
 			from: t,
 			to: n,
@@ -82,6 +82,8 @@ function Y(e, t, n) {
 		addExternal: async (t) => (await e.post(`${r}/calendar/external`, t)).data,
 		syncExternal: async (t) => (await e.post(`${r}/calendar/external/${t}/sync`)).data,
 		removeExternal: (t) => e.delete(`${r}/calendar/external/${t}`),
+		plannerSettings: async () => (await e.get(`${r}/calendar/settings`)).data,
+		savePlannerSettings: async (t) => (await e.put(`${r}/calendar/settings`, t)).data,
 		members: async () => (await e.get(`/households/${n}/members`)).data
 	};
 }
@@ -92,7 +94,9 @@ function X(e = "") {
 		dueDate: null,
 		dueTime: null,
 		priority: "Normal",
-		assigneeId: null
+		assigneeId: null,
+		rrule: null,
+		anchor: null
 	};
 }
 function Z(e) {
@@ -102,7 +106,9 @@ function Z(e) {
 		dueDate: e.dueDate,
 		dueTime: e.dueTime,
 		priority: e.priority,
-		assigneeId: e.assigneeId
+		assigneeId: e.assigneeId,
+		rrule: e.rrule,
+		anchor: e.anchor
 	};
 }
 // src/useTodo.ts
@@ -132,27 +138,36 @@ var Q = 3e4, $ = {
 	]
 };
 function Sr(e) {
-	let t = z(), n = J(), r = p(() => k(e)), i = p(() => Y(t.http, t.apiBase, r.value)), a = p(() => t.user.value?.id ?? null), o = q({
-		queryKey: p(() => $.lists(r.value)),
+	let t = z(), n = J(), r = h(() => k(e)), i = h(() => Y(t.http, t.apiBase, r.value)), a = h(() => t.user.value?.id ?? null), o = q({
+		queryKey: h(() => $.lists(r.value)),
 		queryFn: () => i.value.lists(),
 		refetchInterval: Q
-	}), s = p(() => (t.household.value?.myRole ?? "Guest") !== "Guest"), c = q({
-		queryKey: p(() => $.members(r.value)),
+	}), s = h(() => (t.household.value?.myRole ?? "Guest") !== "Guest"), c = q({
+		queryKey: h(() => $.members(r.value)),
 		queryFn: () => i.value.members(),
 		enabled: s,
 		staleTime: 6e4
-	}), l = (e) => e ? c.data.value?.find((t) => t.userId === e)?.displayName ?? null : null;
-	function u(e, t = !0) {
+	}), l = (e) => e ? c.data.value?.find((t) => t.userId === e)?.displayName ?? null : null, u = q({
+		queryKey: h(() => [
+			"plugins",
+			"todo",
+			r.value,
+			"settings"
+		]),
+		queryFn: () => i.value.plannerSettings(),
+		staleTime: 6e4
+	}), d = h(() => u.data.value?.timeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone);
+	function f(e, t = !0) {
 		return q({
-			queryKey: p(() => $.tasks(r.value, k(e))),
+			queryKey: h(() => $.tasks(r.value, k(e))),
 			queryFn: () => i.value.tasks(k(e)),
-			enabled: p(() => k(t)),
+			enabled: h(() => k(t)),
 			refetchInterval: Q
 		});
 	}
-	function d(e, t) {
+	function p(e, t) {
 		return q({
-			queryKey: p(() => [
+			queryKey: h(() => [
 				"plugins",
 				"todo",
 				r.value,
@@ -164,7 +179,7 @@ function Sr(e) {
 			refetchInterval: Q
 		});
 	}
-	function f(e) {
+	function m(e) {
 		return K({
 			mutationFn: (t) => e(i.value, t),
 			onError: (e) => t.notify("error", t.errorMessage(e)),
@@ -178,11 +193,13 @@ function Sr(e) {
 		lists: o,
 		members: c,
 		memberName: l,
-		tasks: u,
-		calendar: d,
-		change: f,
-		canWrite: p(() => t.can("tasks.write")),
-		canManage: p(() => t.can("tasks.manage"))
+		settings: u,
+		timeZone: d,
+		tasks: f,
+		calendar: p,
+		change: m,
+		canWrite: h(() => t.can("tasks.write")),
+		canManage: h(() => t.can("tasks.manage"))
 	};
 }
 // \0plugin-vue:export-helper
@@ -191,4 +208,4 @@ var Cr = (e, t) => {
 	for (let [e, r] of t) n[e] = r;
 	return n;
 };
-export { j as A, C, D, E, Tn as F, I, N as M, P as N, O, F as P, S, T, g as _, q as a, y as b, H as c, L as d, z as f, h as g, m as h, Z as i, M as j, A as k, V as l, p as m, Sr as n, W as o, c as p, X as r, U as s, Cr as t, B as u, _ as v, w, b as x, v as y };
+export { j as A, C, D, E, F, I, N as M, P as N, O, Tn as P, S, T, v as _, q as a, y as b, H as c, L as d, z as f, _ as g, g as h, Z as i, M as j, A as k, V as l, h as m, Sr as n, W as o, c as p, X as r, U as s, Cr as t, B as u, me as v, w, b as x, xe as y };

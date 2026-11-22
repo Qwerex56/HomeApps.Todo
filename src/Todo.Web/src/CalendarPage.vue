@@ -215,6 +215,7 @@ const settingsOpen = ref(false)
       v-model:visible="editorOpen"
       :event="editing"
       :day="draftDay"
+      :time-zone="todo.timeZone.value"
       :members="members.data.value ?? []"
       :can-edit="canEditEvent"
       :can-delete="canEditEvent"

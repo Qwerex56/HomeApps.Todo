@@ -11,6 +11,8 @@ const props = defineProps<{
   /** null = a new event on `day`. */
   event: CalendarEventDetail | null
   day: string
+  /** The user's IANA zone (planner settings) for a new event. */
+  timeZone: string
   members: HouseholdMember[]
   canEdit: boolean
   canDelete: boolean
@@ -86,7 +88,7 @@ function submit() {
     title: f.title.trim(),
     description: f.description.trim() || null,
     location: f.location.trim() || null,
-    timeZoneId: props.event?.timeZoneId ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
+    timeZoneId: props.event?.timeZoneId ?? props.timeZone,
     startUtc: startsIso.value,
     endUtc: endsIso.value,
     isAllDay: f.isAllDay,
