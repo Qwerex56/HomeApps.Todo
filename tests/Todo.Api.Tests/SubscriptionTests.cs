@@ -46,6 +46,30 @@ public sealed class SubscriptionTests(TodoFactory factory) : IClassFixture<TodoF
     }
 
     [Fact]
+    public async Task Private_events_reach_the_feed_only_when_the_subscription_asks_for_them()
+    {
+        var (h, _) = await SubscribedAsync();
+        var start = DateTimeOffset.UtcNow.AddHours(2);
+        foreach (var (title, isPrivate) in new[] { ("Wspolne", false), ("Tajne", true) })
+        {
+            var created = await h.As(h.Member).PostAsJsonAsync($"{h.Api}/calendar/events", new
+            {
+                title, timeZoneId = "UTC", startUtc = start, endUtc = start.AddHours(1), isAllDay = false, isPrivate,
+                attendees = Array.Empty<Guid>(), reminderMinutes = Array.Empty<int>(), rrule = (string?)null,
+            });
+            Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+        }
+
+        var plain = await CreateFeedAsync(h, "Plain", includePrivateEvents: false);
+        var withPrivate = await CreateFeedAsync(h, "Private", includePrivateEvents: true);
+
+        var plainIcs = await factory.CreateClient().GetStringAsync($"/plugins/todo/feed/{plain}.ics");
+        var privateIcs = await factory.CreateClient().GetStringAsync($"/plugins/todo/feed/{withPrivate}.ics");
+
+        Assert.Equal((true, false, true, true), (plainIcs.Contains("SUMMARY:Wspolne"), plainIcs.Contains("SUMMARY:Tajne"), privateIcs.Contains("SUMMARY:Wspolne"), privateIcs.Contains("SUMMARY:Tajne")));
+    }
+
+    [Fact]
     public async Task Revoking_removes_the_link_and_only_the_owner_may()
     {
         var (h, token) = await SubscribedAsync();
@@ -55,6 +79,13 @@ public sealed class SubscriptionTests(TodoFactory factory) : IClassFixture<TodoF
         var own = await h.As(h.Member).DeleteAsync($"{h.Api}/calendar/subscriptions/{id}");
 
         Assert.Equal((HttpStatusCode.NotFound, HttpStatusCode.NoContent, HttpStatusCode.NotFound), (foreign.StatusCode, own.StatusCode, await StatusAsync(token)));
+    }
+
+    private static async Task<string> CreateFeedAsync(AHousehold h, string label, bool includePrivateEvents)
+    {
+        var response = await h.As(h.Member).PostAsJsonAsync($"{h.Api}/calendar/subscriptions", new { label, includePrivateEvents });
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        return (await response.Content.ReadFromJsonAsync<CreatedSubscriptionView>(AHousehold.Json))!.Token;
     }
 
     private async Task<HttpStatusCode> StatusAsync(string token) => (await factory.CreateClient().GetAsync($"/plugins/todo/feed/{token}.ics")).StatusCode;

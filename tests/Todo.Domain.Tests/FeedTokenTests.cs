@@ -13,6 +13,15 @@ public sealed class FeedTokenTests
     }
 
     [Fact]
+    public void Hash_IsNotTheTokenAndIs64LowercaseHexChars()
+    {
+        var token = FeedToken.Generate();
+        var hash = FeedToken.Hash(token);
+
+        Assert.Equal((64, false, true), (hash.Length, hash == token, hash.All(c => char.IsAsciiHexDigitLower(c))));
+    }
+
+    [Fact]
     public void Hash_IsStableLowercaseSha256Hex()
     {
         Assert.Equal("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", FeedToken.Hash("abc"));
