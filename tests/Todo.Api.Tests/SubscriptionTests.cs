@@ -113,6 +113,17 @@ public sealed class SubscriptionTests(TodoFactory factory) : IClassFixture<TodoF
         await Eventually(async () => await StatusAsync(token) == HttpStatusCode.OK);
     }
 
+    [Fact]
+    public async Task Rejoining_as_a_guest_keeps_the_feed_working()
+    {
+        var (h, token) = await SubscribedAsync();
+        await factory.Harness.Bus.Publish(new MemberLeft(h.Id, h.Member, MemberLeftReason.Left));
+        await Eventually(async () => await StatusAsync(token) == HttpStatusCode.NotFound);
+
+        await factory.Harness.Bus.Publish(new MemberJoined(h.Id, h.Member, HouseholdRole.Guest));
+        await Eventually(async () => await StatusAsync(token) == HttpStatusCode.OK);
+    }
+
     private async Task<HttpStatusCode> StatusAsync(string token) => (await factory.CreateClient().GetAsync($"/plugins/todo/feed/{token}.ics")).StatusCode;
 
     private async Task<(AHousehold Household, string Token)> SubscribedAsync()

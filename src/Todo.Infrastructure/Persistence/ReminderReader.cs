@@ -30,7 +30,14 @@ internal sealed class ReminderReader(TodoDbContext db) : IReminderReader
             .Concat(series.Select(s => new ReminderRecipient(s.HouseholdId, s.CreatedBy)))
             .Concat(tasks.SelectMany(t => new[] { t.CreatedBy, t.AssigneeId ?? t.CreatedBy }.Distinct().Select(u => new ReminderRecipient(t.HouseholdId, u))))
             .Distinct().ToList();
-        var markers = await db.InactiveMarkers.AsNoTracking().ToListAsync(cancellationToken);
+        if (known.Count == 0)
+        {
+            return new ReminderSources(events, series, changes, own, settings, [], tasks);
+        }
+
+        var userIds = known.Select(k => k.UserId).Distinct().ToList();
+        var markers = await db.InactiveMarkers.AsNoTracking().Where(m =>
+            (m.HouseholdId != null && households.Contains(m.HouseholdId.Value)) || (m.UserId != null && userIds.Contains(m.UserId.Value))).ToListAsync(cancellationToken);
         var members = known.Where(k => !markers.Any(m =>
             (m.HouseholdId == k.HouseholdId && m.UserId is null) || (m.HouseholdId is null && m.UserId == k.UserId) || (m.HouseholdId == k.HouseholdId && m.UserId == k.UserId))).ToList();
         return new ReminderSources(events, series, changes, own, settings, members, tasks);

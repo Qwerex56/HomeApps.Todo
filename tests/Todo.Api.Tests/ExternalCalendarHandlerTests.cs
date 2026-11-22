@@ -132,7 +132,7 @@ public sealed class ExternalCalendarHandlerTests
         var c = Import(user);
         c.OwnerLeft(_time.GetUtcNow());
 
-        await new MemberJoinedHandler(new NoLists(), new NoMembers(), _calendars, _time).Handle(new MemberJoinedCommand(Household, user), default);
+        await new MemberJoinedHandler(new NoLists(), new NoMembers(), _calendars, new NoSubscriptions(), _time).Handle(new MemberJoinedCommand(Household, user), default);
 
         Assert.False(c.IsPaused);
     }
