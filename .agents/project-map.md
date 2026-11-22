@@ -1,28 +1,32 @@
 # Project map: HomeApps.Todo
 
-Last updated: 2026-11-22 · HEAD: f83a5dd · branch planner/main (PRs go to integration branch named by owner; master is protected)
+Last updated: 2026-11-22 · HEAD: 9ce7564 · branch feat/household-planner-p2 (PRs go to integration branch named by owner; master is protected)
 
 ## Overview
 - Plugin "Zadania" (Todo) for HomeApps, plus in-progress "Planer" (calendar + recurring tasks). Lives outside HomeApps repo.
 - Stack: .NET 10 (Minimal API, MediatR 12, FluentValidation, FluentResults, EF Core, Postgres, MassTransit/RabbitMQ), kit `HomeApps.*` packages from `~/.homeapps/packages`; UI Vue 3.5 + TS + Vite + TanStack Query + Axios + `@homeapps/plugin-sdk`.
 - Built UI is committed: `src/Todo.Api/wwwroot/ui` (entry.js, entry.css, chunks).
-- Not yet in code: planner (RRULE, events, reminders, ICS). Source of truth: `specs/`.
+- Planner: P1 (domain + storage) in code; P2-P6 todo (status: `.agents/STATUS.md`). Source of truth: `specs/`.
 
 ## Layout
 | Path | Responsibility |
 |---|---|
-| `src/Todo.Domain` | `TodoList` (`Lists/TodoList.cs:11`), `TodoTask` (`Tasks/TodoTask.cs:13`), value objects, `Common/Actor.cs`, `Common/TodoErrors.cs` |
+| `src/Todo.Domain` | `TodoList` (`Lists/TodoList.cs:11`), `TodoTask` (`Tasks/TodoTask.cs:14`, recurrence: `Rule` :69, `RecurrenceAnchor` :72, `EditRecurring` :153), `Tasks/RecurrenceScope.cs`, `Tasks/RecurrenceAnchor.cs`, value objects, `Common/Actor.cs`, `Common/TodoErrors.cs`, `Common/PlannerErrors.cs` |
+| `src/Todo.Domain/Events` | planner aggregates: `CalendarEvent.cs:11`, `EventSeries.cs:11` (RRULE), `EventOverride.cs:7`, `EventReminderOverride.cs:6`, `CalendarSubscription.cs:7`, `ExternalCalendarImport.cs:7`, `RecurrenceRule.cs:7` (record), `EventTime.cs`, `EventTitle.cs`, `EventReminder.cs`, enums `SubscriptionTasksMode`, `ExternalCalendarVisibility` |
+| `src/Todo.Domain/Settings` | `PlannerSettings.cs:7` |
+| `src/Todo.Domain/Households` | `HouseholdMemberProjection.cs:4` (member projection from MemberJoined/Left) |
 | `src/Todo.Contracts` | integration message `TaskCompleted` (`TaskCompleted.cs`) |
 | `src/Todo.Application` | `TodoPlugin.cs` (manifest, line 12/23), commands/queries per folder, `Abstractions/` ports, `Events/` handlers, `Households/` |
-| `src/Todo.Infrastructure` | `TodoDbContext` (`Persistence/TodoDbContext.cs:10`), repos, `Persistence/Migrations/` (Initial), `Households/HouseholdsConsumer.cs:15`, `Jobs/LeftListsCleanup.cs:13` (6 h purge), `DependencyInjection.cs:15` |
+| `src/Todo.Infrastructure` | `TodoDbContext` (`Persistence/TodoDbContext.cs:10`; DbSets :15-33 incl. planner), `Persistence/Configurations/` (EF maps per aggregate, `Converters.cs`), repos, `Persistence/Migrations/` (Initial, `20261122012643_AddPlannerModule`), `Households/HouseholdsConsumer.cs:15`, `Jobs/LeftListsCleanup.cs:13` (6 h purge), `DependencyInjection.cs:15` |
 | `src/Todo.Api` | host: `Program.cs` (entry, MigrateDatabaseOnStartup), `Endpoints/`, `Mcp/TaskTools.cs:30`, `wwwroot/ui` |
 | `src/Todo.Web` | Vue UI source: `src/TasksPage.vue`, `TodayWidget.vue`, `TaskEditor.vue`, `ListDialog.vue`, `TaskRow.vue`, `api.ts`, `useTodo.ts`, `dates.ts`, `main.ts` (definePlugin, pl/en texts) |
-| `tests/Todo.Domain.Tests` | domain tests (no Docker) |
+| `tests/Todo.Domain.Tests` | domain tests (no Docker): `TaskRecurrenceTests`, `CalendarEventTests`, `EventSeriesTests`, `EventOverrideTests`, `CalendarSubscriptionTests`, `ExternalCalendarImportTests`, `HouseholdMemberProjectionTests`, `PlannerSettingsTests` |
 | `tests/Todo.Api.Tests` | API tests on Testcontainers Postgres (`TodoFactory.cs:12`, `TodoApi.cs`, `FakeHouseholds.cs`, `McpTests.cs:14`, `TodoTests.cs`) |
 | `specs/` | READ-ONLY for agents: `household-planner.md` (spec), `household-planner-adr.md` (binding ADR) |
 | `docs/plan.md` | Todo v1 plan and progress log (section 8) |
 | `.claude/skills/` | project skills: `dotnet-conventions`, `vue-conventions`, `testing-standards`, `code-review-checklist` |
 | `.agents/runs/` | run artifacts (gitignored, never commit) |
+| `.agents/STATUS.md` | planner feature stage table (P1-P6), decisions, blockers |
 
 ## Entry points and routes
 - Program: `src/Todo.Api/Program.cs:9` (`AddHomeAppsPlugin`), `:15` (`UseHomeAppsPlugin`), `:17` (migrate). Port 5400 in dev (`Properties/launchSettings.json`).
