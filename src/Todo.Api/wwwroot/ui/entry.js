@@ -1,111 +1,119 @@
-import { D as e, E as t, O as n, S as r, _ as i, b as a, d as o, g as s, h as c, k as l, l as u, m as d, n as f, p, t as m, u as h, v as g, w as _, x as v, y } from "./_plugin-vue_export-helper-DRFww2dX.js";
-import { n as b, r as x, s as S, t as C } from "./CalendarChip-CsI3k0aj.js";
-import { t as w } from "./TaskRow-BDB1gJUc.js";
+import { A as e, D as t, E as n, O as r, S as i, T as a, _ as o, b as s, d as c, g as l, h as u, k as d, l as f, m as p, n as m, p as h, t as g, u as _, v, w as y, x as b, y as x } from "./_plugin-vue_export-helper-BiWouYOk.js";
+import { n as S, r as C, s as w, t as T } from "./CalendarChip-_Bz4g5ye.js";
+import { t as E } from "./TaskRow-BkXZN4_D.js";
 // src/PlannerAgendaWidget.vue?vue&type=script&setup=true&lang.ts
-var T = {
+var D = {
 	key: 0,
 	class: "agenda-widget__list",
 	"aria-busy": "true"
-}, E = {
+}, O = {
 	key: 1,
 	class: "agenda-widget__muted",
 	role: "alert"
-}, D = {
+}, k = {
 	key: 2,
 	class: "agenda-widget__muted"
-}, O = ["aria-label"], k = {
+}, A = ["aria-label"], j = {
 	key: 0,
 	class: "agenda-widget__day"
-}, A = { class: "agenda-widget__list" }, j = 8, M = /*#__PURE__*/ m(/* @__PURE__ */ v({
+}, M = { class: "agenda-widget__list" }, N = 8, P = /*#__PURE__*/ g(/* @__PURE__ */ b({
 	__name: "PlannerAgendaWidget",
 	props: {
 		householdId: {},
 		place: {}
 	},
-	setup(o) {
-		let m = o, h = f(() => m.householdId), { host: v, canWrite: y, change: w } = h, M = /* @__PURE__ */ new Date(), N = d(() => ({
-			from: new Date(M.getFullYear(), M.getMonth(), M.getDate()).toISOString(),
-			to: b(new Date(M.getFullYear(), M.getMonth(), M.getDate()), 2).toISOString()
-		})), P = h.calendar(N, [
+	setup(c) {
+		let g = c, _ = m(() => g.householdId), { host: b, canWrite: x, change: E } = _, P = n(/* @__PURE__ */ new Date()), F = setInterval(() => {
+			let e = /* @__PURE__ */ new Date();
+			f(e) !== f(P.value) && (P.value = e);
+		}, 6e4);
+		y(() => clearInterval(F));
+		let I = p(() => {
+			let e = new Date(P.value.getFullYear(), P.value.getMonth(), P.value.getDate());
+			return {
+				from: e.toISOString(),
+				to: S(e, 2).toISOString()
+			};
+		}), L = _.calendar(I, [
 			"events",
 			"tasks",
 			"external"
-		]), F = d(() => m.place === "Wall"), I = d(() => [0, 1].map((e) => {
-			let t = u(b(M, e));
+		]), R = p(() => g.place === "Wall"), z = p(() => [0, 1].map((e) => {
+			let t = f(S(P.value, e));
 			return {
 				iso: t,
-				label: v.t(e === 0 ? "due.today" : "due.tomorrow"),
-				items: x(P.data.value ?? [], t).slice(0, j)
+				label: b.t(e === 0 ? "due.today" : "due.tomorrow"),
+				items: C(L.data.value ?? [], t).slice(0, N)
 			};
-		})), L = d(() => I.value.every((e) => e.items.length === 0)), R = (e) => y.value && e.itemType === "Task", z = w((e, t) => t.isDone ? e.reopenTask(t.id) : e.completeTask(t.id)), B = (e) => `${e.itemType}-${e.id}-${e.occurrenceDate ?? S(e)}`;
-		return (o, u) => {
-			let d = e("Skeleton");
-			return _(), i("div", { class: r(["agenda-widget", { "agenda-widget--large": F.value }]) }, [l(P).isPending.value ? (_(), i("div", T, [(_(), i(p, null, t(3, (e) => a(d, {
+		})), B = p(() => z.value.every((e) => e.items.length === 0)), V = (e) => x.value && e.itemType === "Task", H = E((e, t) => t.isDone ? e.reopenTask(t.id) : e.completeTask(t.id)), U = (e) => `${e.itemType}-${e.id}-${e.occurrenceDate ?? w(e)}`;
+		return (n, c) => {
+			let f = r("Skeleton");
+			return a(), o("div", { class: i(["agenda-widget", { "agenda-widget--large": R.value }]) }, [e(L).isPending.value ? (a(), o("div", D, [(a(), o(h, null, t(3, (e) => s(f, {
 				key: e,
 				height: "2rem"
-			})), 64))])) : l(P).isError.value ? (_(), i("p", E, n(l(v).errorMessage(l(P).error.value)), 1)) : L.value ? (_(), i("p", D, n(l(v).t("calendar.widgetEmpty")), 1)) : (_(!0), i(p, { key: 3 }, t(I.value, (e) => (_(), i("section", {
-				key: e.iso,
-				"aria-label": e.label
-			}, [e.items.length ? (_(), i("h4", k, n(e.label), 1)) : s("", !0), g("div", A, [(_(!0), i(p, null, t(e.items, (e) => (_(), c(C, {
-				key: B(e),
-				item: e,
-				"can-toggle": R(e),
-				onOpen: (t) => R(e) && l(z).mutate(e),
-				onToggle: (t) => l(z).mutate(e)
+			})), 64))])) : e(L).isError.value ? (a(), o("p", O, d(e(b).errorMessage(e(L).error.value)), 1)) : B.value ? (a(), o("p", k, d(e(b).t("calendar.widgetEmpty")), 1)) : (a(!0), o(h, { key: 3 }, t(z.value, (n) => (a(), o("section", {
+				key: n.iso,
+				"aria-label": n.label
+			}, [n.items.length ? (a(), o("h4", j, d(n.label), 1)) : l("", !0), v("div", M, [(a(!0), o(h, null, t(n.items, (t) => (a(), u(T, {
+				key: U(t),
+				item: t,
+				"can-toggle": V(t),
+				onOpen: (n) => V(t) && e(H).mutate(t),
+				onToggle: (n) => e(H).mutate(t)
 			}, null, 8, [
 				"item",
 				"can-toggle",
 				"onOpen",
 				"onToggle"
-			]))), 128))])], 8, O))), 128))], 2);
+			]))), 128))])], 8, A))), 128))], 2);
 		};
 	}
-}), [["__scopeId", "data-v-6ce30508"]]), N = {
+}), [["__scopeId", "data-v-cce2f65f"]]), F = {
 	key: 0,
 	class: "todo-widget__loading"
-}, P = {
+}, I = {
 	key: 0,
 	class: "todo-widget__tasks"
-}, F = {
+}, L = {
 	key: 1,
 	class: "todo-widget__empty"
-}, I = {
+}, R = {
 	key: 2,
 	class: "todo-widget__more"
-}, L = 8, R = o({
+}, z = 8, B = c({
 	id: "todo",
 	routes: {
-		"": () => import("./TasksPage-ZSGmsNF2.js"),
-		calendar: () => import("./CalendarPage-CdgOsxA8.js")
+		"": () => import("./TasksPage-rRtKY1Wn.js"),
+		calendar: () => import("./CalendarPage-BvC6YhSQ.js")
 	},
 	widgets: {
-		today: /* @__PURE__ */ m(/* @__PURE__ */ v({
+		today: /* @__PURE__ */ g(/* @__PURE__ */ b({
 			__name: "TodayWidget",
 			props: {
 				householdId: {},
 				place: {}
 			},
-			setup(o) {
-				let u = o, m = f(() => u.householdId), { host: v, lists: b, canWrite: x, memberName: S, change: C } = m, T = m.tasks(() => ({
-					dueBy: h(),
+			setup(n) {
+				let c = n, f = m(() => c.householdId), { host: g, lists: y, canWrite: b, memberName: S, change: C } = f, w = f.tasks(() => ({
+					dueBy: _(),
 					status: "Open"
-				})), E = d(() => (T.data.value ?? []).filter((e) => e.status === "Open")), D = d(() => E.value.slice(0, L)), O = (e) => b.data.value?.find((t) => t.id === e), k = d(() => u.place === "Wall"), A = C((e, t) => e.completeTask(t.id)), j = (e) => {
+				})), T = p(() => (w.data.value ?? []).filter((e) => e.status === "Open")), D = p(() => T.value.slice(0, z)), O = (e) => y.data.value?.find((t) => t.id === e), k = p(() => c.place === "Wall"), A = C((e, t) => e.completeTask(t.id)), j = (e) => {
 					let t = O(e.listId);
-					return x.value && !!t && !t.archived;
+					return b.value && !!t && !t.archived;
 				};
-				return (o, u) => {
-					let d = e("Skeleton");
-					return _(), i("div", { class: r(["todo-widget", { "todo-widget--large": k.value }]) }, [l(T).isPending.value ? (_(), i("div", N, [(_(), i(p, null, t(3, (e) => a(d, {
+				return (n, c) => {
+					let f = r("Skeleton");
+					return a(), o("div", { class: i(["todo-widget", { "todo-widget--large": k.value }]) }, [e(w).isPending.value ? (a(), o("div", F, [(a(), o(h, null, t(3, (e) => s(f, {
 						key: e,
 						height: "2rem"
-					})), 64))])) : (_(), i(p, { key: 1 }, [D.value.length ? (_(), i("ul", P, [(_(!0), i(p, null, t(D.value, (e) => (_(), c(w, {
-						key: e.id,
-						task: e,
-						"list-name": O(e.listId)?.name ?? null,
-						"assignee-name": l(S)(e.assigneeId),
-						"can-toggle": j(e),
+					})), 64))])) : (a(), o(h, { key: 1 }, [D.value.length ? (a(), o("ul", I, [(a(!0), o(h, null, t(D.value, (t) => (a(), u(E, {
+						key: t.id,
+						task: t,
+						"list-name": O(t.listId)?.name ?? null,
+						"assignee-name": e(S)(t.assigneeId),
+						"can-toggle": j(t),
 						large: k.value,
-						onToggle: (t) => l(A).mutate(e)
+						onToggle: (n) => e(A).mutate(t)
 					}, null, 8, [
 						"task",
 						"list-name",
@@ -113,14 +121,14 @@ var T = {
 						"can-toggle",
 						"large",
 						"onToggle"
-					]))), 128))])) : (_(), i("p", F, [u[0] ||= g("i", {
+					]))), 128))])) : (a(), o("p", L, [c[0] ||= v("i", {
 						class: "pi pi-check-circle",
 						"aria-hidden": "true"
-					}, null, -1), y(" " + n(l(v).t("empty.today")), 1)])), E.value.length > L ? (_(), i("p", I, n(l(v).t("more", { count: E.value.length - L })), 1)) : s("", !0)], 64))], 2);
+					}, null, -1), x(" " + d(e(g).t("empty.today")), 1)])), T.value.length > z ? (a(), o("p", R, d(e(g).t("more", { count: T.value.length - z })), 1)) : l("", !0)], 64))], 2);
 				};
 			}
 		}), [["__scopeId", "data-v-dd1334e4"]]),
-		agenda: M
+		"planner-agenda": P
 	},
 	messages: {
 		pl: {
@@ -285,6 +293,8 @@ var T = {
 					lastUsed: "ostatnio użyta",
 					never: "nigdy",
 					revoke: "Unieważnij subskrypcję {name}",
+					confirmTitle: "Potwierdź",
+					confirmRemove: "Usunąć „{name}”? Tej operacji nie można cofnąć.",
 					feedOnce: "Skopiuj adres teraz. Drugi raz go nie pokażemy.",
 					feedUrl: "Adres subskrypcji",
 					copy: "Kopiuj",
@@ -477,6 +487,8 @@ var T = {
 					lastUsed: "last used",
 					never: "never",
 					revoke: "Revoke subscription {name}",
+					confirmTitle: "Confirm",
+					confirmRemove: "Remove \"{name}\"? This cannot be undone.",
 					feedOnce: "Copy the address now. It is not shown again.",
 					feedUrl: "Subscription address",
 					copy: "Copy",
@@ -509,4 +521,4 @@ var T = {
 		}
 	}
 });
-export { R as default };
+export { B as default };

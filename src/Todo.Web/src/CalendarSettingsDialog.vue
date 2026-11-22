@@ -23,7 +23,7 @@ const subscriptions = useQuery({
 const externals = useQuery({
   queryKey: computed(() => ['plugins', 'todo', props.householdId, 'external'] as const),
   queryFn: () => api.value.externals(),
-  enabled: open,
+  enabled: computed(() => open.value && todo.canWrite.value),
 })
 
 // Own preferences. The server keeps instants in UTC; the zone only decides how the UI shows them.
@@ -67,6 +67,17 @@ function addSubscription() {
 async function copy() {
   await navigator.clipboard?.writeText(feedUrl.value)
   host.notify('success', host.t('calendar.settings.copied'))
+}
+
+// Revoking and removing ask first.
+const asking = ref<{ kind: 'subscription' | 'external'; id: string; name: string } | null>(null)
+const askOpen = computed({ get: () => asking.value !== null, set: (v) => !v && (asking.value = null) })
+function confirmAsking() {
+  const a = asking.value
+  asking.value = null
+  if (!a) return
+  if (a.kind === 'subscription') revokeSubscription.mutate(a.id)
+  else removeExternal.mutate(a.id)
 }
 
 // External calendars.
@@ -128,7 +139,7 @@ const ago = (iso: string | null) => (iso ? new Date(iso).toLocaleString('pl-PL')
       <ul v-else class="settings__list">
         <li v-for="s in subscriptions.data.value" :key="s.id">
           <span>{{ s.label }} <small>({{ host.t('calendar.settings.lastUsed') }}: {{ ago(s.lastAccessedAt) }})</small></span>
-          <Button icon="pi pi-trash" text severity="danger" :aria-label="host.t('calendar.settings.revoke', { name: s.label })" @click="revokeSubscription.mutate(s.id)" />
+          <Button icon="pi pi-trash" text severity="danger" :aria-label="host.t('calendar.settings.revoke', { name: s.label })" @click="asking = { kind: 'subscription', id: s.id, name: s.label }" />
         </li>
         <li v-if="!subscriptions.data.value?.length" class="settings__hint">{{ host.t('calendar.settings.noSubscriptions') }}</li>
       </ul>
@@ -147,7 +158,7 @@ const ago = (iso: string | null) => (iso ? new Date(iso).toLocaleString('pl-PL')
       </form>
     </section>
 
-    <section class="settings" :aria-label="host.t('calendar.settings.external')">
+    <section v-if="todo.canWrite.value" class="settings" :aria-label="host.t('calendar.settings.external')">
       <h3>{{ host.t('calendar.settings.external') }}</h3>
       <Skeleton v-if="externals.isPending.value" height="2rem" />
       <Message v-else-if="externals.isError.value" severity="error">{{ host.errorMessage(externals.error.value) }}</Message>
@@ -163,7 +174,7 @@ const ago = (iso: string | null) => (iso ? new Date(iso).toLocaleString('pl-PL')
           </span>
           <span>
             <Button icon="pi pi-refresh" text :loading="syncExternal.isPending.value" :aria-label="host.t('calendar.settings.sync', { name: c.name })" @click="syncExternal.mutate(c.id)" />
-            <Button icon="pi pi-trash" text severity="danger" :aria-label="host.t('calendar.settings.remove', { name: c.name })" @click="removeExternal.mutate(c.id)" />
+            <Button icon="pi pi-trash" text severity="danger" :aria-label="host.t('calendar.settings.remove', { name: c.name })" @click="asking = { kind: 'external', id: c.id, name: c.name }" />
           </span>
         </li>
         <li v-if="!externals.data.value?.length" class="settings__hint">{{ host.t('calendar.settings.noExternal') }}</li>
@@ -176,6 +187,13 @@ const ago = (iso: string | null) => (iso ? new Date(iso).toLocaleString('pl-PL')
         <Button type="submit" :label="host.t('calendar.settings.addExternal')" :loading="addExternal.isPending.value" />
       </form>
     </section>
+    <Dialog v-model:visible="askOpen" modal :header="host.t('calendar.settings.confirmTitle')" :style="{ width: '24rem', maxWidth: 'calc(100vw - 2rem)' }">
+      <p>{{ host.t('calendar.settings.confirmRemove', { name: asking?.name ?? '' }) }}</p>
+      <template #footer>
+        <Button severity="secondary" text :label="host.t('cancel')" @click="asking = null" />
+        <Button severity="danger" :label="host.t('delete')" @click="confirmAsking" />
+      </template>
+    </Dialog>
   </Dialog>
 </template>
 

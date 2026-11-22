@@ -7,39 +7,39 @@ export function addDays(date: Date, days: number): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days)
 }
 
-/** Monday of the week containing the date (local midnight). */
-export function startOfWeek(date: Date): Date {
-  return addDays(date, -((date.getDay() + 6) % 7))
+/** First day of the week containing the date (local midnight); `first` is 0 Sunday, 1 Monday, 6 Saturday. */
+export function startOfWeek(date: Date, first = 1): Date {
+  return addDays(date, -((date.getDay() - first + 7) % 7))
 }
 
 export function startOfMonth(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), 1)
 }
 
-/** The 6x7 grid of a month, weeks starting on Monday. */
-export function monthGrid(anchor: Date): Date[] {
-  const first = startOfWeek(startOfMonth(anchor))
-  return Array.from({ length: 42 }, (_, i) => addDays(first, i))
+/** The 6x7 grid of a month, weeks starting on the chosen day. */
+export function monthGrid(anchor: Date, first = 1): Date[] {
+  const start = startOfWeek(startOfMonth(anchor), first)
+  return Array.from({ length: 42 }, (_, i) => addDays(start, i))
 }
 
-export function weekDays(anchor: Date): Date[] {
-  const first = startOfWeek(anchor)
-  return Array.from({ length: 7 }, (_, i) => addDays(first, i))
+export function weekDays(anchor: Date, first = 1): Date[] {
+  const start = startOfWeek(anchor, first)
+  return Array.from({ length: 7 }, (_, i) => addDays(start, i))
 }
 
 const AGENDA_DAYS = 30
 
 /** The days a view shows, first inclusive. */
-export function visibleDays(view: CalendarView, anchor: Date): Date[] {
-  if (view === 'month') return monthGrid(anchor)
-  if (view === 'week') return weekDays(anchor)
+export function visibleDays(view: CalendarView, anchor: Date, firstDay = 1): Date[] {
+  if (view === 'month') return monthGrid(anchor, firstDay)
+  if (view === 'week') return weekDays(anchor, firstDay)
   if (view === 'day') return [anchor]
   return Array.from({ length: AGENDA_DAYS }, (_, i) => addDays(anchor, i))
 }
 
 /** The window to ask the API for: local midnight of the first day to local midnight after the last, as ISO instants. */
-export function windowOf(view: CalendarView, anchor: Date): { from: string; to: string } {
-  const days = visibleDays(view, anchor)
+export function windowOf(view: CalendarView, anchor: Date, firstDay = 1): { from: string; to: string } {
+  const days = visibleDays(view, anchor, firstDay)
   const first = days[0]!
   const last = days[days.length - 1]!
   return { from: first.toISOString(), to: addDays(last, 1).toISOString() }
@@ -85,19 +85,31 @@ export function itemsOn(items: CalendarItem[], day: string): CalendarItem[] {
   return items.filter((i) => onDay(i, day)).sort((a, b) => sortKey(a).localeCompare(sortKey(b)) || a.title.localeCompare(b.title))
 }
 
-/** Local date and HH:mm (inputs) to an ISO instant. */
-export function toInstant(date: string, time: string): string {
+const zoneParts = (instant: number, zone: string) => {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat('en-CA', { timeZone: zone, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+      .formatToParts(new Date(instant))
+      .map((p) => [p.type, p.value]),
+  ) as Record<string, string>
+  return { day: `${parts.year}-${parts.month}-${parts.day}`, time: `${parts.hour}:${parts.minute}`, asUtc: Date.UTC(+parts.year!, +parts.month! - 1, +parts.day!, +parts.hour!, +parts.minute!) }
+}
+
+/** Date (YYYY-MM-DD) and HH:mm as typed in the given time zone to an ISO instant. */
+export function toInstant(date: string, time: string, zone: string): string {
   const [h, m] = (time || '00:00').split(':').map(Number)
-  const d = fromIso(date)
-  d.setHours(h ?? 0, m ?? 0, 0, 0)
-  return d.toISOString()
+  const [y, mo, d] = date.split('-').map(Number)
+  const wanted = Date.UTC(y!, mo! - 1, d!, h ?? 0, m ?? 0)
+  let guess = wanted
+  for (let i = 0; i < 2; i++) guess = wanted - (zoneParts(guess, zone).asUtc - guess)
+  return new Date(guess).toISOString()
 }
 
-export function localTime(instant: string): string {
-  const d = new Date(instant)
-  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+/** HH:mm of an instant in the given time zone. */
+export function localTime(instant: string, zone: string): string {
+  return zoneParts(Date.parse(instant), zone).time
 }
 
-export function localDay(instant: string): string {
-  return isoDate(new Date(instant))
+/** YYYY-MM-DD of an instant in the given time zone. */
+export function localDay(instant: string, zone: string): string {
+  return zoneParts(Date.parse(instant), zone).day
 }

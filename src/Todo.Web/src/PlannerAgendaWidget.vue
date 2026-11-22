@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, ref } from 'vue'
 import type { WidgetProps } from '@homeapps/plugin-sdk'
 import type { CalendarItem } from './api'
 import { addDays, itemsOn, startDay } from './calendarDates'
@@ -12,18 +12,24 @@ const props = defineProps<WidgetProps>()
 const todo = useTodo(() => props.householdId)
 const { host, canWrite, change } = todo
 
-const start = new Date()
-const range = computed(() => ({
-  from: new Date(start.getFullYear(), start.getMonth(), start.getDate()).toISOString(),
-  to: addDays(new Date(start.getFullYear(), start.getMonth(), start.getDate()), 2).toISOString(),
-}))
+// The day moves on while a /wall display stays open: re-read the clock every minute.
+const today = ref(new Date())
+const timer = setInterval(() => {
+  const now = new Date()
+  if (isoDate(now) !== isoDate(today.value)) today.value = now
+}, 60_000)
+onBeforeUnmount(() => clearInterval(timer))
+const range = computed(() => {
+  const start = new Date(today.value.getFullYear(), today.value.getMonth(), today.value.getDate())
+  return { from: start.toISOString(), to: addDays(start, 2).toISOString() }
+})
 const calendar = todo.calendar(range, ['events', 'tasks', 'external'])
 const large = computed(() => props.place === 'Wall')
 const MAX = 8
 
 const days = computed(() =>
   [0, 1].map((offset) => {
-    const iso = isoDate(addDays(start, offset))
+    const iso = isoDate(addDays(today.value, offset))
     return { iso, label: host.t(offset === 0 ? 'due.today' : 'due.tomorrow'), items: itemsOn(calendar.data.value ?? [], iso).slice(0, MAX) }
   }),
 )

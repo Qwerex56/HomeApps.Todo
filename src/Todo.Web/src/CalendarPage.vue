@@ -31,8 +31,9 @@ const anchor = ref(new Date())
 const layers = ref<CalendarLayer[]>(['events', 'private', 'tasks', 'external'])
 const person = ref<string | null>(null)
 
-const days = computed(() => visibleDays(view.value, anchor.value))
-const range = computed(() => windowOf(view.value, anchor.value))
+const firstDay = computed(() => todo.settings.data.value?.firstDayOfWeek ?? 1)
+const days = computed(() => visibleDays(view.value, anchor.value, firstDay.value))
+const range = computed(() => windowOf(view.value, anchor.value, firstDay.value))
 const calendar = todo.calendar(range, layers)
 const items = computed(() => {
   const all = calendar.data.value ?? []
@@ -63,7 +64,7 @@ const personOptions = computed(() => [
 const externals = useQuery({
   queryKey: computed(() => ['plugins', 'todo', householdId.value, 'external'] as const),
   queryFn: () => api.value.externals(),
-  enabled: computed(() => layers.value.includes('external')),
+  enabled: computed(() => canWrite.value && layers.value.includes('external')),
 })
 const stale = computed(() => (externals.data.value ?? []).filter((c) => c.isStale))
 const staleAge = (iso: string | null) => (iso ? new Date(iso).toLocaleString('pl-PL') : host.t('calendar.settings.never'))
@@ -87,7 +88,14 @@ const editorOpen = ref(false)
 const editing = ref<CalendarEventDetail | null>(null)
 const draftDay = ref(todayIso())
 const pending = ref<{ mode: 'edit' | 'delete'; input?: EventInput } | null>(null)
-const canEditEvent = computed(() => canWrite.value && (!editing.value || editing.value.createdBy === userId.value || canManage.value))
+// ADR 3.3: a Member edits an event they made, attend, or that is for the whole household; deleting is the author's or an admin's.
+const canEditEvent = computed(() => {
+  const e = editing.value
+  if (!canWrite.value) return false
+  if (!e || e.createdBy === userId.value || canManage.value) return true
+  return !e.isPrivate && (e.attendees.length === 0 || e.attendees.includes(userId.value ?? ''))
+})
+const canDeleteEvent = computed(() => canWrite.value && (!editing.value || editing.value.createdBy === userId.value || canManage.value))
 
 function newEvent(day = todayIso()) {
   editing.value = null
@@ -218,7 +226,7 @@ const settingsOpen = ref(false)
       :time-zone="todo.timeZone.value"
       :members="members.data.value ?? []"
       :can-edit="canEditEvent"
-      :can-delete="canEditEvent"
+      :can-delete="canDeleteEvent"
       :saving="saving"
       @save="onSave"
       @delete="onDelete"

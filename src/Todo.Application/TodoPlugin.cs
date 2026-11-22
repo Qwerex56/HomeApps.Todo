@@ -52,7 +52,7 @@ public static class TodoPlugin
             Widgets =
             [
                 new PluginWidget("today", new LocalizedText("Na dziś", "Today"), WidgetSize.Medium, [WidgetPlace.Household, WidgetPlace.Wall]),
-                new PluginWidget("agenda", new LocalizedText("Planer: dziś i jutro", "Planner: today and tomorrow"), WidgetSize.Medium, [WidgetPlace.Household, WidgetPlace.Wall]),
+                new PluginWidget("planner-agenda", new LocalizedText("Planer: dziś i jutro", "Planner: today and tomorrow"), WidgetSize.Medium, [WidgetPlace.Household, WidgetPlace.Wall]),
             ],
         },
         Notifications =

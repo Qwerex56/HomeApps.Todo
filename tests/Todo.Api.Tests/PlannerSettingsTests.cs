@@ -24,4 +24,28 @@ public sealed class PlannerSettingsTests(TodoFactory factory) : IClassFixture<To
         Assert.Equal((null, HttpStatusCode.BadRequest, HttpStatusCode.OK, null), (first!.TimeZone, bad.StatusCode, ok.StatusCode, other!.TimeZone));
         Assert.Equal("Europe/Warsaw", (await ok.Content.ReadFromJsonAsync<PlannerSettingsView>(AHousehold.Json))!.TimeZone);
     }
+
+    [Fact]
+    public async Task A_guest_reads_and_saves_their_own_settings()
+    {
+        var h = await AHousehold.SwitchedOnAsync(factory);
+        var url = $"{h.Api}/calendar/settings";
+
+        var get = await h.As(h.Guest).GetAsync(url);
+        var put = await h.As(h.Guest).PutAsJsonAsync(url, new { eventReminders = Ten, taskReminders = Hour, firstDayOfWeek = 1, timeZone = "Europe/Warsaw" });
+
+        Assert.Equal((HttpStatusCode.OK, HttpStatusCode.OK), (get.StatusCode, put.StatusCode));
+    }
+
+    [Fact]
+    public async Task An_unknown_household_is_404_household_not_found()
+    {
+        var h = await AHousehold.SwitchedOnAsync(factory);
+        var url = $"/plugins/todo/api/households/{Guid.NewGuid()}/calendar/settings";
+
+        var get = await h.As(h.Member).GetAsync(url);
+
+        Assert.Equal(HttpStatusCode.NotFound, get.StatusCode);
+        Assert.Equal("household.not_found", await AHousehold.CodeOf(get));
+    }
 }

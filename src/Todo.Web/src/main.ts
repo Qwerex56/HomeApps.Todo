@@ -5,7 +5,7 @@ import TodayWidget from './TodayWidget.vue'
 export default definePlugin({
   id: 'todo',
   routes: { '': () => import('./TasksPage.vue'), calendar: () => import('./CalendarPage.vue') },
-  widgets: { today: TodayWidget, agenda: PlannerAgendaWidget },
+  widgets: { today: TodayWidget, 'planner-agenda': PlannerAgendaWidget },
   messages: {
     pl: {
       lists: 'Listy',
@@ -126,6 +126,8 @@ export default definePlugin({
           lastUsed: 'ostatnio użyta',
           never: 'nigdy',
           revoke: 'Unieważnij subskrypcję {name}',
+          confirmTitle: 'Potwierdź',
+          confirmRemove: 'Usunąć „{name}”? Tej operacji nie można cofnąć.',
           feedOnce: 'Skopiuj adres teraz. Drugi raz go nie pokażemy.',
           feedUrl: 'Adres subskrypcji',
           copy: 'Kopiuj',
@@ -267,6 +269,8 @@ export default definePlugin({
           lastUsed: 'last used',
           never: 'never',
           revoke: 'Revoke subscription {name}',
+          confirmTitle: 'Confirm',
+          confirmRemove: 'Remove "{name}"? This cannot be undone.',
           feedOnce: 'Copy the address now. It is not shown again.',
           feedUrl: 'Subscription address',
           copy: 'Copy',

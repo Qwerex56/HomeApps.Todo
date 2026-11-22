@@ -43,14 +43,15 @@ function blank(day: string): Form {
   return { title: '', description: '', location: '', startDate: day, startTime: '09:00', endDate: day, endTime: '10:00', isAllDay: false, isPrivate: false, attendees: [], reminderMinutes: [], rrule: '' }
 }
 function formOf(e: CalendarEventDetail): Form {
+  const zone = props.timeZone
   return {
     title: e.title,
     description: e.description ?? '',
     location: e.location ?? '',
-    startDate: localDay(e.startUtc),
-    startTime: localTime(e.startUtc),
-    endDate: localDay(e.endUtc),
-    endTime: localTime(e.endUtc),
+    startDate: localDay(e.startUtc, zone),
+    startTime: localTime(e.startUtc, zone),
+    endDate: localDay(e.endUtc, zone),
+    endTime: localTime(e.endUtc, zone),
     isAllDay: e.isAllDay,
     isPrivate: e.isPrivate,
     attendees: [...e.attendees],
@@ -74,8 +75,8 @@ watch(
 const isSeries = computed(() => !!props.event?.seriesId)
 const recurring = computed(() => isSeries.value || form.value.rrule !== '')
 const readOnly = computed(() => !props.canEdit)
-const startsIso = computed(() => toInstant(form.value.startDate, form.value.isAllDay ? '00:00' : form.value.startTime))
-const endsIso = computed(() => toInstant(form.value.endDate, form.value.isAllDay ? '23:59' : form.value.endTime))
+const startsIso = computed(() => toInstant(form.value.startDate, form.value.isAllDay ? '00:00' : form.value.startTime, props.timeZone))
+const endsIso = computed(() => toInstant(form.value.endDate, form.value.isAllDay ? '23:59' : form.value.endTime, props.timeZone))
 const titleError = computed(() => (submitted.value && !form.value.title.trim() ? host.t('calendar.errors.title') : null))
 const rangeError = computed(() => (submitted.value && endsIso.value < startsIso.value ? host.t('calendar.errors.range') : null))
 const ruleOptions = RULES.map((value) => ({ value, label: host.t(`calendar.repeat.${value || 'none'}`) }))

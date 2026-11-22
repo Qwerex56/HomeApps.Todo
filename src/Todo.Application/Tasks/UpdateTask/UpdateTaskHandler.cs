@@ -35,9 +35,14 @@ internal sealed class UpdateTaskHandler(ITodoListRepository lists, ITodoTaskRepo
             }
 
             var rrule = scope.Value == RecurrenceScope.ThisInstance || string.IsNullOrWhiteSpace(input.Rrule) ? null : input.Rrule;
+            var next = scope.Value == RecurrenceScope.ThisInstance ? task.Skip(time) : null;
             edited = task.EditRecurring(
                 list, actor, scope.Value, input.Title, input.Notes, input.Due, input.Priority, rrule,
                 input.Anchor ?? task.RecurrenceAnchor ?? RecurrenceAnchor.FromDueDate, time);
+            if (edited.IsSuccess && next is not null)
+            {
+                tasks.Add(next);
+            }
         }
 
         return edited.IsFailed ? edited : task.Assign(list, actor, input.AssigneeId, time);
