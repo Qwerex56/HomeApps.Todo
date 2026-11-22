@@ -1,7 +1,7 @@
 import { computed, toValue, type MaybeRefOrGetter } from 'vue'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { useHost } from '@homeapps/plugin-sdk'
-import { todoApi, type HouseholdMember, type TaskQuery, type TodoApi } from './api'
+import { todoApi, type CalendarLayer, type HouseholdMember, type TaskQuery, type TodoApi } from './api'
 
 /** How often open views ask again (plan 4.6: no realtime in 1.0, 30 s plus right after one's own changes). */
 export const REFRESH_MS = 30_000
@@ -48,6 +48,15 @@ export function useTodo(householdId: MaybeRefOrGetter<string>) {
     })
   }
 
+  /** Calendar items of a window (ISO instants) for the chosen layers. */
+  function calendar(range: MaybeRefOrGetter<{ from: string; to: string }>, layers: MaybeRefOrGetter<CalendarLayer[]>) {
+    return useQuery({
+      queryKey: computed(() => ['plugins', 'todo', id.value, 'calendar', toValue(range), toValue(layers)] as const),
+      queryFn: () => api.value.calendarItems(toValue(range).from, toValue(range).to, toValue(layers)),
+      refetchInterval: REFRESH_MS,
+    })
+  }
+
   /** A change through the API, then everything of this household's plugin data asked again. Errors become a toast. */
   function change<TArgs>(run: (api: TodoApi, args: TArgs) => Promise<unknown>) {
     return useMutation({
@@ -65,6 +74,7 @@ export function useTodo(householdId: MaybeRefOrGetter<string>) {
     members,
     memberName,
     tasks,
+    calendar,
     change,
     canWrite: computed(() => host.can('tasks.write')),
     canManage: computed(() => host.can('tasks.manage')),
