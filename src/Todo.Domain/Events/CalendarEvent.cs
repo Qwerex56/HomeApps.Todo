@@ -115,11 +115,6 @@ public sealed class CalendarEvent
             return Result.Fail(PlannerErrors.EventNotFound);
         }
 
-        if (IsPrivate)
-        {
-            return actor.UserId == CreatedBy ? Result.Ok() : Result.Fail(PlannerErrors.CannotEditPrivate);
-        }
-
         return actor.UserId == CreatedBy || IsForWholeHousehold || Attendees.Contains(actor.UserId)
             ? Result.Ok()
             : Result.Fail(PlannerErrors.CannotEditEvent);

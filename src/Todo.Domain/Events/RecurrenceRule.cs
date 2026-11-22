@@ -20,7 +20,7 @@ public sealed record RecurrenceRule
             value = value["RRULE:".Length..];
         }
 
-        if (value.Length > MaxLength || !value.StartsWith("FREQ=", StringComparison.Ordinal)
+        if (value.Length > MaxLength || !HasValidFrequency(value)
             || value.Any(c => !(char.IsAsciiLetterOrDigit(c) || c is '=' or ';' or ',' or '-' or '+')))
         {
             return Result.Fail<RecurrenceRule>(PlannerErrors.InvalidRule);
@@ -28,6 +28,9 @@ public sealed record RecurrenceRule
 
         return new RecurrenceRule(value);
     }
+
+    private static bool HasValidFrequency(string value) =>
+        value.Split(';')[0] is "FREQ=DAILY" or "FREQ=WEEKLY" or "FREQ=MONTHLY" or "FREQ=YEARLY";
 
     public override string ToString() => Value;
 }

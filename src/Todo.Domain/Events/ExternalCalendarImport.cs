@@ -39,6 +39,8 @@ public sealed class ExternalCalendarImport
 
     public bool IsPaused => OwnerLeftAt is not null;
 
+    public const int MaxColorLength = 16;
+
     public static Result<ExternalCalendarImport> Create(
         Guid householdId, Guid userId, string? url, string? name, string? color, ExternalCalendarVisibility visibility, TimeProvider time)
     {
@@ -46,7 +48,8 @@ public sealed class ExternalCalendarImport
         var trimmed = url?.Trim() ?? string.Empty;
         var label = name?.Trim() ?? string.Empty;
         if (trimmed.Length is 0 or > MaxUrlLength || !Uri.TryCreate(trimmed, UriKind.Absolute, out _)
-            || label.Length is 0 or > MaxNameLength || Text.HasControlCharacters(label))
+            || label.Length is 0 or > MaxNameLength || Text.HasControlCharacters(label)
+            || (Text.OrNull(color)?.Length ?? 0) > MaxColorLength)
         {
             return Result.Fail<ExternalCalendarImport>(PlannerErrors.InvalidImport);
         }
