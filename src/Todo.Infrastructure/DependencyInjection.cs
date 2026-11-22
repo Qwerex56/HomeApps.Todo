@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Todo.Application;
 using Todo.Application.Abstractions;
 using Todo.Application.Common;
+using Todo.Infrastructure.Feeds;
 using Todo.Infrastructure.Jobs;
 using Todo.Infrastructure.Persistence;
 
@@ -22,6 +23,9 @@ public static class DependencyInjection
         services.AddScoped<ICalendarEventRepository, CalendarEventRepository>();
         services.AddScoped<IEventSeriesRepository, EventSeriesRepository>();
         services.AddScoped<ICalendarReader, CalendarReader>();
+        services.AddScoped<ICalendarSubscriptionRepository, CalendarSubscriptionRepository>();
+        services.AddScoped<IHouseholdMemberRepository, HouseholdMemberRepository>();
+        services.AddSingleton<ICalendarFeedGenerator, IcsFeedGenerator>();
         services.AddHostedService<LeftListsCleanup>();
 
         return services;

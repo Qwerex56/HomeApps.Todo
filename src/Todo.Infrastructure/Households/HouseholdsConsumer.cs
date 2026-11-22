@@ -25,7 +25,7 @@ public sealed class HouseholdMembersConsumer(ISender sender) : IConsumer<MemberL
     {
         ArgumentNullException.ThrowIfNull(context);
         var m = context.Message;
-        ThrowIfFailed(await sender.Send(new MemberJoinedCommand(m.HouseholdId, m.UserId), context.CancellationToken), m);
+        ThrowIfFailed(await sender.Send(new MemberJoinedCommand(m.HouseholdId, m.UserId, m.Role.ToString()), context.CancellationToken), m);
     }
 
     private static void ThrowIfFailed(Result result, object message)
