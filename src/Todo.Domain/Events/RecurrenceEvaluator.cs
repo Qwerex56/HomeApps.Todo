@@ -123,6 +123,16 @@ public static class RecurrenceEvaluator
 
                 break;
             default:
+                if (p.ByMonth.Count == 0 && p.ByMonthDay.Count == 0 && p.ByDay.Count > 0)
+                {
+                    foreach (var d in p.ByDay.SelectMany(b => OfWeekdayInYear(periodStart.Year, b)))
+                    {
+                        yield return d;
+                    }
+
+                    break;
+                }
+
                 var months = p.ByMonth.Count == 0 ? new List<int> { start.Month } : p.ByMonth;
                 foreach (var m in months)
                 {
@@ -169,6 +179,19 @@ public static class RecurrenceEvaluator
         return index >= 0 && index < all.Count ? [all[index]] : [];
     }
 
+    private static List<DateOnly> OfWeekdayInYear(int year, (int? Ordinal, DayOfWeek Day) b)
+    {
+        var first = new DateOnly(year, 1, 1);
+        var all = Enumerable.Range(0, DateTime.IsLeapYear(year) ? 366 : 365).Select(first.AddDays).Where(d => d.DayOfWeek == b.Day).ToList();
+        if (b.Ordinal is not { } n)
+        {
+            return all;
+        }
+
+        var index = n > 0 ? n - 1 : all.Count + n;
+        return index >= 0 && index < all.Count ? [all[index]] : [];
+    }
+
     private sealed record Parsed(
         string Freq, int Interval, int? Count, DateOnly? Until, List<(int? Ordinal, DayOfWeek Day)> ByDay, List<int> ByMonthDay, List<int> ByMonth);
 
@@ -186,6 +209,16 @@ public static class RecurrenceEvaluator
         }
 
         if (!parts.TryGetValue("FREQ", out var freq) || freq is not ("DAILY" or "WEEKLY" or "MONTHLY" or "YEARLY"))
+        {
+            return false;
+        }
+
+        if (parts.TryGetValue("WKST", out var wkst) && wkst != "MO")
+        {
+            return false;
+        }
+
+        if (freq is "DAILY" or "WEEKLY" && parts.ContainsKey("BYMONTHDAY"))
         {
             return false;
         }
