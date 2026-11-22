@@ -10,7 +10,7 @@ public sealed class PlannerSettingsTests(TodoFactory factory) : IClassFixture<To
     [Fact]
     public async Task Settings_default_then_save_per_user_and_reject_a_bad_zone()
     {
-        var h = await AHousehold.EnabledAsync(factory);
+        var h = await AHousehold.SwitchedOnAsync(factory);
         var url = $"{h.Api}/calendar/settings";
 
         var first = await h.As(h.Member).GetFromJsonAsync<PlannerSettingsView>(url, AHousehold.Json);
