@@ -1,13 +1,16 @@
-using HomeApps.BuildingBlocks.Api.Endpoints;
 using MediatR;
 using Todo.Application.Subscriptions.GetCalendarFeed;
 
 namespace Todo.Api.Endpoints;
 
-/// <summary>The public ICS feed (ADR 3.5). Outside the <c>/api</c> group and anonymous, as phone calendars send no token.</summary>
-internal sealed class FeedEndpoints : IEndpoint
+/// <summary>
+/// The public ICS feed (ADR 3.5). Outside the <c>/api</c> group and anonymous, as phone calendars send no token. Not an
+/// <c>IEndpoint</c>: the kit maps those under <c>/api</c>, so <c>Program</c> maps this one directly.
+/// </summary>
+internal static class FeedEndpoints
 {
-    public void MapEndpoint(IEndpointRouteBuilder app) =>
+    public static IEndpointRouteBuilder MapFeed(this IEndpointRouteBuilder app)
+    {
         app.MapGet("/feed/{token}.ics", async (string token, HttpContext http, ISender sender, CancellationToken ct) =>
             {
                 var result = await sender.Send(new GetCalendarFeedQuery(token), ct);
@@ -22,4 +25,6 @@ internal sealed class FeedEndpoints : IEndpoint
             })
             .AllowAnonymous()
             .WithName("GetCalendarFeedIcs");
+        return app;
+    }
 }
