@@ -6,7 +6,7 @@
 | household-planner | P4 External Calendar Import & SSRF | done (Api tests with Docker pending) | feat/household-planner-p4 |
 | household-planner | P5 Reminders & task recurrence | done (Api tests with Docker pending) | feat/household-planner-p5 | specs/household-planner-adr.md | 2026-11-22 |
 | household-planner | P6 Front-end & wall widget | todo | - | specs/household-planner-adr.md | 2026-11-22 |
-| household-planner | P7 Fix API guesses against HomeApps docs (owner-added) | todo | - | - | 2026-11-22 |
+| household-planner | P7 Fix API guesses against HomeApps docs (owner-added) | done (Api tests with Docker pending) | feat/household-planner-p7 (stacked on P5) | - | 2026-11-22 |
 
 ## Decisions
 - 2026-11-22: MemberLeft emptying an event's Attendees keeps the author as attendee (when the author is not the leaver), so the event does not become "whole household".
@@ -21,6 +21,7 @@
 
 - 2026-11-22 nightly: owner supplied ../HomeApps/docs; P5 time zone decided by Coordinator: per-user zone in PlannerSettings.TimeZoneId, fallback Planner:DefaultTimeZone=Europe/Warsaw (confirm). Settings endpoint to set it does not exist yet (not in ADR contract). Reviewer/DA via agy OK after adding sed, diff to allowlist. Notification Url confirmed correct by docs.
 - 2026-11-22 nightly: P5 DA noted: NextInstance uses UTC date for FromCompletionDate (off by a day near local midnight). Owner decision/P7.
+- 2026-11-22 nightly: P7 fixed manifest Events.Consumes. Owner decision: ADR keeps local HouseholdMemberProjection, but plugins.md says plugins keep no membership copy and ask Households with the caller's token; projection may be stale on a second plugin replica.
 
 ## Blockers
 - Run `dotnet test tests/Todo.Api.Tests` (HasOpenInSeriesTests, ReminderSchedulerTests, migration AddPlannerSettingsTimeZone) on a Docker host before merging P5.
