@@ -5,7 +5,7 @@ using Todo.Application.Abstractions;
 namespace Todo.Application.Accounts.UserErased;
 
 /// <summary>The account is erased: its feed links and imported calendars are deleted for good. (Private events follow in a later stage.)</summary>
-internal sealed class UserErasedHandler(ICalendarSubscriptionRepository subscriptions, IExternalCalendarRepository calendars) : ICommandHandler<UserErasedCommand>
+internal sealed class UserErasedHandler(ICalendarSubscriptionRepository subscriptions, IExternalCalendarRepository calendars, IInactiveMarkerRepository markers) : ICommandHandler<UserErasedCommand>
 {
     public async Task<Result> Handle(UserErasedCommand command, CancellationToken cancellationToken)
     {
@@ -19,6 +19,7 @@ internal sealed class UserErasedHandler(ICalendarSubscriptionRepository subscrip
             calendars.Remove(calendar);
         }
 
+        await markers.MarkAsync(null, command.UserId, cancellationToken);
         return Result.Ok();
     }
 }

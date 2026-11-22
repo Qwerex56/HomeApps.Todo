@@ -4,15 +4,11 @@ using Todo.Application.Abstractions;
 
 namespace Todo.Application.Households.HouseholdArchived;
 
-internal sealed class HouseholdArchivedHandler(IHouseholdMemberRepository members) : ICommandHandler<HouseholdArchivedCommand>
+internal sealed class HouseholdArchivedHandler(IInactiveMarkerRepository markers) : ICommandHandler<HouseholdArchivedCommand>
 {
     public async Task<Result> Handle(HouseholdArchivedCommand command, CancellationToken cancellationToken)
     {
-        foreach (var member in await members.ListOfHouseholdAsync(command.HouseholdId, cancellationToken))
-        {
-            member.Archive();
-        }
-
+        await markers.MarkAsync(command.HouseholdId, null, cancellationToken);
         return Result.Ok();
     }
 }

@@ -4,11 +4,11 @@ using Todo.Application.Abstractions;
 
 namespace Todo.Application.Households.MemberLeft;
 
-internal sealed class MemberLeftHandler(ITodoListRepository lists, ITodoTaskRepository tasks, IHouseholdMemberRepository members, IExternalCalendarRepository calendars, TimeProvider time) : ICommandHandler<MemberLeftCommand>
+internal sealed class MemberLeftHandler(ITodoListRepository lists, ITodoTaskRepository tasks, IInactiveMarkerRepository markers, IExternalCalendarRepository calendars, TimeProvider time) : ICommandHandler<MemberLeftCommand>
 {
     public async Task<Result> Handle(MemberLeftCommand command, CancellationToken cancellationToken)
     {
-        (await members.GetAsync(command.HouseholdId, command.UserId, cancellationToken))?.Left(time.GetUtcNow());
+        await markers.MarkAsync(command.HouseholdId, command.UserId, cancellationToken);
 
         foreach (var task in await tasks.ListAssignedToAsync(command.HouseholdId, command.UserId, cancellationToken))
         {

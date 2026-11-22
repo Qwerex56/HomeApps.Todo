@@ -1,6 +1,5 @@
 using FluentResults;
 using HomeApps.BuildingBlocks.Application.Messaging;
-using HomeApps.Contracts.Households;
 using Todo.Application.Abstractions;
 using Todo.Application.Common;
 using Todo.Domain.Common;
@@ -9,7 +8,7 @@ using Todo.Domain.Events;
 namespace Todo.Application.Subscriptions.GetCalendarFeed;
 
 internal sealed class GetCalendarFeedHandler(
-    ICalendarSubscriptionRepository subscriptions, IHouseholdMemberRepository members, ICalendarReader reader,
+    ICalendarSubscriptionRepository subscriptions, IInactiveMarkerRepository markers, ICalendarReader reader,
     ICalendarFeedGenerator generator, TimeProvider time) : IQueryHandler<GetCalendarFeedQuery, string>
 {
     private const int TokenLength = 43;
@@ -29,8 +28,7 @@ internal sealed class GetCalendarFeedHandler(
             return Result.Fail(PlannerErrors.SubscriptionNotFound);
         }
 
-        var member = await members.GetAsync(subscription.HouseholdId, subscription.UserId, cancellationToken);
-        if (member is not { IsActive: true })
+        if (await markers.IsInactiveAsync(subscription.HouseholdId, subscription.UserId, cancellationToken))
         {
             return Result.Fail(PlannerErrors.SubscriptionNotFound);
         }
@@ -38,7 +36,7 @@ internal sealed class GetCalendarFeedHandler(
         var now = time.GetUtcNow();
         var from = now - Past;
         var to = now + Future;
-        var guest = !Enum.TryParse<HouseholdRole>(member.Role, out var role) || role < HouseholdRole.Member;
+        var guest = subscription.IsGuest;
         var wanted = (Func<bool, bool>)(isPrivate => isPrivate ? subscription.IncludePrivateEvents : subscription.IncludeHouseholdEvents);
 
         var events = (await reader.EventsAsync(subscription.HouseholdId, subscription.UserId, guest, from, to, cancellationToken))

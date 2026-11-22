@@ -5,7 +5,7 @@ using Todo.Application.Abstractions;
 namespace Todo.Application.Accounts.UserEnabled;
 
 /// <summary>The account is back: the same feed links work again.</summary>
-internal sealed class UserEnabledHandler(ICalendarSubscriptionRepository subscriptions, IHouseholdMemberRepository members)
+internal sealed class UserEnabledHandler(ICalendarSubscriptionRepository subscriptions, IInactiveMarkerRepository markers)
     : ICommandHandler<UserEnabledCommand>
 {
     public async Task<Result> Handle(UserEnabledCommand command, CancellationToken cancellationToken)
@@ -15,10 +15,7 @@ internal sealed class UserEnabledHandler(ICalendarSubscriptionRepository subscri
             subscription.Resume();
         }
 
-        foreach (var member in await members.ListOfUserAsync(command.UserId, cancellationToken))
-        {
-            member.Enable();
-        }
+        await markers.ClearAsync(null, command.UserId, cancellationToken);
 
         return Result.Ok();
     }

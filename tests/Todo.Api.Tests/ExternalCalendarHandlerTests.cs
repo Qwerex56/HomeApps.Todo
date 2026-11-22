@@ -161,7 +161,7 @@ public sealed class ExternalCalendarHandlerTests
         Import(user, household: Guid.NewGuid());
         var kept = Import(Guid.NewGuid());
 
-        await new UserErasedHandler(new NoSubscriptions(), _calendars).Handle(new UserErasedCommand(user), default);
+        await new UserErasedHandler(new NoSubscriptions(), _calendars, new NoMembers()).Handle(new UserErasedCommand(user), default);
 
         Assert.Equal([kept], _calendars.All);
     }
@@ -347,17 +347,13 @@ public sealed class ExternalCalendarHandlerTests
         }
     }
 
-    private sealed class NoMembers : IHouseholdMemberRepository
+    private sealed class NoMembers : IInactiveMarkerRepository
     {
-        public Task<HouseholdMemberProjection?> GetAsync(Guid householdId, Guid userId, CancellationToken ct) => Task.FromResult<HouseholdMemberProjection?>(null);
+        public Task MarkAsync(Guid? householdId, Guid? userId, CancellationToken ct) => Task.CompletedTask;
 
-        public Task<IReadOnlyList<HouseholdMemberProjection>> ListOfUserAsync(Guid userId, CancellationToken ct) => Task.FromResult<IReadOnlyList<HouseholdMemberProjection>>([]);
+        public Task ClearAsync(Guid? householdId, Guid? userId, CancellationToken ct) => Task.CompletedTask;
 
-        public Task<IReadOnlyList<HouseholdMemberProjection>> ListOfHouseholdAsync(Guid householdId, CancellationToken ct) => Task.FromResult<IReadOnlyList<HouseholdMemberProjection>>([]);
-
-        public void Add(HouseholdMemberProjection member)
-        {
-        }
+        public Task<bool> IsInactiveAsync(Guid householdId, Guid userId, CancellationToken ct) => Task.FromResult(false);
     }
 
     private sealed class NoSubscriptions : ICalendarSubscriptionRepository

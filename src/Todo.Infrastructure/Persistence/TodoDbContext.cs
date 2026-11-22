@@ -30,7 +30,7 @@ public sealed class TodoDbContext(DbContextOptions<TodoDbContext> options, IPubl
 
     public DbSet<ExternalCalendarImport> ExternalCalendarImports => Set<ExternalCalendarImport>();
 
-    public DbSet<HouseholdMemberProjection> HouseholdMembers => Set<HouseholdMemberProjection>();
+    public DbSet<InactiveMarker> InactiveMarkers => Set<InactiveMarker>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

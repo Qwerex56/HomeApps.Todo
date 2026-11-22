@@ -4,8 +4,8 @@ using Todo.Application.Abstractions;
 
 namespace Todo.Application.Accounts.UserDisabled;
 
-/// <summary>The account is blocked: its feed links stop serving at once and its memberships count as inactive.</summary>
-internal sealed class UserDisabledHandler(ICalendarSubscriptionRepository subscriptions, IHouseholdMemberRepository members)
+/// <summary>The account is blocked: its feed links stop serving at once, and reminders for it stop.</summary>
+internal sealed class UserDisabledHandler(ICalendarSubscriptionRepository subscriptions, IInactiveMarkerRepository markers)
     : ICommandHandler<UserDisabledCommand>
 {
     public async Task<Result> Handle(UserDisabledCommand command, CancellationToken cancellationToken)
@@ -15,10 +15,7 @@ internal sealed class UserDisabledHandler(ICalendarSubscriptionRepository subscr
             subscription.Suspend();
         }
 
-        foreach (var member in await members.ListOfUserAsync(command.UserId, cancellationToken))
-        {
-            member.Disable();
-        }
+        await markers.MarkAsync(null, command.UserId, cancellationToken);
 
         return Result.Ok();
     }

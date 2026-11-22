@@ -30,7 +30,7 @@ public static class DependencyInjection
         services.AddScoped<IExternalCalendarRepository, ExternalCalendarRepository>();
         services.AddSingleton<ISsrfSafeClient, SsrfSafeHttpClient>();
         services.AddScoped<ExternalCalendarSyncer>();
-        services.AddScoped<IHouseholdMemberRepository, HouseholdMemberRepository>();
+        services.AddScoped<IInactiveMarkerRepository, InactiveMarkerRepository>();
         services.AddSingleton<ICalendarFeedGenerator, IcsFeedGenerator>();
         services.AddHostedService<LeftListsCleanup>();
         services.AddHostedService<ExternalCalendarSyncJob>();

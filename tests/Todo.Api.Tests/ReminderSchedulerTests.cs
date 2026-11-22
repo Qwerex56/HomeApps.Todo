@@ -31,9 +31,9 @@ public sealed class ReminderSchedulerTests
     private CalendarEvent Event(DateTimeOffset start, int[] reminders, Guid[]? attendees = null, bool isPrivate = false) =>
         CalendarEvent.Create(Household, Actor.Member(_author), "Dentysta", null, null, "Europe/Warsaw", start, start.AddHours(1), false, isPrivate, attendees, reminders, _time).Value;
 
-    private static HouseholdMemberProjection Member(Guid user) => new(Household, user, "Member", Now.AddDays(-10));
+    private static ReminderRecipient Member(Guid user) => new(Household, user);
 
-    private static ReminderSources Sources(IEnumerable<CalendarEvent> events, params HouseholdMemberProjection[] members) =>
+    private static ReminderSources Sources(IEnumerable<CalendarEvent> events, params ReminderRecipient[] members) =>
         new([.. events], [], [], [], [], members, []);
 
     [Fact]
@@ -60,15 +60,13 @@ public sealed class ReminderSchedulerTests
     }
 
     [Fact]
-    public void Disabled_and_departed_members_get_nothing()
+    public void People_left_out_of_the_recipients_get_nothing()
     {
-        var gone = Member(Guid.NewGuid());
-        gone.Left(Now.AddDays(-1));
-        var off = Member(Guid.NewGuid());
-        off.Disable();
-        var sources = Sources([Event(Now.AddMinutes(5), [5])], gone, off);
+        // The reader drops inactive users (left, disabled, erased, archived household) before the scan.
+        var gone = Guid.NewGuid();
+        var sources = Sources([Event(Now.AddMinutes(5), [5], attendees: [gone])], Member(_author));
 
-        Assert.Empty(ReminderScanner.Scan(sources, Now.AddMinutes(-1), Now).Due);
+        Assert.DoesNotContain(ReminderScanner.Scan(sources, Now.AddMinutes(-1), Now).Due, d => d.UserId == gone);
     }
 
     [Fact]
