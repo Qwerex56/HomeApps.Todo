@@ -30,7 +30,7 @@ Last updated: 2026-11-22 · HEAD: c1c3df7 · branch feat/household-planner-p4 (P
 
 ## Entry points and routes
 - Program: `src/Todo.Api/Program.cs:9` (`AddHomeAppsPlugin`), `:15` (`UseHomeAppsPlugin`), `:17` (migrate). Port 5400 in dev (`Properties/launchSettings.json`).
-- Endpoints (all under `/plugins/todo/api`, households `/households/{householdId:guid}`):
+- Endpoints (all under `/plugins/todo/api/v1`, households `/households/{householdId:guid}`):
   - `Endpoints/ListEndpoints.cs:19` lists: GET/POST `/lists`, PUT `/lists/{id}`, POST `archive|restore`, DELETE.
   - `Endpoints/CalendarEndpoints.cs` calendar events/items and series instances (P2; contract in ADR).
   - `Endpoints/FeedEndpoints.cs` (ICS feed), `Endpoints/SubscriptionEndpoints.cs` (calendar subscriptions, P3), `Endpoints/ExternalCalendarEndpoints.cs` (external ICS import, P4).

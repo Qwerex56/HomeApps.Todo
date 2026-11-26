@@ -44,7 +44,7 @@ docker compose -f compose.yaml up -d --build   # -f, bo .env HomeApps może usta
 
 ## API (pod `/plugins/todo`)
 
-| Metoda | Ścieżka (`/api/households/{hid}/...`) | Uprawnienie |
+| Metoda | Ścieżka (`/api/v1/households/{hid}/...`) | Uprawnienie |
 |---|---|---|
 | GET | `lists` | `tasks.read` (wspólne + moje prywatne) |
 | POST | `lists` `{name, visibility: Shared\|Private}` | `tasks.write`; wspólna wymaga `tasks.manage` |
@@ -59,9 +59,9 @@ docker compose -f compose.yaml up -d --build   # -f, bo .env HomeApps może usta
 | DELETE | `tasks/{id}?scope=` | wspólna lista: autor albo `tasks.manage`; prywatna: właściciel; zakres jak wyżej |
 | GET/PUT | `enablement` | z kitu (włącza Admin domu) |
 
-Poza `/api`: `GET /plugins/todo/manifest`, `/plugins/todo/openapi/v1.json`, `/plugins/todo/health/{live,ready}`.
+Poza `/api/v1`: `GET /plugins/todo/manifest`, `/plugins/todo/openapi/v1.json`, `/plugins/todo/health/{live,ready}`.
 
-## Kalendarz (pod `/api/households/{hid}/calendar`, etap P2)
+## Kalendarz (pod `/api/v1/households/{hid}/calendar`, etap P2)
 
 Wydarzenia i serie cykliczne (RRULE). Zapisy wymagają roli Członek domu lub wyższej (`tasks.write`).
 
@@ -91,7 +91,7 @@ Wydarzenia i serie cykliczne (RRULE). Zapisy wymagają roli Członek domu lub wy
 - Time zones: each user may set an IANA `timeZone` in planner settings (validated). Without it the server uses `Planner:DefaultTimeZone` (`Europe/Warsaw` in `appsettings.json`). The zone is used for local times (digest, due-time reminders, new events and the agenda). Event and series zones are kept as IANA ids.
 - All server-side calculations (recurrence, stored instants, reminder timing) run in UTC. Local times around DST: a skipped local time moves forward one hour, a repeated one takes its first occurrence.
 
-## Planner settings (`/api/households/{hid}/calendar/settings`, stage P6)
+## Planner settings (`/api/v1/households/{hid}/calendar/settings`, stage P6)
 
 | Method | Path | What |
 |---|---|---|
@@ -124,7 +124,7 @@ The plugin keeps no copy of users or memberships (see `docs/plugins.md` in HomeA
 - `CalendarSubscription.IsGuest`, updated from `MemberRoleChanged`/`MemberJoined`, for feed visibility;
 - `InactiveMarker` rows, derived from events and not from roles or names: household-level for `HouseholdArchived`/`HouseholdRestored`, user-level for `UserDisabled`/`UserEnabled`/`UserErased` (erased is permanent), and both for `MemberLeft`/`MemberJoined`. The feed and reminders skip marked users.
 
-## ICS subscriptions (under `/api/households/{hid}/calendar/subscriptions`, stage P3)
+## ICS subscriptions (under `/api/v1/households/{hid}/calendar/subscriptions`, stage P3)
 
 Read-only ICS link so a phone calendar can show the household calendar. Each subscription has its own random token.
 
@@ -133,7 +133,7 @@ Read-only ICS link so a phone calendar can show the household calendar. Each sub
 | GET | `subscriptions` | the caller's subscriptions in this household (no token) |
 | POST | `subscriptions` `{label, includeHouseholdEvents?, includePrivateEvents?, tasksMode?}` | new subscription; 201 with `token` and `feedPath` |
 | DELETE | `subscriptions/{id}` | revoke the link; 204 |
-| GET | `/plugins/todo/feed/{token}.ics` (outside `/api`, anonymous) | `text/calendar` feed (RFC 5545) |
+| GET | `/plugins/todo/feed/{token}.ics` (outside `/api/v1`, anonymous) | `text/calendar` feed (RFC 5545) |
 
 - The token (43 Base64Url characters, 256 bits) is returned **only once**, in the `POST` response. The database stores only its SHA-256 hash. A lost token cannot be recovered: create a new subscription and revoke the old one.
 - `feedPath` is `/plugins/todo/feed/{token}.ics`; prepend your HomeApps domain when adding it to the calendar app.
@@ -145,7 +145,7 @@ Read-only ICS link so a phone calendar can show the household calendar. Each sub
 - Account lifecycle: `UserDisabled` suspends all of the user's subscriptions (the feed returns 404 at once), `UserEnabled` restores them without changing the link, and `UserErased` deletes them permanently.
 - A role change in the household is reflected in the feed immediately. Leaving the household (`MemberLeft`) and archiving it (`HouseholdArchived`) block the feed until membership is restored (`HouseholdRestored`).
 
-## External calendars (under `/api/households/{hid}/calendar/external`, stage P4)
+## External calendars (under `/api/v1/households/{hid}/calendar/external`, stage P4)
 
 Imports a calendar from an ICS address (for example a work or school calendar) into the household view. Each import belongs to the member who added it. Writes require the Member role or higher (`tasks.write`); guests see no imported events.
 
