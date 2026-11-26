@@ -25,7 +25,7 @@ internal sealed class ListEndpoints : IEndpoint
         lists.MapPost("/", async (Guid householdId, CreateListRequest body, ISender sender, CancellationToken ct) =>
             (await sender.Send(new CreateListCommand(householdId, body.Name, body.Visibility), ct))
             .Map(id => new IdResponse(id))
-            .ToCreatedHttpResult(created => $"/plugins/todo/api/households/{householdId}/lists/{created.Id}"))
+            .ToCreatedHttpResult(created => $"/plugins/todo/api/v1/households/{householdId}/lists/{created.Id}"))
             .Produces<IdResponse>(StatusCodes.Status201Created);
 
         lists.MapPut("/{listId:guid}", async (Guid householdId, Guid listId, RenameListRequest body, ISender sender, CancellationToken ct) =>

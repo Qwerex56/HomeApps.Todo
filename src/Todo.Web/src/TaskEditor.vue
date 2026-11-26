@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useHost } from '@homeapps/plugin-sdk'
+import { useHost } from '@home-apps/plugin-sdk'
 import { inputOf, type HouseholdMember, type TaskInput, type TaskPriority, type TaskView, type TodoListView } from './api'
 import { fromIso, isoDate } from './dates'
 

@@ -70,7 +70,7 @@ export interface TaskQuery {
   status?: TodoStatus
 }
 
-/** A member as Households lists them (GET /households/{id}/members); only Members and up may read it. */
+/** A member as Households lists them (GET /households/v1/{id}/members); only Members and up may read it. */
 export interface HouseholdMember {
   userId: string
   displayName: string
@@ -227,7 +227,7 @@ export function todoApi(http: AxiosInstance, apiBase: string, householdId: strin
     savePlannerSettings: async (input: PlannerSettings) =>
       fromWireSettings((await http.put<WirePlannerSettings>(`${base}/calendar/settings`, { ...input, firstDayOfWeek: DAY_NAMES[input.firstDayOfWeek] })).data),
 
-    members: async () => (await http.get<HouseholdMember[]>(`/households/${householdId}/members`)).data,
+    members: async () => (await http.get<HouseholdMember[]>(`/households/v1/${householdId}/members`)).data,
   }
 }
 

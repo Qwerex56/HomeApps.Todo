@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { WidgetProps } from '@homeapps/plugin-sdk'
+import type { WidgetProps } from '@home-apps/plugin-sdk'
 import type { TaskView } from './api'
 import { todayIso } from './dates'
 import { useTodo } from './useTodo'

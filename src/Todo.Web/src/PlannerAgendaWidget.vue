@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref } from 'vue'
-import type { WidgetProps } from '@homeapps/plugin-sdk'
+import type { WidgetProps } from '@home-apps/plugin-sdk'
 import type { CalendarItem } from './api'
 import { addDays, itemsOn, startDay } from './calendarDates'
 import { isoDate } from './dates'

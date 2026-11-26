@@ -8,7 +8,7 @@ using HomeApps.Contracts.Households;
 namespace Todo.Api.Tests;
 
 /// <summary>
-/// Stands in for Households' <c>GET /households/{id}/members/me</c>, and for the MCP tools' <c>GET /households</c> and
+/// Stands in for Households' <c>GET /households/v1/{id}/members/me</c>, and for the MCP tools' <c>GET /households</c> and
 /// <c>GET /households/{id}/members/names</c>; reads the user from the test token.
 /// </summary>
 public sealed class FakeHouseholds : HttpMessageHandler
@@ -34,7 +34,7 @@ public sealed class FakeHouseholds : HttpMessageHandler
 
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        var segments = request.RequestUri!.AbsolutePath.Trim('/').Split('/');
+        var segments = request.RequestUri!.AbsolutePath.Trim('/').Split('/').Where(segment => segment != "v1").ToArray();
         var userId = SubjectOf(request.Headers.Authorization?.ToString());
         if (segments.Length == 1)
         {

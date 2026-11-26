@@ -34,7 +34,7 @@ public static class TodoPlugin
     {
         Id = "todo",
         Version = typeof(TodoPlugin).Assembly.GetName().Version is { } v ? $"{v.Major}.{v.Minor}.{v.Build}" : "1.0.0",
-        MinHomeAppsVersion = "2.3.0",
+        MinHomeAppsVersion = "3.0.0",
         Name = new LocalizedText("Zadania", "Tasks"),
         Description = new LocalizedText("Wspólne i prywatne listy zadań domu", "Shared and private task lists of a household"),
         Icon = "pi-check-square",

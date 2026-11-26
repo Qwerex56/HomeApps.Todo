@@ -4,7 +4,7 @@ Last updated: 2026-11-22 · HEAD: c1c3df7 · branch feat/household-planner-p4 (P
 
 ## Overview
 - Plugin "Zadania" (Todo) for HomeApps, plus in-progress "Planer" (calendar + recurring tasks). Lives outside HomeApps repo.
-- Stack: .NET 10 (Minimal API, MediatR 12, FluentValidation, FluentResults, EF Core, Postgres, MassTransit/RabbitMQ), kit `HomeApps.*` packages from `~/.homeapps/packages`; UI Vue 3.5 + TS + Vite + TanStack Query + Axios + `@homeapps/plugin-sdk`.
+- Stack: .NET 10 (Minimal API, MediatR 12, FluentValidation, FluentResults, EF Core, Postgres, MassTransit/RabbitMQ), kit `HomeApps.*` packages from `~/.homeapps/packages`; UI Vue 3.5 + TS + Vite + TanStack Query + Axios + `@home-apps/plugin-sdk`.
 - Built UI is committed: `src/Todo.Api/wwwroot/ui` (entry.js, entry.css, chunks).
 - Planner: P1-P4 in code (P4 Docker API tests pending); P5-P6 todo (status: `.agents/STATUS.md`). Source of truth: `specs/`.
 
@@ -30,7 +30,7 @@ Last updated: 2026-11-22 · HEAD: c1c3df7 · branch feat/household-planner-p4 (P
 
 ## Entry points and routes
 - Program: `src/Todo.Api/Program.cs:9` (`AddHomeAppsPlugin`), `:15` (`UseHomeAppsPlugin`), `:17` (migrate). Port 5400 in dev (`Properties/launchSettings.json`).
-- Endpoints (all under `/plugins/todo/api`, households `/households/{householdId:guid}`):
+- Endpoints (all under `/plugins/todo/api/v1`, households `/households/{householdId:guid}`):
   - `Endpoints/ListEndpoints.cs:19` lists: GET/POST `/lists`, PUT `/lists/{id}`, POST `archive|restore`, DELETE.
   - `Endpoints/CalendarEndpoints.cs` calendar events/items and series instances (P2; contract in ADR).
   - `Endpoints/FeedEndpoints.cs` (ICS feed), `Endpoints/SubscriptionEndpoints.cs` (calendar subscriptions, P3), `Endpoints/ExternalCalendarEndpoints.cs` (external ICS import, P4).

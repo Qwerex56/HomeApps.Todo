@@ -1,4 +1,4 @@
-import { definePlugin } from '@homeapps/plugin-sdk'
+import { definePlugin } from '@home-apps/plugin-sdk'
 import PlannerAgendaWidget from './PlannerAgendaWidget.vue'
 import TodayWidget from './TodayWidget.vue'
 

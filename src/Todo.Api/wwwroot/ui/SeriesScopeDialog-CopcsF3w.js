@@ -1,4 +1,4 @@
-import { A as e, D as t, O as n, P as r, T as i, _ as a, b as o, f as s, h as c, p as l, t as u, v as d, x as f } from "./_plugin-vue_export-helper-Ntn7wuVI.js";
+import { A as e, D as t, O as n, P as r, T as i, _ as a, b as o, f as s, h as c, p as l, t as u, v as d, x as f } from "./_plugin-vue_export-helper-B-kgh5nT.js";
 // src/SeriesScopeDialog.vue?vue&type=script&setup=true&lang.ts
 var p = ["aria-label"], m = /*#__PURE__*/ u(/* @__PURE__ */ f({
 	__name: "SeriesScopeDialog",
@@ -52,5 +52,5 @@ var p = ["aria-label"], m = /*#__PURE__*/ u(/* @__PURE__ */ f({
 			}, 8, ["visible", "header"]);
 		};
 	}
-}), [["__scopeId", "data-v-35daf7fc"]]);
+}), [["__scopeId", "data-v-eaae82d9"]]);
 export { m as t };

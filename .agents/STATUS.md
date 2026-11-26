@@ -7,6 +7,7 @@
 | household-planner | P5 Reminders & task recurrence | done (Api 126/126 and Domain 245/245 on Docker, 2026-11-22) | feat/household-planner-p5 | specs/household-planner-adr.md | 2026-11-22 |
 | household-planner | P6 Front-end & wall widget | todo | - | specs/household-planner-adr.md | 2026-11-22 |
 | household-planner | P7 Fix API guesses against HomeApps docs (owner-added) | done (Api 126/126 and Domain 245/245 on Docker, 2026-11-22) | feat/household-planner-p7 (stacked on P5) | - | 2026-11-22 |
+| release-3.0 | Stage 0 (plugin side: kit 3.0.0, /api/v1, plugin-sdk) | done (PR pending; Domain 245, Api 126 on Docker, review 2 rounds, DA approved) | feat/release-3.0-stage-0 | ../HomeApps/specs/release-3.0-adr.md | 2026-11-26 |
 
 ## Decisions
 - 2026-11-22: MemberLeft emptying an event's Attendees keeps the author as attendee (when the author is not the leaver), so the event does not become "whole household".

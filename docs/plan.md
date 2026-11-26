@@ -14,7 +14,7 @@ Data: 2026-10-29. Baza: HomeApps 2.0.0 (lokalny master 8ffe7d6). Kod dopiero po 
 |---|---|---|
 | Kit (MediatR, FluentResults, outbox, JWT, `ICurrentUser`, `IEndpoint`) | `src/BuildingBlocks/*` | dostępny tylko jako `ProjectReference` w repo; plugin z zewnątrz nie ma jak go użyć |
 | Kontrakty zdarzeń domów (`MemberLeft`, `MemberRoleChanged`, `HouseholdArchived`) | `src/Contracts/Households` | jw., brak paczki |
-| "Czy ten user jest w domu i z jaką rolą" | `GET /households/{id}/members/me` (z JWT użytkownika) | brak klienta z cache w kicie (P7/K2 z jarvis-hub.md) |
+| "Czy ten user jest w domu i z jaką rolą" | `GET /households/v1/{id}/members/me` (z JWT użytkownika) | brak klienta z cache w kicie (P7/K2 z jarvis-hub.md) |
 | Polityki per zakres (`IsHouseholdMember`, `CanManageHousehold`...) | brak | do napisania |
 | Manifest | tylko szkic | typy, endpoint, walidacja |
 | Lista pluginów w instancji | brak | konfiguracja + odczyt w GUI |
@@ -42,7 +42,7 @@ Manifest opisuje plugin i wskazuje, gdzie jest jego API, UI i MCP. Sam nie jest 
     { "id": "tasks.manage", "minRole": "Admin"  }
   ],
   "endpoints": {
-    "api": "/plugins/todo/api",
+    "api": "/plugins/todo/api/v1",
     "openapi": "/plugins/todo/openapi/v1.json",
     "mcp": "/plugins/todo/mcp",
     "realtime": null,
@@ -57,7 +57,7 @@ Manifest opisuje plugin i wskazuje, gdzie jest jego API, UI i MCP. Sam nie jest 
     ],
     "settings": true
   },
-  "display": [ { "id": "today", "path": "/plugins/todo/api/households/{householdId}/display/today", "refreshSeconds": 300 } ],
+  "display": [ { "id": "today", "path": "/plugins/todo/api/v1/households/{householdId}/display/today", "refreshSeconds": 300 } ],
   "mcp": { "tools": ["add_task", "my_tasks", "complete_task"] },
   "events": {
     "publishes": ["HomeApps.Todo.Contracts.TaskCompleted", "HomeApps.Todo.Contracts.TaskDue"],
@@ -81,7 +81,7 @@ Co dodaję względem szkicu z jarvis-hub.md 9b.6 i dlaczego:
 | `mcp.tools` | JARVIS wie, czego się spodziewać, zanim połączy się z MCP |
 | `events` | dokumentacja zależności między serwisami (nie jest wymuszane w runtime) |
 
-Włączenie w domu: każdy plugin ma `GET/PUT /plugins/{id}/api/households/{householdId}/enablement` (kit daje gotowe: tabela `PluginEnablement`, polityka z `enablement.minRole`). Brak rekordu = wyłączony (zgodnie z 9b.1).
+Włączenie w domu: każdy plugin ma `GET/PUT /plugins/{id}/api/v1/households/{householdId}/enablement` (kit daje gotowe: tabela `PluginEnablement`, polityka z `enablement.minRole`). Brak rekordu = wyłączony (zgodnie z 9b.1).
 
 ## 3. Co dopisuję do HomeApps (etap A, przed pluginem)
 
@@ -90,7 +90,7 @@ Włączenie w domu: każdy plugin ma `GET/PUT /plugins/{id}/api/households/{hous
 - **Dystrybucja kitu: lokalny feed NuGet** (propozycja T2). `scripts/pack.sh` w HomeApps pakuje `HomeApps.BuildingBlocks.*`, `HomeApps.Contracts` i nowe `HomeApps.Plugins` do `~/.homeapps/packages` (wersja = wersja HomeApps, np. 2.1.0). Repo pluginu ma `nuget.config` wskazujący ten folder. Zero zmian w kodzie usług HomeApps, w repo dalej `ProjectReference`.
 - **Nowy projekt `src/BuildingBlocks/HomeApps.Plugins`** (cienki):
   - `PluginManifest` (rekordy) + `MapPluginManifest()` i walidacja przy starcie (id = prefiks tras, wersja, role istnieją).
-  - `IHouseholdAccess.GetMembershipAsync(householdId, userId)` → `HouseholdRole?`; HTTP do `http://households:8080/households/{id}/members/me` z JWT wywołującego, cache w pamięci 60 s, czyszczony konsumentem `MemberLeft`/`MemberRoleChanged`/`HouseholdArchived` (K2).
+  - `IHouseholdAccess.GetMembershipAsync(householdId, userId)` → `HouseholdRole?`; HTTP do `http://households:8080/households/v1/{id}/members/me` z JWT wywołującego, cache w pamięci 60 s, czyszczony konsumentem `MemberLeft`/`MemberRoleChanged`/`HouseholdArchived` (K2).
   - Filtr endpointu `.RequireHouseholdPermission("tasks.write")` (rola z `IHouseholdAccess` vs `permissions` z manifestu) i `.RequireHouseholdUserScope()` gdzie potrzeba.
   - `PluginEnablement` (encja + konfiguracja EF + dwa endpointy) do użycia w DbContext pluginu.
   - `MapPluginUi()`: serwuje zbudowany UI pluginu z `wwwroot/ui` pod `/plugins/{id}/ui`.
@@ -135,7 +135,7 @@ Propozycja T4: na start **listy + zadania**, bez podzadań.
 - Gdy ktoś wychodzi z domu (`MemberLeft`): jego zadania wspólne tracą przypisanie, jego prywatne listy w tym domu zostają ukryte (T5: usuwać czy trzymać na wypadek powrotu, propozycja: trzymać 30 dni, potem usunąć). `HouseholdArchived`: plugin tylko przestaje odpowiadać dla tego domu.
 - Imiona osób: plugin trzyma tylko `UserId`; GUI dokleja nazwy z listy członków Household, którą już ma.
 
-### 4.3 API (Minimal APIs + MediatR 12, pod `/plugins/todo/api`)
+### 4.3 API (Minimal APIs + MediatR 12, pod `/plugins/todo/api/v1`)
 
 | Metoda | Trasa | Uprawnienie |
 |---|---|---|

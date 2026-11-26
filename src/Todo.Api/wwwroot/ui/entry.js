@@ -1,6 +1,6 @@
-import { A as e, D as t, E as n, O as r, S as i, T as a, _ as o, b as s, d as c, g as l, h as u, k as d, l as f, m as p, n as m, p as h, t as g, u as _, v, w as y, x as b, y as x } from "./_plugin-vue_export-helper-Ntn7wuVI.js";
-import { n as S, r as C, s as w, t as T } from "./CalendarChip-CPNvSX1x.js";
-import { t as E } from "./TaskRow-Cjsj_ntn.js";
+import { A as e, D as t, E as n, O as r, S as i, T as a, _ as o, b as s, d as c, g as l, h as u, k as d, l as f, m as p, n as m, p as h, t as g, u as _, v, w as y, x as b, y as x } from "./_plugin-vue_export-helper-B-kgh5nT.js";
+import { n as S, r as C, s as w, t as T } from "./CalendarChip-0N5siCjS.js";
+import { t as E } from "./TaskRow-CpARz2Bo.js";
 // src/PlannerAgendaWidget.vue?vue&type=script&setup=true&lang.ts
 var D = {
 	key: 0,
@@ -68,7 +68,7 @@ var D = {
 			]))), 128))])], 8, A))), 128))], 2);
 		};
 	}
-}), [["__scopeId", "data-v-1badfdc5"]]), F = {
+}), [["__scopeId", "data-v-7d5078c6"]]), F = {
 	key: 0,
 	class: "todo-widget__loading"
 }, I = {
@@ -83,8 +83,8 @@ var D = {
 }, z = 8, B = c({
 	id: "todo",
 	routes: {
-		"": () => import("./TasksPage-D67PzAZj.js"),
-		calendar: () => import("./CalendarPage-DgPHK3xG.js")
+		"": () => import("./TasksPage-Bi0Y8FWI.js"),
+		calendar: () => import("./CalendarPage-yU8-q6FI.js")
 	},
 	widgets: {
 		today: /* @__PURE__ */ g(/* @__PURE__ */ b({
@@ -127,7 +127,7 @@ var D = {
 					}, null, -1), x(" " + d(e(g).t("empty.today")), 1)])), T.value.length > z ? (a(), o("p", R, d(e(g).t("more", { count: T.value.length - z })), 1)) : l("", !0)], 64))], 2);
 				};
 			}
-		}), [["__scopeId", "data-v-dd1334e4"]]),
+		}), [["__scopeId", "data-v-f9be4f38"]]),
 		"planner-agenda": P
 	},
 	messages: {

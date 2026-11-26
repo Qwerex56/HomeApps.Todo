@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { useHost } from '@homeapps/plugin-sdk'
+import { useHost } from '@home-apps/plugin-sdk'
 import type { ListVisibility } from './api'
 
 // New list (name + who sees it) or renaming one (name only).

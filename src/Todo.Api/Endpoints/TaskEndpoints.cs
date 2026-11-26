@@ -31,7 +31,7 @@ internal sealed class TaskEndpoints : IEndpoint
         household.MapPost("/lists/{listId:guid}/tasks", async (Guid householdId, Guid listId, TaskInput body, ISender sender, CancellationToken ct) =>
             (await sender.Send(new CreateTaskCommand(householdId, listId, body), ct))
             .Map(id => new IdResponse(id))
-            .ToCreatedHttpResult(created => $"/plugins/todo/api/households/{householdId}/tasks/{created.Id}"))
+            .ToCreatedHttpResult(created => $"/plugins/todo/api/v1/households/{householdId}/tasks/{created.Id}"))
             .Produces<IdResponse>(StatusCodes.Status201Created);
 
         household.MapPut("/tasks/{taskId:guid}", async (Guid householdId, Guid taskId, TaskInput body, string? scope, ISender sender, CancellationToken ct) =>

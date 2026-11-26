@@ -1,4 +1,4 @@
-import { A as e, O as t, S as n, T as r, _ as i, b as a, f as o, g as s, h as c, k as l, m as u, o as d, s as f, t as p, v as m, x as h, y as g } from "./_plugin-vue_export-helper-Ntn7wuVI.js";
+import { A as e, O as t, S as n, T as r, _ as i, b as a, f as o, g as s, h as c, k as l, m as u, o as d, s as f, t as p, v as m, x as h, y as g } from "./_plugin-vue_export-helper-B-kgh5nT.js";
 // src/TaskRow.vue?vue&type=script&setup=true&lang.ts
 var _ = ["draggable", "data-task-id"], v = {
 	key: 0,
@@ -96,5 +96,5 @@ var _ = ["draggable", "data-task-id"], v = {
 			], 10, _);
 		};
 	}
-}), [["__scopeId", "data-v-e063312c"]]);
+}), [["__scopeId", "data-v-b9a55ee3"]]);
 export { T as t };
