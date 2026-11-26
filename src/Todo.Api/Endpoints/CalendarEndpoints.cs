@@ -22,7 +22,7 @@ internal sealed class CalendarEndpoints : IEndpoint
 
         group.MapPost("/events", async (Guid householdId, CreateCalendarEventRequest body, ISender sender, CancellationToken ct) =>
             (await sender.Send(body.ToCommand(householdId), ct))
-            .ToCreatedHttpResult(created => $"/plugins/todo/api/households/{householdId}/calendar/events/{created.Id}"))
+            .ToCreatedHttpResult(created => $"/plugins/todo/api/v1/households/{householdId}/calendar/events/{created.Id}"))
             .Produces<CalendarEventDetailView>(StatusCodes.Status201Created);
 
         group.MapGet("/events/{id:guid}", async (Guid householdId, Guid id, ISender sender, CancellationToken ct) =>

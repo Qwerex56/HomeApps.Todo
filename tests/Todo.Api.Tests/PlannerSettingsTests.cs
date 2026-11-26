@@ -41,7 +41,7 @@ public sealed class PlannerSettingsTests(TodoFactory factory) : IClassFixture<To
     public async Task An_unknown_household_is_404_household_not_found()
     {
         var h = await AHousehold.SwitchedOnAsync(factory);
-        var url = $"/plugins/todo/api/households/{Guid.NewGuid()}/calendar/settings";
+        var url = $"/plugins/todo/api/v1/households/{Guid.NewGuid()}/calendar/settings";
 
         var get = await h.As(h.Member).GetAsync(url);
 

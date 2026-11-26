@@ -20,7 +20,7 @@ internal sealed class SubscriptionEndpoints : IEndpoint
 
         group.MapPost("", async (Guid householdId, CreateSubscriptionRequest body, ISender sender, CancellationToken ct) =>
             (await sender.Send(body.ToCommand(householdId), ct))
-            .ToCreatedHttpResult(created => $"/plugins/todo/api/households/{householdId}/calendar/subscriptions/{created.Subscription.Id}"))
+            .ToCreatedHttpResult(created => $"/plugins/todo/api/v1/households/{householdId}/calendar/subscriptions/{created.Subscription.Id}"))
             .Produces<CreatedSubscriptionView>(StatusCodes.Status201Created);
 
         group.MapDelete("/{id:guid}", async (Guid householdId, Guid id, ISender sender, CancellationToken ct) =>

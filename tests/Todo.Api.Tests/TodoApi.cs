@@ -24,7 +24,7 @@ internal sealed class AHousehold(TodoFactory factory)
 
     public Guid Guest { get; } = Guid.NewGuid();
 
-    public string Api => $"/plugins/todo/api/households/{Id}";
+    public string Api => $"/plugins/todo/api/v1/households/{Id}";
 
     public static async Task<AHousehold> SwitchedOnAsync(TodoFactory factory)
     {

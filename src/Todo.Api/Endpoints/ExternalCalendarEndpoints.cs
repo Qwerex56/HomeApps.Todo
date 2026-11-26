@@ -21,7 +21,7 @@ internal sealed class ExternalCalendarEndpoints : IEndpoint
 
         group.MapPost("", async (Guid householdId, AddExternalCalendarRequest body, ISender sender, CancellationToken ct) =>
             (await sender.Send(body.ToCommand(householdId), ct))
-            .ToCreatedHttpResult(created => $"/plugins/todo/api/households/{householdId}/calendar/external/{created.Id}"))
+            .ToCreatedHttpResult(created => $"/plugins/todo/api/v1/households/{householdId}/calendar/external/{created.Id}"))
             .Produces<ExternalCalendarView>(StatusCodes.Status201Created);
 
         group.MapPost("/{id:guid}/sync", async (Guid householdId, Guid id, ISender sender, CancellationToken ct) =>
