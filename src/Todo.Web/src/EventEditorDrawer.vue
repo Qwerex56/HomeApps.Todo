@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useHost } from '@homeapps/plugin-sdk'
+import { useHost } from '@home-apps/plugin-sdk'
 import type { CalendarEventDetail, EventInput, HouseholdMember } from './api'
 import { localDay, localTime, toInstant } from './calendarDates'
 

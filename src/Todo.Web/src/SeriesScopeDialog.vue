@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useHost } from '@homeapps/plugin-sdk'
+import { useHost } from '@home-apps/plugin-sdk'
 import type { SeriesScope } from './api'
 
 // Which occurrences an edit or a delete of a recurring event applies to.

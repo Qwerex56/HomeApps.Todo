@@ -4,7 +4,7 @@ Last updated: 2026-11-22 · HEAD: c1c3df7 · branch feat/household-planner-p4 (P
 
 ## Overview
 - Plugin "Zadania" (Todo) for HomeApps, plus in-progress "Planer" (calendar + recurring tasks). Lives outside HomeApps repo.
-- Stack: .NET 10 (Minimal API, MediatR 12, FluentValidation, FluentResults, EF Core, Postgres, MassTransit/RabbitMQ), kit `HomeApps.*` packages from `~/.homeapps/packages`; UI Vue 3.5 + TS + Vite + TanStack Query + Axios + `@homeapps/plugin-sdk`.
+- Stack: .NET 10 (Minimal API, MediatR 12, FluentValidation, FluentResults, EF Core, Postgres, MassTransit/RabbitMQ), kit `HomeApps.*` packages from `~/.homeapps/packages`; UI Vue 3.5 + TS + Vite + TanStack Query + Axios + `@home-apps/plugin-sdk`.
 - Built UI is committed: `src/Todo.Api/wwwroot/ui` (entry.js, entry.css, chunks).
 - Planner: P1-P4 in code (P4 Docker API tests pending); P5-P6 todo (status: `.agents/STATUS.md`). Source of truth: `specs/`.
 

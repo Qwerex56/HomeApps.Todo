@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useHost } from '@homeapps/plugin-sdk'
+import { useHost } from '@home-apps/plugin-sdk'
 import type { CalendarItem } from './api'
 import { itemsOn } from './calendarDates'
 import { isoDate } from './dates'

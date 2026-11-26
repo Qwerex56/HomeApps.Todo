@@ -17,6 +17,6 @@
     "vue-tsc": "^3.3.13"
   },
   "dependencies": {
-    "@homeapps/plugin-sdk": "file:../../../../../.homeapps/packages/home-apps-plugin-sdk-3.0.0.tgz"
+    "@home-apps/plugin-sdk": "file:../../../../../.homeapps/packages/home-apps-plugin-sdk-3.0.0.tgz"
   }
 }

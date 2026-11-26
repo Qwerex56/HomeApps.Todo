@@ -1,12 +1,12 @@
 ---
 name: vue-conventions
-description: HomeApps.Todo plugin UI conventions (Vue 3.5 + TypeScript + Vite, TanStack Query + Axios, @homeapps/plugin-sdk definePlugin, Polish messages in main.ts). Use when writing, changing or reviewing code in src/Todo.Web.
+description: HomeApps.Todo plugin UI conventions (Vue 3.5 + TypeScript + Vite, TanStack Query + Axios, @home-apps/plugin-sdk definePlugin, Polish messages in main.ts). Use when writing, changing or reviewing code in src/Todo.Web.
 ---
 
 # Todo plugin UI conventions
 
 `src/Todo.Web` is a **plugin UI**, not the HomeApps web app: Vue 3.5, TypeScript ~5.9 strict (`vue-tsc`), Vite 8,
-`@tanstack/vue-query` + `axios` for server data, `@homeapps/plugin-sdk` (`definePlugin`) for routes, widgets and
+`@tanstack/vue-query` + `axios` for server data, `@home-apps/plugin-sdk` (`definePlugin`) for routes, widgets and
 Polish `messages`. No Pinia, no vue-i18n of its own, no PrimeVue/Tailwind imports unless the plugin SDK exposes them:
 **do not add packages** (see the ADR, section on the front end) without the owner's approval.
 

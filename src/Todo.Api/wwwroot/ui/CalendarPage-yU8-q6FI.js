@@ -1,6 +1,6 @@
-import { A as e, C as t, D as n, E as r, F as i, I as a, L as o, M as s, N as c, O as l, P as u, S as d, T as f, _ as p, a as m, b as h, f as g, g as _, h as v, i as y, j as b, k as x, l as S, m as C, n as w, p as T, t as E, u as D, v as O, x as k, y as A } from "./_plugin-vue_export-helper-Ntn7wuVI.js";
-import { a as j, c as ee, i as M, l as N, o as P, r as F, t as I, u as L } from "./CalendarChip-CPNvSX1x.js";
-import { t as R } from "./SeriesScopeDialog-DuFctRNm.js";
+import { A as e, C as t, D as n, E as r, F as i, I as a, L as o, M as s, N as c, O as l, P as u, S as d, T as f, _ as p, a as m, b as h, f as g, g as _, h as v, i as y, j as b, k as x, l as S, m as C, n as w, p as T, t as E, u as D, v as O, x as k, y as A } from "./_plugin-vue_export-helper-B-kgh5nT.js";
+import { a as j, c as ee, i as M, l as N, o as P, r as F, t as I, u as L } from "./CalendarChip-0N5siCjS.js";
+import { t as R } from "./SeriesScopeDialog-CopcsF3w.js";
 // src/AgendaList.vue?vue&type=script&setup=true&lang.ts
 var z = { class: "agenda" }, B = {
 	key: 0,
@@ -39,7 +39,7 @@ var z = { class: "agenda" }, B = {
 			"onToggle"
 		]))), 128))]))), 128))]));
 	}
-}), [["__scopeId", "data-v-869f9204"]]), te = ["aria-label"], U = { class: "settings__field" }, W = { class: "settings__field" }, ne = { class: "settings__field" }, re = { class: "settings__field" }, ie = ["aria-label"], ae = { class: "settings__hint" }, oe = {
+}), [["__scopeId", "data-v-53e744d4"]]), te = ["aria-label"], U = { class: "settings__field" }, W = { class: "settings__field" }, ne = { class: "settings__field" }, re = { class: "settings__field" }, ie = ["aria-label"], ae = { class: "settings__hint" }, oe = {
 	key: 2,
 	class: "settings__list"
 }, se = {
@@ -428,7 +428,7 @@ var z = { class: "agenda" }, B = {
 			}, 8, ["visible", "header"]);
 		};
 	}
-}), [["__scopeId", "data-v-ce1eee4d"]]), G = ["aria-label"], K = {
+}), [["__scopeId", "data-v-57dff6fb"]]), G = ["aria-label"], K = {
 	key: 0,
 	class: "grid__head",
 	role: "row"
@@ -529,7 +529,7 @@ var z = { class: "agenda" }, B = {
 			t.rest > 0 ? (f(), p("span", ge, x(e(l).t("more", { count: t.rest })), 1)) : _("", !0)
 		], 42, he))), 128))], 4)], 8, G));
 	}
-}), [["__scopeId", "data-v-2ee0d671"]]), Y = { class: "editor__field" }, ve = {
+}), [["__scopeId", "data-v-a96b0a3c"]]), Y = { class: "editor__field" }, ve = {
 	key: 0,
 	id: "ev-title-err",
 	class: "editor__error",
@@ -797,7 +797,7 @@ var z = { class: "agenda" }, B = {
 			}, 8, ["visible", "header"]);
 		};
 	}
-}), [["__scopeId", "data-v-58b09aa9"]]), He = { class: "planner" }, Ue = { class: "planner__bar" }, We = ["aria-label"], Ge = {
+}), [["__scopeId", "data-v-b366e60c"]]), He = { class: "planner" }, Ue = { class: "planner__bar" }, We = ["aria-label"], Ge = {
 	class: "planner__title",
 	"aria-live": "polite"
 }, Ke = { class: "planner__layers" }, qe = { class: "planner__legend" }, Je = ["value"], Ye = {
@@ -1131,5 +1131,5 @@ var z = { class: "agenda" }, B = {
 			]);
 		};
 	}
-}), [["__scopeId", "data-v-363f62b3"]]);
+}), [["__scopeId", "data-v-21637182"]]);
 export { Qe as default };

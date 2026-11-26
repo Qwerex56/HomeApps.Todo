@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
-import { useHost } from '@homeapps/plugin-sdk'
+import { useHost } from '@home-apps/plugin-sdk'
 import type { CreatedSubscription, PlannerSettings, ExternalVisibility, SubscriptionTasksMode } from './api'
 import { useTodo } from './useTodo'
 

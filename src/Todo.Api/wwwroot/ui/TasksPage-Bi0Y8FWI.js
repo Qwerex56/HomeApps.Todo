@@ -1,6 +1,6 @@
-import { A as e, D as t, E as n, L as r, N as i, O as a, P as o, S as s, T as c, _ as l, b as u, c as d, f, g as p, h as m, i as h, k as g, l as _, m as v, n as y, p as b, r as x, t as S, u as C, v as w, x as T, y as E } from "./_plugin-vue_export-helper-Ntn7wuVI.js";
-import { t as ee } from "./SeriesScopeDialog-DuFctRNm.js";
-import { t as D } from "./TaskRow-Cjsj_ntn.js";
+import { A as e, D as t, E as n, L as r, N as i, O as a, P as o, S as s, T as c, _ as l, b as u, c as d, f, g as p, h as m, i as h, k as g, l as _, m as v, n as y, p as b, r as x, t as S, u as C, v as w, x as T, y as E } from "./_plugin-vue_export-helper-B-kgh5nT.js";
+import { t as ee } from "./SeriesScopeDialog-CopcsF3w.js";
+import { t as D } from "./TaskRow-CpARz2Bo.js";
 // src/ListDialog.vue?vue&type=script&setup=true&lang.ts
 var O = { class: "todo-list-form__actions" }, te = /*#__PURE__*/ S(/* @__PURE__ */ T({
 	__name: "ListDialog",
@@ -71,7 +71,7 @@ var O = { class: "todo-list-form__actions" }, te = /*#__PURE__*/ S(/* @__PURE__ 
 			}, 8, ["visible", "header"]);
 		};
 	}
-}), [["__scopeId", "data-v-25f3ed2f"]]), k = { class: "todo-editor__field" }, A = { class: "todo-editor__field" }, j = { class: "todo-editor__row" }, M = { class: "todo-editor__field" }, N = { class: "todo-editor__field todo-editor__time" }, P = { class: "todo-editor__field" }, F = { class: "todo-editor__field" }, I = {
+}), [["__scopeId", "data-v-c2411e01"]]), k = { class: "todo-editor__field" }, A = { class: "todo-editor__field" }, j = { class: "todo-editor__row" }, M = { class: "todo-editor__field" }, N = { class: "todo-editor__field todo-editor__time" }, P = { class: "todo-editor__field" }, F = { class: "todo-editor__field" }, I = {
 	key: 0,
 	class: "todo-editor__field"
 }, L = {
@@ -273,7 +273,7 @@ var O = { class: "todo-list-form__actions" }, te = /*#__PURE__*/ S(/* @__PURE__ 
 			], 32);
 		};
 	}
-}), [["__scopeId", "data-v-635beb8b"]]), ie = { class: "todo-page" }, ae = ["aria-label"], oe = ["onClick", "onDrop"], se = { class: "todo-nav__name" }, ce = ["onClick"], le = { class: "todo-main" }, ue = { class: "todo-phone-picker" }, de = { class: "todo-header" }, fe = ["title"], pe = {
+}), [["__scopeId", "data-v-791c5251"]]), ie = { class: "todo-page" }, ae = ["aria-label"], oe = ["onClick", "onDrop"], se = { class: "todo-nav__name" }, ce = ["onClick"], le = { class: "todo-main" }, ue = { class: "todo-phone-picker" }, de = { class: "todo-header" }, fe = ["title"], pe = {
 	key: 2,
 	class: "todo-loading"
 }, me = {
@@ -691,5 +691,5 @@ var O = { class: "todo-list-form__actions" }, te = /*#__PURE__*/ S(/* @__PURE__ 
 			]);
 		};
 	}
-}), [["__scopeId", "data-v-08d13021"]]);
+}), [["__scopeId", "data-v-a0103b47"]]);
 export { z as default };

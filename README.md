@@ -10,7 +10,7 @@ i korzysta z jego kitu (paczki `HomeApps.*` z lokalnego feedu) oraz kontraktu ma
 - Node 22 (tylko do zmian w UI)
 - Kit HomeApps w lokalnym feedzie: w repo HomeApps uruchom `scripts/pack.sh`
   (pakuje do `~/.homeapps/packages`, z którego czyta `nuget.config` tego repo, a `src/Todo.Web` bierze stamtąd
-  `@homeapps/plugin-sdk`).
+  `@home-apps/plugin-sdk`).
 
 ## Budowanie i testy
 
@@ -216,7 +216,7 @@ Zdarzenia: publikuje `HomeApps.Todo.Contracts.TaskCompleted` (tylko zadania z li
 | `src/Todo.Application` | manifest (`TodoPlugin`), komendy i zapytania MediatR (folder na każdą: `Lists/CreateList/CreateListCommand.cs`, `…Validator.cs`, `…Handler.cs`), porty w `Abstractions` |
 | `src/Todo.Infrastructure` | `TodoDbContext` (`PluginDbContext`), repozytoria, migracje, konsumenci Households, sprzątanie T5, `CalendarReminderJob`, `ExternalCalendarSyncJob` |
 | `src/Todo.Api` | host pluginu i endpointy; `wwwroot/ui` to zbudowane UI |
-| `src/Todo.Web` | UI (Vue 3 + `@homeapps/plugin-sdk`): strona „Zadania” (`TasksPage`), widżet „Na dziś” (`TodayWidget`), planer `/calendar` (`CalendarPage`), widżet `planner-agenda`, teksty pl/en w `main.ts` |
+| `src/Todo.Web` | UI (Vue 3 + `@home-apps/plugin-sdk`): strona „Zadania” (`TasksPage`), widżet „Na dziś” (`TodayWidget`), planer `/calendar` (`CalendarPage`), widżet `planner-agenda`, teksty pl/en w `main.ts` |
 | `tests/Todo.Domain.Tests` | testy domeny |
 | `tests/Todo.Api.Tests` | testy end to end na Postgresie, z Households udawanym po HTTP |
 

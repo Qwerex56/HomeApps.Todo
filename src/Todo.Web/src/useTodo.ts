@@ -1,6 +1,6 @@
 import { computed, toValue, type MaybeRefOrGetter } from 'vue'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { useHost } from '@homeapps/plugin-sdk'
+import { useHost } from '@home-apps/plugin-sdk'
 import { todoApi, type CalendarLayer, type HouseholdMember, type TaskQuery, type TodoApi } from './api'
 
 /** How often open views ask again (plan 4.6: no realtime in 1.0, 30 s plus right after one's own changes). */
